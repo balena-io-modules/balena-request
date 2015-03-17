@@ -39,6 +39,10 @@ The session token to use.
 
 The HTTP method to perform. Defaults to `GET`.
 
+#### Object options.json
+
+Optional request JSON body.
+
 #### StreamWritable options.pipe
 
 A stream to pipe the request. Useful if downloading a file.
