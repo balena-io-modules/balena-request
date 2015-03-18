@@ -1,6 +1,7 @@
 _ = require('lodash')
 expect = require('chai').expect
 fs = require('fs')
+token = require('resin-token')
 nock = require('nock')
 url = require('url')
 sinon = require('sinon')
@@ -172,7 +173,7 @@ describe 'Request:', ->
 	describe 'given there is a token', ->
 
 		beforeEach ->
-			@token = 1234
+			token.set('1234')
 
 		describe '#request()', ->
 
@@ -182,7 +183,6 @@ describe 'Request:', ->
 					method: 'GET'
 					url: @uris.ok
 					remoteUrl: REMOTE_URL
-					token: @token
 				}, (error, response) ->
 					authorizationHeader = response?.request.headers.Authorization
 
@@ -192,6 +192,9 @@ describe 'Request:', ->
 					done()
 
 	describe 'given there is not a token', ->
+
+		beforeEach ->
+			token.remove()
 
 		describe '#request()', ->
 

@@ -1,5 +1,6 @@
 progress = require('request-progress')
 errors = require('resin-errors')
+token = require('resin-token')
 connection = require('./connection')
 ProgressState = require('./progress-state')
 
@@ -21,8 +22,10 @@ exports.authenticate = (options, callback) ->
 	if not options?
 		throw new errors.ResinMissingParameter('options')
 
-	if options.token?
-		options.headers = exports.addAuthorizationHeader(options.headers, options.token)
+	sessionToken = token.get()
+
+	if sessionToken?
+		options.headers = exports.addAuthorizationHeader(options.headers, sessionToken)
 
 	return callback()
 

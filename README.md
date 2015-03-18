@@ -31,10 +31,6 @@ The relative url to make the request to.
 
 The absolute url of the resin server to make the request to.
 
-#### String options.token
-
-The session token to use.
-
 #### String options.method
 
 The HTTP method to perform. Defaults to `GET`.
