@@ -89,6 +89,13 @@ Support
 
 If you're having any problem, please [raise an issue](https://github.com/resin-io/resin-request/issues/new) on GitHub.
 
+ChangeLog
+---------
+
+### v1.1.0
+
+- `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
+
 License
 -------
 
