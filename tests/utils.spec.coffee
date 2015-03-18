@@ -1,6 +1,7 @@
 _ = require('lodash')
 expect = require('chai').expect
 sinon = require('sinon')
+token = require('resin-token')
 utils = require('../lib/utils')
 connection = require('../lib/connection')
 
@@ -102,10 +103,11 @@ describe 'utils:', ->
 
 		describe 'given there is a token', ->
 
-			it 'should add the Authorization header', (done) ->
-				options =
-					token: 1234
+			beforeEach ->
+				token.set('1234')
 
+			it 'should add the Authorization header', (done) ->
+				options = {}
 				utils.authenticate options, (error) ->
 					expect(error).to.not.exist
 					expect(options.headers.Authorization).to.equal('Bearer 1234')
@@ -113,9 +115,11 @@ describe 'utils:', ->
 
 		describe 'given there is no saved token', ->
 
+			beforeEach ->
+				token.remove()
+
 			it 'should not add the Authorization header', (done) ->
 				options = {}
-				expect(options).to.deep.equal({})
 
 				utils.authenticate options, (error) ->
 					expect(error).to.not.exist

@@ -1,8 +1,10 @@
-var ProgressState, connection, errors, progress;
+var ProgressState, connection, errors, progress, token;
 
 progress = require('request-progress');
 
 errors = require('resin-errors');
+
+token = require('resin-token');
 
 connection = require('./connection');
 
@@ -32,11 +34,13 @@ exports.addAuthorizationHeader = function(headers, token) {
 };
 
 exports.authenticate = function(options, callback) {
+  var sessionToken;
   if (options == null) {
     throw new errors.ResinMissingParameter('options');
   }
-  if (options.token != null) {
-    options.headers = exports.addAuthorizationHeader(options.headers, options.token);
+  sessionToken = token.get();
+  if (sessionToken != null) {
+    options.headers = exports.addAuthorizationHeader(options.headers, sessionToken);
   }
   return callback();
 };
