@@ -27,10 +27,6 @@ Make an HTTP request to a resin server.
 
 The relative url to make the request to.
 
-#### String options.remoteUrl
-
-The absolute url of the resin server to make the request to.
-
 #### String options.method
 
 The HTTP method to perform. Defaults to `GET`.

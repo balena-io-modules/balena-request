@@ -2,6 +2,7 @@ _ = require('lodash')
 expect = require('chai').expect
 fs = require('fs')
 token = require('resin-token')
+settings = require('resin-settings-client')
 nock = require('nock')
 url = require('url')
 sinon = require('sinon')
@@ -11,7 +12,7 @@ request = require('../lib/request')
 utils = require('../lib/utils')
 connection = require('../lib/connection')
 
-REMOTE_URL = 'https://dashboard.resin.io'
+REMOTE_URL = settings.get('remoteUrl')
 
 METHODS = [
 	'GET'
@@ -44,13 +45,12 @@ describe 'Request:', ->
 			ok: 'ok'
 			error: 'error'
 
-		testUri = REMOTE_URL
-		nock(testUri).get(@uris.nojson).reply(200, @responses.nojson)
-		nock(testUri).get(@uris.error).reply(400, status: @status.error)
+		nock(REMOTE_URL).get(@uris.nojson).reply(200, @responses.nojson)
+		nock(REMOTE_URL).get(@uris.error).reply(400, status: @status.error)
 
 		for method in METHODS
 			lowercaseMethod = method.toLowerCase()
-			nock(testUri)[lowercaseMethod](@uris.ok).reply(200, status: @status.ok)
+			nock(REMOTE_URL)[lowercaseMethod](@uris.ok).reply(200, status: @status.ok)
 
 	describe '#request()', ->
 
@@ -58,7 +58,6 @@ describe 'Request:', ->
 			request.request {
 				method: 'GET'
 				url: @uris.ok
-				remoteUrl: REMOTE_URL
 			}, (error, response) =>
 				return done(error) if error?
 				expect(response.body.status).to.equal(@status.ok)
@@ -68,7 +67,6 @@ describe 'Request:', ->
 		it 'should make a GET request if method is omitted', (done) ->
 			request.request {
 				url: @uris.ok
-				remoteUrl: REMOTE_URL
 			}, (error, response) ->
 				return done(error) if error?
 				expect(response.request.method).to.equal('GET')
@@ -79,7 +77,6 @@ describe 'Request:', ->
 				request.request {
 					method: type
 					url: @uris.ok
-					remoteUrl: REMOTE_URL
 				}, (error, response) ->
 					return done(error) if error?
 					expect(response.request.method).to.equal(type)
@@ -92,7 +89,6 @@ describe 'Request:', ->
 			request.request {
 				method: 'GET'
 				url: @uris.nojson
-				remoteUrl: REMOTE_URL
 			}, (error, response) =>
 				return done(error) if error?
 				expect(response.body).to.equal(@responses.nojson)
@@ -102,7 +98,6 @@ describe 'Request:', ->
 			request.request {
 				method: 'GET'
 				url: @uris.ok
-				remoteUrl: REMOTE_URL
 			}, (error, response, body) ->
 				expect(error).to.not.exist
 				expect(body).to.be.an.object
@@ -115,7 +110,6 @@ describe 'Request:', ->
 			request.request {
 				method: 'POST'
 				url: @uris.ok
-				remoteUrl: REMOTE_URL
 				json: body
 			}, (error, response) ->
 				return done(error) if error?
@@ -126,7 +120,6 @@ describe 'Request:', ->
 			request.request {
 				method: 'FOO'
 				url: @uris.ok
-				remoteUrl: REMOTE_URL
 			}, (error, response) ->
 				expect(error).to.exist
 				expect(error).to.be.an.instanceof(Error)
@@ -136,7 +129,6 @@ describe 'Request:', ->
 			request.request {
 				method: 'GET'
 				url: @uris.error
-				remoteUrl: REMOTE_URL
 			}, (error, response) ->
 				expect(error).to.exist
 				expect(error).to.be.an.instanceof(Error)
@@ -146,7 +138,6 @@ describe 'Request:', ->
 			request.request {
 				method: 'GET'
 				url: url.resolve(REMOTE_URL, @uris.ok)
-				remoteUrl: REMOTE_URL
 			}, (error, response) =>
 				expect(error).to.not.exist
 				expect(response.body.status).to.equal(@status.ok)
@@ -160,7 +151,6 @@ describe 'Request:', ->
 				method: 'GET'
 				url: @uris.nojson
 				pipe: fs.createWriteStream(outputFile)
-				remoteUrl: REMOTE_URL
 			}, (error) =>
 				expect(error).to.not.exist
 				fs.readFile outputFile, { encoding: 'utf8' }, (error, contents) =>
@@ -182,7 +172,6 @@ describe 'Request:', ->
 				request.request {
 					method: 'GET'
 					url: @uris.ok
-					remoteUrl: REMOTE_URL
 				}, (error, response) ->
 					authorizationHeader = response?.request.headers.Authorization
 
@@ -202,7 +191,6 @@ describe 'Request:', ->
 				request.request {
 					method: 'GET'
 					url: @uris.ok
-					remoteUrl: REMOTE_URL
 				}, (error, response) ->
 					expect(error).to.not.exist
 					authorizationHeader = response?.request.headers.Authorization
