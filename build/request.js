@@ -1,10 +1,12 @@
-var async, errors, urlResolve, utils, _;
+var async, errors, settings, urlResolve, utils, _;
 
 _ = require('lodash');
 
 async = require('async');
 
 errors = require('resin-errors');
+
+settings = require('resin-settings-client');
 
 utils = require('./utils');
 
@@ -20,10 +22,7 @@ exports.request = function(options, callback, onProgress) {
   if (options.url == null) {
     throw new errors.ResinMissingOption('url');
   }
-  if (options.remoteUrl == null) {
-    throw new errors.ResinMissingOption('remoteUrl');
-  }
-  options.url = urlResolve(options.remoteUrl, options.url);
+  options.url = urlResolve(settings.get('remoteUrl'), options.url);
   if (options.method != null) {
     options.method = options.method.toUpperCase();
   }
