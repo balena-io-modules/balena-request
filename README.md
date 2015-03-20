@@ -93,6 +93,11 @@ If you're having any problem, please [raise an issue](https://github.com/resin-i
 ChangeLog
 ---------
 
+### v1.2.1
+
+- Improve error logging support.
+- Implement `DEBUG` flag.
+
 ### v1.2.0
 
 - Make use of [resin-settings-client](https://github.com/resin-io/resin-settings-client) to retrieve `options.remoteUrl`.
