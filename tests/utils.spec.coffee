@@ -181,22 +181,44 @@ describe 'utils:', ->
 
 		describe 'if status code is equal or higher than 400', ->
 
-			beforeEach ->
-				@requestStub = sinon.stub(connection, 'request')
-				@requestStub.yields null,
-					statusCode: 400
-					body: 'Status Code Error'
+			describe 'if the body is an object', ->
+				beforeEach ->
+					@requestStub = sinon.stub(connection, 'request')
+					@requestStub.yields null,
+						statusCode: 400
+						body:
+							error:
+								text: 'Hello World Error'
 
-			afterEach ->
-				@requestStub.restore()
+				afterEach ->
+					@requestStub.restore()
 
-			it 'should wrap the body as an error', (done) ->
-				utils.sendRequest {}, (error, response, body) ->
-					expect(error).to.be.an.instanceof(Error)
-					expect(error.message).to.equal('Request error: Status Code Error')
-					expect(response).to.not.exist
-					expect(body).to.not.exist
-					done()
+				it 'should return error.text', (done) ->
+					utils.sendRequest {}, (error, response, body) ->
+						expect(error).to.be.an.instanceof(Error)
+						expect(error.message).to.equal('Request error: Hello World Error')
+						expect(response).to.not.exist
+						expect(body).to.not.exist
+						done()
+
+			describe 'if the body is a string', ->
+
+				beforeEach ->
+					@requestStub = sinon.stub(connection, 'request')
+					@requestStub.yields null,
+						statusCode: 400
+						body: 'Status Code Error'
+
+				afterEach ->
+					@requestStub.restore()
+
+				it 'should wrap the body as an error', (done) ->
+					utils.sendRequest {}, (error, response, body) ->
+						expect(error).to.be.an.instanceof(Error)
+						expect(error.message).to.equal('Request error: Status Code Error')
+						expect(response).to.not.exist
+						expect(body).to.not.exist
+						done()
 
 		describe 'if body contains stringified JSON and status code is >= 400', ->
 
