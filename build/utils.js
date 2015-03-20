@@ -1,4 +1,6 @@
-var ProgressState, connection, errors, progress, token;
+var ProgressState, connection, errors, progress, token, _;
+
+_ = require('lodash');
 
 progress = require('request-progress');
 
@@ -61,7 +63,11 @@ exports.sendRequest = function(options, callback) {
       return callback(error);
     }
     if (response.statusCode >= 400) {
-      return callback(new errors.ResinRequestError(response.body));
+      if (response.body.error != null) {
+        return callback(new errors.ResinRequestError(response.body.error.text));
+      } else {
+        return callback(new errors.ResinRequestError(response.body));
+      }
     }
     try {
       response.body = JSON.parse(response.body);

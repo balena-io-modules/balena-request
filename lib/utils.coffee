@@ -1,3 +1,4 @@
+_ = require('lodash')
 progress = require('request-progress')
 errors = require('resin-errors')
 token = require('resin-token')
@@ -50,7 +51,10 @@ exports.sendRequest = (options, callback) ->
 		return callback(error) if error?
 
 		if response.statusCode >= 400
-			return callback(new errors.ResinRequestError(response.body))
+			if response.body.error?
+				return callback(new errors.ResinRequestError(response.body.error.text))
+			else
+				return callback(new errors.ResinRequestError(response.body))
 
 		try
 			response.body = JSON.parse(response.body)
