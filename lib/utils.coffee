@@ -51,7 +51,7 @@ exports.sendRequest = (options, callback) ->
 		return callback(error) if error?
 
 		if process.env.DEBUG
-			console.log("DEBUG: #{options.url} -> #{response.statusCode}")
+			console.log("DEBUG: #{options.method} #{options.url} -> #{response.statusCode}")
 
 		if response.statusCode >= 400
 			if response.body.error?
