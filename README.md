@@ -93,6 +93,10 @@ If you're having any problem, please [raise an issue](https://github.com/resin-i
 ChangeLog
 ---------
 
+### v1.2.2
+
+- Print request method on `DEBUG`.
+
 ### v1.2.1
 
 - Improve error logging support.
