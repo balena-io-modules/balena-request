@@ -59,6 +59,11 @@ The `state` object contains:
 
 Notice that if the resource doesn't expose a `content-length` containing the size of the resource, `state` will be undefined.
 
+Debug
+-----
+
+If you set the following environment variable: `DEBUG=true` you'll get information about the url of the requests being made along with their response's status code.
+
 Tests
 -----
 

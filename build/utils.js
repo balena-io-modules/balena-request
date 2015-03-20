@@ -60,6 +60,9 @@ exports.sendRequest = function(options, callback) {
     if (error != null) {
       return callback(error);
     }
+    if (process.env.DEBUG) {
+      console.log("DEBUG: " + options.url + " -> " + response.statusCode);
+    }
     if (response.statusCode >= 400) {
       return callback(new errors.ResinRequestError(response.body));
     }
