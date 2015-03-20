@@ -50,6 +50,9 @@ exports.sendRequest = (options, callback) ->
 	connection.request options, (error, response) ->
 		return callback(error) if error?
 
+		if process.env.DEBUG
+			console.log("DEBUG: #{options.url} -> #{response.statusCode}")
+
 		if response.statusCode >= 400
 			if response.body.error?
 				return callback(new errors.ResinRequestError(response.body.error.text))
