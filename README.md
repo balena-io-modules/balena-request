@@ -93,6 +93,11 @@ If you're having any problem, please [raise an issue](https://github.com/resin-i
 ChangeLog
 ---------
 
+### v1.2.3
+
+- Print node-request progress state on `DEBUG`.
+- Configure Hound CI correctly.
+
 ### v1.2.2
 
 - Print request method on `DEBUG`.
