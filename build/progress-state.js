@@ -59,6 +59,10 @@ ProgressState.createFromNodeRequestProgress = function(callback) {
   received = 0;
   return function(state) {
     var eta, newTime, progressState, receivedDelta, remaining, remainingTicks, timeDelta;
+    if (process.env.DEBUG) {
+      console.log('');
+      console.log(state);
+    }
     if (state.total == null) {
       return callback();
     }

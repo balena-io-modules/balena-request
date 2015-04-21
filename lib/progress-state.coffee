@@ -62,6 +62,10 @@ ProgressState.createFromNodeRequestProgress = (callback) ->
 
 	return (state) ->
 
+		if process.env.DEBUG
+			console.log('')
+			console.log(state)
+
 		# TODO: Extract this logic and test it troughly
 
 		# Return no state if the resource doesn't provides
