@@ -39,12 +39,21 @@ exports.pipeRequest = (options, callback, onProgress) ->
 		throw new errors.ResinMissingOption('pipe')
 
 	# TODO: Find a way to test this
+
+	options.pipe
+		.on('error', callback)
+		.on('close', callback)
+
 	progress(connection.request(options))
 		.on('progress', ProgressState.createFromNodeRequestProgress(onProgress))
 		.on('error', callback)
-		.pipe(options.pipe)
-		.on('error', callback)
-		.on('close', callback)
+		.on('end', callback)
+
+		# For some reason, piping the stream to options.pipe
+		# make the process exit suddenly after ~10s.
+		# This is most likely an issue with node-request.
+		.on 'data', (chunk) ->
+			options.pipe.write(chunk)
 
 exports.sendRequest = (options, callback) ->
 	connection.request options, (error, response) ->

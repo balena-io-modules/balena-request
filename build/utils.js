@@ -54,7 +54,10 @@ exports.pipeRequest = function(options, callback, onProgress) {
   if (options.pipe == null) {
     throw new errors.ResinMissingOption('pipe');
   }
-  return progress(connection.request(options)).on('progress', ProgressState.createFromNodeRequestProgress(onProgress)).on('error', callback).pipe(options.pipe).on('error', callback).on('close', callback);
+  options.pipe.on('error', callback).on('close', callback);
+  return progress(connection.request(options)).on('progress', ProgressState.createFromNodeRequestProgress(onProgress)).on('error', callback).on('end', callback).on('data', function(chunk) {
+    return options.pipe.write(chunk);
+  });
 };
 
 exports.sendRequest = function(options, callback) {
