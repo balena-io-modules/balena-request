@@ -93,6 +93,10 @@ If you're having any problem, please [raise an issue](https://github.com/resin-i
 ChangeLog
 ---------
 
+### v1.2.4
+
+- Fix pipe issue.
+
 ### v1.2.3
 
 - Print node-request progress state on `DEBUG`.
