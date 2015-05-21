@@ -4,6 +4,7 @@ resin-request
 [![npm version](https://badge.fury.io/js/resin-request.svg)](http://badge.fury.io/js/resin-request)
 [![dependencies](https://david-dm.org/resin-io/resin-request.png)](https://david-dm.org/resin-io/resin-request.png)
 [![Build Status](https://travis-ci.org/resin-io/resin-request.svg?branch=master)](https://travis-ci.org/resin-io/resin-request)
+[![Build status](https://ci.appveyor.com/api/projects/status/8qmwhh1vhm27otn4?svg=true)](https://ci.appveyor.com/project/jviotti/resin-request)
 
 Resin.io HTTP request client.
 
