@@ -12,12 +12,9 @@ utils = require('./utils');
 
 urlResolve = require('url').resolve;
 
-exports.request = function(options, callback, onProgress) {
+exports.request = function(options, callback) {
   if (options == null) {
     options = {};
-  }
-  if (onProgress == null) {
-    onProgress = _.noop;
   }
   if (options.url == null) {
     throw new errors.ResinMissingOption('url');
@@ -28,7 +25,8 @@ exports.request = function(options, callback, onProgress) {
   }
   _.defaults(options, {
     method: 'GET',
-    gzip: true
+    gzip: true,
+    onProgress: _.noop
   });
   return async.waterfall([
     function(callback) {
@@ -37,7 +35,7 @@ exports.request = function(options, callback, onProgress) {
       return utils.authenticate(options, callback);
     }, function(callback) {
       if (options.pipe != null) {
-        return utils.pipeRequest(options, callback, onProgress);
+        return utils.pipeRequest(options, callback);
       } else {
         return utils.sendRequest(options, callback);
       }

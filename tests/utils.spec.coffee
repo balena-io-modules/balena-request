@@ -132,14 +132,14 @@ describe 'utils:', ->
 
 			it 'should throw an error', ->
 				expect ->
-					utils.pipeRequest(null, _.noop, _.noop)
+					utils.pipeRequest(null, _.noop)
 				.to.throw('Missing parameter: options')
 
 		describe 'if no pipe option', ->
 
 			it 'should throw an error', ->
 				expect ->
-					utils.pipeRequest({}, _.noop, _.noop)
+					utils.pipeRequest({}, _.noop)
 				.to.throw('Missing option: pipe')
 
 	describe '.sendRequest()', ->

@@ -6,7 +6,7 @@ utils = require('./utils')
 
 urlResolve = require('url').resolve
 
-exports.request = (options = {}, callback, onProgress = _.noop) ->
+exports.request = (options = {}, callback) ->
 
 	if not options.url?
 		throw new errors.ResinMissingOption('url')
@@ -17,6 +17,7 @@ exports.request = (options = {}, callback, onProgress = _.noop) ->
 	_.defaults options,
 		method: 'GET'
 		gzip: true
+		onProgress: _.noop
 
 	async.waterfall([
 
@@ -28,7 +29,7 @@ exports.request = (options = {}, callback, onProgress = _.noop) ->
 
 		(callback) ->
 			if options.pipe?
-				utils.pipeRequest(options, callback, onProgress)
+				utils.pipeRequest(options, callback)
 			else
 				utils.sendRequest(options, callback)
 

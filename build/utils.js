@@ -47,7 +47,7 @@ exports.authenticate = function(options, callback) {
   return callback();
 };
 
-exports.pipeRequest = function(options, callback, onProgress) {
+exports.pipeRequest = function(options, callback) {
   if (options == null) {
     throw new errors.ResinMissingParameter('options');
   }
@@ -55,7 +55,7 @@ exports.pipeRequest = function(options, callback, onProgress) {
     throw new errors.ResinMissingOption('pipe');
   }
   options.pipe.on('error', callback).on('close', callback);
-  return progress(connection.request(options)).on('progress', ProgressState.createFromNodeRequestProgress(onProgress)).on('error', callback).on('end', callback).on('data', function(chunk) {
+  return progress(connection.request(options)).on('progress', ProgressState.createFromNodeRequestProgress(options.onProgress)).on('error', callback).on('end', callback).on('data', function(chunk) {
     return options.pipe.write(chunk);
   });
 };

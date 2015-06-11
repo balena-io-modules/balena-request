@@ -30,7 +30,7 @@ exports.authenticate = (options, callback) ->
 
 	return callback()
 
-exports.pipeRequest = (options, callback, onProgress) ->
+exports.pipeRequest = (options, callback) ->
 
 	if not options?
 		throw new errors.ResinMissingParameter('options')
@@ -45,7 +45,7 @@ exports.pipeRequest = (options, callback, onProgress) ->
 		.on('close', callback)
 
 	progress(connection.request(options))
-		.on('progress', ProgressState.createFromNodeRequestProgress(onProgress))
+		.on('progress', ProgressState.createFromNodeRequestProgress(options.onProgress))
 		.on('error', callback)
 		.on('end', callback)
 

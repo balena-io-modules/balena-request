@@ -151,6 +151,7 @@ describe 'Request:', ->
 				method: 'GET'
 				url: @uris.nojson
 				pipe: fs.createWriteStream(outputFile)
+				onProgress: _.noop
 			}, (error) =>
 				expect(error).to.not.exist
 				fs.readFile outputFile, { encoding: 'utf8' }, (error, contents) =>
@@ -158,7 +159,6 @@ describe 'Request:', ->
 					expect(contents).to.equal(@responses.nojson)
 					mockFs.restore()
 					done()
-			, _.noop
 
 	describe 'given there is a token', ->
 
