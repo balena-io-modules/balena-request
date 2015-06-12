@@ -20,7 +20,7 @@ $ npm install --save resin-request
 Documentation
 -------------
 
-### resinRequest.request(Object options, Function callback[, Function onProgress])
+### resinRequest.request(Object options, Function callback)
 
 Make an HTTP request to a resin server.
 
@@ -36,17 +36,7 @@ The HTTP method to perform. Defaults to `GET`.
 
 Optional request JSON body.
 
-#### StreamWritable options.pipe
-
-A stream to pipe the request. Useful if downloading a file.
-
-If you use this option, you may use the `onProgress` callback.
-
-#### Function callback(error, response, body)
-
-This function is called when the request is completed.
-
-#### Function onProgress(state)
+#### Function options.onProgress (state)
 
 A function called to notify the progress if piping the request.
 
@@ -59,6 +49,16 @@ The `state` object contains:
 - `delta`: The number of bytes received since the last call to `onProgress`.
 
 Notice that if the resource doesn't expose a `content-length` containing the size of the resource, `state` will be undefined.
+
+#### StreamWritable options.pipe
+
+A stream to pipe the request. Useful if downloading a file.
+
+If you use this option, you may use the `onProgress` callback.
+
+#### Function callback(error, response, body)
+
+This function is called when the request is completed.
 
 Debug
 -----
