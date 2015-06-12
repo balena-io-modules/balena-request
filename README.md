@@ -94,6 +94,10 @@ If you're having any problem, please [raise an issue](https://github.com/resin-i
 ChangeLog
 ---------
 
+### v1.3.0
+
+- Move `onProgress` callback to `options` object.
+
 ### v1.2.5
 
 - Upgrade Resin Settings Client to v1.0.1, which defaults remoteUrl to api.resin.io.
