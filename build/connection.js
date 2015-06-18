@@ -1,9 +1,5 @@
-var isOnline, request;
-
-isOnline = require('is-online');
+var request;
 
 request = require('request');
-
-exports.isOnline = isOnline;
 
 exports.request = request;

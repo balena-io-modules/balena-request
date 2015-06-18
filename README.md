@@ -6,7 +6,12 @@ resin-request
 [![Build Status](https://travis-ci.org/resin-io/resin-request.svg?branch=master)](https://travis-ci.org/resin-io/resin-request)
 [![Build status](https://ci.appveyor.com/api/projects/status/8qmwhh1vhm27otn4?svg=true)](https://ci.appveyor.com/project/jviotti/resin-request)
 
-Resin.io HTTP request client.
+Resin.io HTTP client.
+
+Role
+----
+
+The intention of this module is to provide an exclusive client to make HTTP requests to the Resin.io servers.
 
 Installation
 ------------
@@ -20,50 +25,79 @@ $ npm install --save resin-request
 Documentation
 -------------
 
-### resinRequest.request(Object options, Function callback)
 
-Make an HTTP request to a resin server.
+* [request](#module_request)
+  * [.send(options)](#module_request.send) ⇒ <code>Promise.&lt;Object&gt;</code>
+  * [.stream(options)](#module_request.stream) ⇒ <code>Promise.&lt;Stream&gt;</code>
 
-#### String options.url
+<a name="module_request.send"></a>
+### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
+This function automatically handles authorizacion with Resin.io.
+If you don't have a token, the request is made anonymously.
+This function automatically prepends the Resin.io host, therefore you should pass relative urls.
 
-The relative url to make the request to.
+**Kind**: static method of <code>[request](#module_request)</code>  
+**Summary**: Perform an HTTP request to Resin.io  
+**Returns**: <code>Promise.&lt;Object&gt;</code> - response  
+**Access:** public  
 
-#### String options.method
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>Object</code> |  | options |
+| [options.method] | <code>String</code> | <code>&#x27;GET&#x27;</code> | method |
+| options.url | <code>String</code> |  | relative url |
+| [options.body] | <code>\*</code> |  | body |
 
-The HTTP method to perform. Defaults to `GET`.
+**Example**  
+```js
+request.send
+	method: 'GET'
+	url: '/foo'
+.get('body')
+```
+**Example**  
+```js
+request.send
+	method: 'POST'
+	url: '/bar'
+	data:
+		hello: 'world'
+.get('body')
+```
+<a name="module_request.stream"></a>
+### request.stream(options) ⇒ <code>Promise.&lt;Stream&gt;</code>
+This function emits a `progress` event.
+This is provided by [request-progress](https://github.com/IndigoUnited/node-request-progress).
+Refer to that project for documentation of the `state` object.
 
-#### Object options.json
+**Kind**: static method of <code>[request](#module_request)</code>  
+**Summary**: Stream an HTTP response from Resin.io.  
+**Returns**: <code>Promise.&lt;Stream&gt;</code> - response  
+**Access:** public  
 
-Optional request JSON body.
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| options | <code>Object</code> |  | options |
+| [options.method] | <code>String</code> | <code>&#x27;GET&#x27;</code> | method |
+| options.url | <code>String</code> |  | relative url |
+| [options.body] | <code>\*</code> |  | body |
 
-#### Function options.onProgress (state)
+**Example**  
+```js
+request.stream
+	method: 'GET'
+	url: '/download/foo'
+.then (stream) ->
+	stream.on 'progress', (state) ->
+		console.log(state)
 
-A function called to notify the progress if piping the request.
+		stream.pipe(fs.createWriteStream('/opt/download'))
+```
 
-The `state` object contains:
+Support
+-------
 
-- `percentage`: The percentage of the request.
-- `received`: The amount of bytes received.
-- `total`: The total amount of bytes.
-- `eta`: The request time estimate.
-- `delta`: The number of bytes received since the last call to `onProgress`.
-
-Notice that if the resource doesn't expose a `content-length` containing the size of the resource, `state` will be undefined.
-
-#### StreamWritable options.pipe
-
-A stream to pipe the request. Useful if downloading a file.
-
-If you use this option, you may use the `onProgress` callback.
-
-#### Function callback(error, response, body)
-
-This function is called when the request is completed.
-
-Debug
------
-
-If you set the following environment variable: `DEBUG=true` you'll get information about the url of the requests being made along with their response's status code.
+If you're having any problem, please [raise an issue](https://github.com/resin-io/resin-request/issues/new) on GitHub and the Resin.io team will be happy to help.
 
 Tests
 -----
@@ -85,48 +119,6 @@ Before submitting a PR, please make sure that you include tests, and that [coffe
 ```sh
 $ gulp lint
 ```
-
-Support
--------
-
-If you're having any problem, please [raise an issue](https://github.com/resin-io/resin-request/issues/new) on GitHub.
-
-ChangeLog
----------
-
-### v1.3.0
-
-- Move `onProgress` callback to `options` object.
-
-### v1.2.5
-
-- Upgrade Resin Settings Client to v1.0.1, which defaults remoteUrl to api.resin.io.
-
-### v1.2.4
-
-- Fix pipe issue.
-
-### v1.2.3
-
-- Print node-request progress state on `DEBUG`.
-- Configure Hound CI correctly.
-
-### v1.2.2
-
-- Print request method on `DEBUG`.
-
-### v1.2.1
-
-- Improve error logging support.
-- Implement `DEBUG` flag.
-
-### v1.2.0
-
-- Make use of [resin-settings-client](https://github.com/resin-io/resin-settings-client) to retrieve `options.remoteUrl`.
-
-### v1.1.0
-
-- `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
 License
 -------

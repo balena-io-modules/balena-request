@@ -1,83 +1,99 @@
-var ProgressState, connection, errors, progress, token, _;
 
-_ = require('lodash');
+/*
+The MIT License
 
-progress = require('request-progress');
+Copyright (c) 2015 Resin.io, Inc. https://resin.io.
 
-errors = require('resin-errors');
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+ */
+var token;
 
 token = require('resin-token');
 
-connection = require('./connection');
 
-ProgressState = require('./progress-state');
+/**
+ * @summary Get authorization header content
+ * @function
+ * @protected
+ *
+ * @description
+ * This promise becomes undefined if no saved token.
+ *
+ * @returns {Promise<String>} authorization header
+ *
+ * @example
+ * utils.getAuthorizationHeader().then (authorizationHeader) ->
+ *		headers =
+ *			Authorization: authorizationHeader
+ */
 
-exports.checkIfOnline = function(callback) {
-  return connection.isOnline(function(error, isOnline) {
-    if (error != null) {
-      return callback(error);
+exports.getAuthorizationHeader = function() {
+  return token.get().then(function(sessionToken) {
+    if (sessionToken == null) {
+      return;
     }
-    if (isOnline) {
-      return callback();
-    }
-    return callback(new errors.ResinNoInternetConnection());
+    return "Bearer " + sessionToken;
   });
 };
 
-exports.addAuthorizationHeader = function(headers, token) {
-  if (headers == null) {
-    headers = {};
+
+/**
+ * @summary Get error message from response
+ * @function
+ * @protected
+ *
+ * @param {Object} response - node request response
+ * @returns {String} error message
+ *
+ * @example
+ * request
+ *		method: 'GET'
+ *		url: 'https://foo.bar'
+ *	, (error, response) ->
+ *		throw error if error?
+ *		message = utils.getErrorMessageFromResponse(response)
+ */
+
+exports.getErrorMessageFromResponse = function(response) {
+  if (response.body == null) {
+    return 'The request was unsuccessful';
   }
-  if (token == null) {
-    throw new errors.ResinMissingParameter('token');
+  if (response.body.error != null) {
+    return response.body.error.text;
   }
-  headers.Authorization = "Bearer " + token;
-  return headers;
+  return response.body;
 };
 
-exports.authenticate = function(options, callback) {
-  var sessionToken;
-  if (options == null) {
-    throw new errors.ResinMissingParameter('options');
-  }
-  sessionToken = token.get();
-  if (sessionToken != null) {
-    options.headers = exports.addAuthorizationHeader(options.headers, sessionToken);
-  }
-  return callback();
-};
 
-exports.pipeRequest = function(options, callback) {
-  if (options == null) {
-    throw new errors.ResinMissingParameter('options');
-  }
-  if (options.pipe == null) {
-    throw new errors.ResinMissingOption('pipe');
-  }
-  options.pipe.on('error', callback).on('close', callback);
-  return progress(connection.request(options)).on('progress', ProgressState.createFromNodeRequestProgress(options.onProgress)).on('error', callback).on('end', callback).on('data', function(chunk) {
-    return options.pipe.write(chunk);
-  });
-};
+/**
+ * @summary Check if the status code represents an error
+ * @function
+ * @protected
+ *
+ * @param {Number} statusCode - status code
+ * @returns {Boolean} represents an error
+ *
+ * @example
+ * if utils.isErrorCode(400)
+ *		console.log('400 is an error code!')
+ */
 
-exports.sendRequest = function(options, callback) {
-  return connection.request(options, function(error, response) {
-    if (error != null) {
-      return callback(error);
-    }
-    if (process.env.DEBUG) {
-      console.log("DEBUG: " + options.method + " " + options.url + " -> " + response.statusCode);
-    }
-    if (response.statusCode >= 400) {
-      if (response.body.error != null) {
-        return callback(new errors.ResinRequestError(response.body.error.text));
-      } else {
-        return callback(new errors.ResinRequestError(response.body));
-      }
-    }
-    try {
-      response.body = JSON.parse(response.body);
-    } catch (_error) {}
-    return callback(null, response, response.body);
-  });
+exports.isErrorCode = function(statusCode) {
+  return statusCode >= 400;
 };

@@ -1,74 +1,83 @@
-_ = require('lodash')
-progress = require('request-progress')
-errors = require('resin-errors')
+###
+The MIT License
+
+Copyright (c) 2015 Resin.io, Inc. https://resin.io.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+###
+
 token = require('resin-token')
-connection = require('./connection')
-ProgressState = require('./progress-state')
 
-exports.checkIfOnline = (callback) ->
-	connection.isOnline (error, isOnline) ->
-		return callback(error) if error?
-		return callback() if isOnline
-		return callback(new errors.ResinNoInternetConnection())
+###*
+# @summary Get authorization header content
+# @function
+# @protected
+#
+# @description
+# This promise becomes undefined if no saved token.
+#
+# @returns {Promise<String>} authorization header
+#
+# @example
+# utils.getAuthorizationHeader().then (authorizationHeader) ->
+#		headers =
+#			Authorization: authorizationHeader
+###
+exports.getAuthorizationHeader = ->
+	token.get().then (sessionToken) ->
+		return if not sessionToken?
+		return "Bearer #{sessionToken}"
 
-exports.addAuthorizationHeader = (headers = {}, token) ->
-	if not token?
-		throw new errors.ResinMissingParameter('token')
+###*
+# @summary Get error message from response
+# @function
+# @protected
+#
+# @param {Object} response - node request response
+# @returns {String} error message
+#
+# @example
+# request
+#		method: 'GET'
+#		url: 'https://foo.bar'
+#	, (error, response) ->
+#		throw error if error?
+#		message = utils.getErrorMessageFromResponse(response)
+###
+exports.getErrorMessageFromResponse = (response) ->
+	if not response.body?
+		return 'The request was unsuccessful'
+	if response.body.error?
+		return response.body.error.text
+	return response.body
 
-	headers.Authorization = "Bearer #{token}"
-	return headers
-
-exports.authenticate = (options, callback) ->
-
-	if not options?
-		throw new errors.ResinMissingParameter('options')
-
-	sessionToken = token.get()
-
-	if sessionToken?
-		options.headers = exports.addAuthorizationHeader(options.headers, sessionToken)
-
-	return callback()
-
-exports.pipeRequest = (options, callback) ->
-
-	if not options?
-		throw new errors.ResinMissingParameter('options')
-
-	if not options.pipe?
-		throw new errors.ResinMissingOption('pipe')
-
-	# TODO: Find a way to test this
-
-	options.pipe
-		.on('error', callback)
-		.on('close', callback)
-
-	progress(connection.request(options))
-		.on('progress', ProgressState.createFromNodeRequestProgress(options.onProgress))
-		.on('error', callback)
-		.on('end', callback)
-
-		# For some reason, piping the stream to options.pipe
-		# make the process exit suddenly after ~10s.
-		# This is most likely an issue with node-request.
-		.on 'data', (chunk) ->
-			options.pipe.write(chunk)
-
-exports.sendRequest = (options, callback) ->
-	connection.request options, (error, response) ->
-		return callback(error) if error?
-
-		if process.env.DEBUG
-			console.log("DEBUG: #{options.method} #{options.url} -> #{response.statusCode}")
-
-		if response.statusCode >= 400
-			if response.body.error?
-				return callback(new errors.ResinRequestError(response.body.error.text))
-			else
-				return callback(new errors.ResinRequestError(response.body))
-
-		try
-			response.body = JSON.parse(response.body)
-
-		return callback(null, response, response.body)
+###*
+# @summary Check if the status code represents an error
+# @function
+# @protected
+#
+# @param {Number} statusCode - status code
+# @returns {Boolean} represents an error
+#
+# @example
+# if utils.isErrorCode(400)
+#		console.log('400 is an error code!')
+###
+exports.isErrorCode = (statusCode) ->
+	return statusCode >= 400

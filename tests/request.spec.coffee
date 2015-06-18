@@ -1,199 +1,324 @@
-_ = require('lodash')
-expect = require('chai').expect
-fs = require('fs')
-token = require('resin-token')
-settings = require('resin-settings-client')
+m = require('mochainon')
 nock = require('nock')
-url = require('url')
-sinon = require('sinon')
-mockFs = require('mock-fs')
-
+settings = require('resin-settings-client')
+token = require('resin-token')
 request = require('../lib/request')
-utils = require('../lib/utils')
-connection = require('../lib/connection')
-
-REMOTE_URL = settings.get('remoteUrl')
-
-METHODS = [
-	'GET'
-	'HEAD'
-	'POST'
-	'PUT'
-	'DELETE'
-	'PATCH'
-]
 
 describe 'Request:', ->
 
-	before ->
-		@connectionIsOnlineStub = sinon.stub(connection, 'isOnline')
-		@connectionIsOnlineStub.yields(null, true)
+	describe '.send()', ->
 
-	after ->
-		@connectionIsOnlineStub.restore()
+		describe 'given a simple GET endpoint', ->
 
-	beforeEach ->
-		@uris =
-			ok: '/ok'
-			nojson: '/nojson'
-			error: '/error'
+			beforeEach ->
+				nock(settings.get('remoteUrl')).get('/foo').reply(200, from: 'resin')
 
-		@responses =
-			nojson: 'NO JSON @responses'
+			afterEach ->
+				nock.cleanAll()
 
-		@status =
-			ok: 'ok'
-			error: 'error'
+			describe 'given an absolute url', ->
 
-		nock(REMOTE_URL).get(@uris.nojson).reply(200, @responses.nojson)
-		nock(REMOTE_URL).get(@uris.error).reply(400, status: @status.error)
+				beforeEach ->
+					nock('https://foobar.baz').get('/foo').reply(200, from: 'foobar')
 
-		for method in METHODS
-			lowercaseMethod = method.toLowerCase()
-			nock(REMOTE_URL)[lowercaseMethod](@uris.ok).reply(200, status: @status.ok)
+				afterEach ->
+					nock.cleanAll()
 
-	describe '#request()', ->
+				it 'should preserve the absolute url', ->
+					promise = request.send
+						method: 'GET'
+						url: 'https://foobar.baz/foo'
+					.get('body')
+					m.chai.expect(promise).to.eventually.become(from: 'foobar')
 
-		it 'should make a real HTTP request', (done) ->
-			request.request {
-				method: 'GET'
-				url: @uris.ok
-			}, (error, response) =>
-				return done(error) if error?
-				expect(response.body.status).to.equal(@status.ok)
-				expect(response.statusCode).to.equal(200)
-				done()
+			describe 'given there is a token', ->
 
-		it 'should make a GET request if method is omitted', (done) ->
-			request.request {
-				url: @uris.ok
-			}, (error, response) ->
-				return done(error) if error?
-				expect(response.request.method).to.equal('GET')
-				done()
+				beforeEach (done) ->
+					token.set('asdf').then(done)
 
-		checkRequestType = (type) ->
-			return (done) ->
-				request.request {
-					method: type
-					url: @uris.ok
-				}, (error, response) ->
-					return done(error) if error?
-					expect(response.request.method).to.equal(type)
-					done()
+				it 'should send an Authorization header', ->
+					promise = request.send
+						method: 'GET'
+						url: '/foo'
+					.get('request')
+					.get('headers')
+					.get('Authorization')
+					m.chai.expect(promise).to.eventually.equal('Bearer asdf')
 
-		for method in METHODS
-			it("should make a #{method} request if method is #{method}", checkRequestType(method))
+			describe 'given there is no token', ->
 
-		it 'should get a raw response of response is not JSON', (done) ->
-			request.request {
-				method: 'GET'
-				url: @uris.nojson
-			}, (error, response) =>
-				return done(error) if error?
-				expect(response.body).to.equal(@responses.nojson)
-				done()
+				beforeEach (done) ->
+					token.remove().then(done)
 
-		it 'should parse the body', (done) ->
-			request.request {
-				method: 'GET'
-				url: @uris.ok
-			}, (error, response, body) ->
-				expect(error).to.not.exist
-				expect(body).to.be.an.object
-				expect(body).not.to.be.a.string
-				done()
+				it 'should not send an Authorization header', ->
+					promise = request.send
+						method: 'GET'
+						url: '/foo'
+					.get('request')
+					.get('headers')
+					.get('Authorization')
+					m.chai.expect(promise).to.eventually.not.exist
 
-		it 'should be able to send data in the body', (done) ->
-			body = { hello: 'world' }
+		describe 'given multiple endpoints', ->
 
-			request.request {
-				method: 'POST'
-				url: @uris.ok
-				json: body
-			}, (error, response) ->
-				return done(error) if error?
-				expect(response.request.body.toString()).to.equal(JSON.stringify(body))
-				done()
+			beforeEach ->
+				nock(settings.get('remoteUrl'))
+					.get('/foo').reply(200, method: 'GET')
+					.post('/foo').reply(200, method: 'POST')
+					.put('/foo').reply(200, method: 'PUT')
+					.patch('/foo').reply(200, method: 'PATCH')
+					.delete('/foo').reply(200, method: 'DELETE')
 
-		it 'should throw an error if method is unknown', (done) ->
-			request.request {
-				method: 'FOO'
-				url: @uris.ok
-			}, (error, response) ->
-				expect(error).to.exist
-				expect(error).to.be.an.instanceof(Error)
-				done()
+			afterEach ->
+				nock.cleanAll()
 
-		it 'should throw an error if the status code is >= 400', (done) ->
-			request.request {
-				method: 'GET'
-				url: @uris.error
-			}, (error, response) ->
-				expect(error).to.exist
-				expect(error).to.be.an.instanceof(Error)
-				done()
+			it 'should default to GET', ->
+				promise = request.send
+					url: '/foo'
+				.get('body')
+				m.chai.expect(promise).to.eventually.become(method: 'GET')
 
-		it 'should accept a full url', (done) ->
-			request.request {
-				method: 'GET'
-				url: url.resolve(REMOTE_URL, @uris.ok)
-			}, (error, response) =>
-				expect(error).to.not.exist
-				expect(response.body.status).to.equal(@status.ok)
-				done()
+		describe 'given an endpoint that returns a non json response', ->
 
-		it 'should allow piping files', (done) ->
-			outputFile = '/hello'
+			beforeEach ->
+				nock(settings.get('remoteUrl')).get('/foo').reply(200, 'Hello World')
 
-			mockFs()
-			request.request {
-				method: 'GET'
-				url: @uris.nojson
-				pipe: fs.createWriteStream(outputFile)
-				onProgress: _.noop
-			}, (error) =>
-				expect(error).to.not.exist
-				fs.readFile outputFile, { encoding: 'utf8' }, (error, contents) =>
-					expect(error).to.not.exist
-					expect(contents).to.equal(@responses.nojson)
-					mockFs.restore()
-					done()
+			afterEach ->
+				nock.cleanAll()
 
-	describe 'given there is a token', ->
-
-		beforeEach ->
-			token.set('1234')
-
-		describe '#request()', ->
-
-			it 'should send the Authorization header', (done) ->
-
-				request.request {
+			it 'should resolve with the plain body', ->
+				promise = request.send
 					method: 'GET'
-					url: @uris.ok
-				}, (error, response) ->
-					authorizationHeader = response?.request.headers.Authorization
+					url: '/foo'
+				.get('body')
+				m.chai.expect(promise).to.eventually.equal('Hello World')
 
-					expect(error).to.not.exist
-					expect(authorizationHeader).to.exist
-					expect(authorizationHeader).to.equal("Bearer #{1234}")
-					done()
+		describe 'given an endpoint that accepts a non json body', ->
 
-	describe 'given there is not a token', ->
+			beforeEach ->
+				nock(settings.get('remoteUrl')).post('/foo').reply 200, (uri, body) ->
+					return "The body is: #{body}"
 
-		beforeEach ->
-			token.remove()
+			afterEach ->
+				nock.cleanAll()
 
-		describe '#request()', ->
+			it 'should take the plain body successfully', ->
+				promise = request.send
+					method: 'POST'
+					url: '/foo'
+					body: 'Qux'
+				.get('body')
+				m.chai.expect(promise).to.eventually.equal('The body is: "Qux"')
 
-			it 'should not send the Authorization header', (done) ->
-				request.request {
+		describe 'given simple read only endpoints', ->
+
+			describe 'given a GET endpoint', ->
+
+				describe 'given no response error', ->
+
+					beforeEach ->
+						nock(settings.get('remoteUrl')).get('/foo').reply(200, hello: 'world')
+
+					afterEach ->
+						nock.cleanAll()
+
+					it 'should correctly make the request', ->
+						promise = request.send
+							method: 'GET'
+							url: '/foo'
+						.get('body')
+						m.chai.expect(promise).to.eventually.become(hello: 'world')
+
+				describe 'given a response error', ->
+
+					beforeEach ->
+						nock(settings.get('remoteUrl')).get('/foo').reply(500, error: text: 'Server Error')
+
+					afterEach ->
+						nock.cleanAll()
+
+					it 'should be rejected with the error message', ->
+						promise = request.send
+							method: 'GET'
+							url: '/foo'
+						m.chai.expect(promise).to.be.rejectedWith('Server Error')
+
+			describe 'given a HEAD endpoint', ->
+
+				describe 'given no response error', ->
+
+					beforeEach ->
+						nock(settings.get('remoteUrl')).head('/foo').reply(200)
+
+					afterEach ->
+						nock.cleanAll()
+
+					it 'should correctly make the request', ->
+						promise = request.send
+							method: 'HEAD'
+							url: '/foo'
+						.get('statusCode')
+						m.chai.expect(promise).to.eventually.equal(200)
+
+				describe 'given a response error', ->
+
+					beforeEach ->
+						nock(settings.get('remoteUrl')).head('/foo').reply(500)
+
+					afterEach ->
+						nock.cleanAll()
+
+					it 'should be rejected with a generic error message', ->
+						promise = request.send
+							method: 'HEAD'
+							url: '/foo'
+						.get('statusCode')
+						m.chai.expect(promise).to.be.rejectedWith('The request was unsuccessful')
+
+		describe 'given simple endpoints that handle a request body', ->
+
+			describe 'given a POST endpoint that mirrors the request body', ->
+
+				beforeEach ->
+					nock(settings.get('remoteUrl')).post('/foo').reply 200, (uri, body) ->
+						return body
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should eventually return the body', ->
+					promise = request.send
+						method: 'POST'
+						url: '/foo'
+						body:
+							foo: 'bar'
+					.get('body')
+					m.chai.expect(promise).to.eventually.become(foo: 'bar')
+
+			describe 'given a PUT endpoint that mirrors the request body', ->
+
+				beforeEach ->
+					nock(settings.get('remoteUrl')).put('/foo').reply 200, (uri, body) ->
+						return body
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should eventually return the body', ->
+					promise = request.send
+						method: 'PUT'
+						url: '/foo'
+						body:
+							foo: 'bar'
+					.get('body')
+					m.chai.expect(promise).to.eventually.become(foo: 'bar')
+
+			describe 'given a PATCH endpoint that mirrors the request body', ->
+
+				beforeEach ->
+					nock(settings.get('remoteUrl')).patch('/foo').reply 200, (uri, body) ->
+						return body
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should eventually return the body', ->
+					promise = request.send
+						method: 'PATCH'
+						url: '/foo'
+						body:
+							foo: 'bar'
+					.get('body')
+					m.chai.expect(promise).to.eventually.become(foo: 'bar')
+
+			describe 'given a DELETE endpoint that mirrors the request body', ->
+
+				beforeEach ->
+					nock(settings.get('remoteUrl')).delete('/foo').reply 200, (uri, body) ->
+						return body
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should eventually return the body', ->
+					promise = request.send
+						method: 'DELETE'
+						url: '/foo'
+						body:
+							foo: 'bar'
+					.get('body')
+					m.chai.expect(promise).to.eventually.become(foo: 'bar')
+
+	describe '.stream()', ->
+
+		describe 'given a simple endpoint that responds with a string', ->
+
+			beforeEach ->
+				nock(settings.get('remoteUrl')).get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
+
+			afterEach ->
+				nock.cleanAll()
+
+			it 'should be able to pipe the response', (done) ->
+				request.stream
 					method: 'GET'
-					url: @uris.ok
-				}, (error, response) ->
-					expect(error).to.not.exist
-					authorizationHeader = response?.request.headers.Authorization
-					expect(authorizationHeader).to.not.exist
-					done()
+					url: '/foo'
+				.then (stream) ->
+					result = ''
+					stream.on 'data', (chunk) -> result += chunk
+					stream.on 'end', ->
+						m.chai.expect(result).to.equal('Lorem ipsum dolor sit amet')
+						done()
 
+			describe 'given there is a token', ->
+
+				beforeEach (done) ->
+					token.set('asdf').then(done)
+
+				it 'should send an Authorization header', (done) ->
+					request.stream
+						method: 'GET'
+						url: '/foo'
+					.then (stream) ->
+						stream.on 'response', (response) ->
+							m.chai.expect(response.request.headers.Authorization).to.equal('Bearer asdf')
+						stream.on('end', done)
+
+			describe 'given there is no token', ->
+
+				beforeEach (done) ->
+					token.remove().then(done)
+
+				it 'should not send an Authorization header', (done) ->
+					request.stream
+						method: 'GET'
+						url: '/foo'
+					.then (stream) ->
+						stream.on 'response', (response) ->
+							m.chai.expect(response.request.headers.Authorization).to.not.exist
+						stream.on('end', done)
+
+		describe 'given multiple endpoints', ->
+
+			beforeEach ->
+				nock(settings.get('remoteUrl'))
+					.get('/foo').reply(200, 'GET')
+					.post('/foo').reply(200, 'POST')
+					.put('/foo').reply(200, 'PUT')
+					.patch('/foo').reply(200, 'PATCH')
+					.delete('/foo').reply(200, 'DELETE')
+
+			afterEach ->
+				nock.cleanAll()
+
+			describe 'given no method option', ->
+
+				it 'should default to GET', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						result = ''
+						stream.on 'data', (chunk) -> result += chunk
+						stream.on 'end', ->
+							m.chai.expect(result).to.equal('GET')
+							done()
