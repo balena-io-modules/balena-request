@@ -13,6 +13,10 @@ Role
 
 The intention of this module is to provide an exclusive client to make HTTP requests to the Resin.io servers.
 
+**THIS MODULE IS LOW LEVEL AND IS NOT MEANT TO BE USED BY END USERS DIRECTLY**.
+
+Unless you know what you're doing, use the [Resin SDK](https://github.com/resin-io/resin-sdk) instead.
+
 Installation
 ------------
 
