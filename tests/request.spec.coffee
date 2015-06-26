@@ -2,6 +2,7 @@ m = require('mochainon')
 nock = require('nock')
 settings = require('resin-settings-client')
 token = require('resin-token')
+johnDoeFixture = require('./tokens.json').johndoe
 request = require('../lib/request')
 
 describe 'Request:', ->
@@ -33,8 +34,8 @@ describe 'Request:', ->
 
 			describe 'given there is a token', ->
 
-				beforeEach (done) ->
-					token.set('asdf').then(done)
+				beforeEach ->
+					token.set(johnDoeFixture.token)
 
 				it 'should send an Authorization header', ->
 					promise = request.send
@@ -43,12 +44,12 @@ describe 'Request:', ->
 					.get('request')
 					.get('headers')
 					.get('Authorization')
-					m.chai.expect(promise).to.eventually.equal('Bearer asdf')
+					m.chai.expect(promise).to.eventually.equal("Bearer #{johnDoeFixture.token}")
 
 			describe 'given there is no token', ->
 
-				beforeEach (done) ->
-					token.remove().then(done)
+				beforeEach ->
+					token.remove()
 
 				it 'should not send an Authorization header', ->
 					promise = request.send
@@ -272,8 +273,8 @@ describe 'Request:', ->
 
 			describe 'given there is a token', ->
 
-				beforeEach (done) ->
-					token.set('asdf').then(done)
+				beforeEach ->
+					token.set(johnDoeFixture.token)
 
 				it 'should send an Authorization header', (done) ->
 					request.stream
@@ -281,13 +282,13 @@ describe 'Request:', ->
 						url: '/foo'
 					.then (stream) ->
 						stream.on 'response', (response) ->
-							m.chai.expect(response.request.headers.Authorization).to.equal('Bearer asdf')
+							m.chai.expect(response.request.headers.Authorization).to.equal("Bearer #{johnDoeFixture.token}")
 						stream.on('end', done)
 
 			describe 'given there is no token', ->
 
-				beforeEach (done) ->
-					token.remove().then(done)
+				beforeEach ->
+					token.remove()
 
 				it 'should not send an Authorization header', (done) ->
 					request.stream
