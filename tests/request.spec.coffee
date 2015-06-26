@@ -252,6 +252,21 @@ describe 'Request:', ->
 
 	describe '.stream()', ->
 
+		describe 'given a simple endpoint that responds with an error', ->
+
+			beforeEach ->
+				nock(settings.get('remoteUrl')).get('/foo').reply(400, 'Something happened')
+
+			afterEach ->
+				nock.cleanAll()
+
+			it 'should reject with the error message', ->
+				promise = request.stream
+					method: 'GET'
+					url: '/foo'
+
+				m.chai.expect(promise).to.be.rejectedWith('Something happened')
+
 		describe 'given a simple endpoint that responds with a string', ->
 
 			beforeEach ->

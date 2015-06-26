@@ -120,4 +120,14 @@ exports.send = (options = {}) ->
 ###
 exports.stream = (options = {}) ->
 	prepareOptions(options).then (processedOptions) ->
-		return progress(request(processedOptions))
+
+		return new Promise (resolve, reject) ->
+
+			progress(request(processedOptions)).on 'response', (response) ->
+				return resolve(this) if not utils.isErrorCode(response.statusCode)
+
+				# If status code is an error code, interpret
+				# the body of the request as an error.
+				utils.getStreamData(this).then (data) ->
+					responseError = data or utils.getErrorMessageFromResponse(response)
+					return reject(new errors.ResinRequestError(responseError))
