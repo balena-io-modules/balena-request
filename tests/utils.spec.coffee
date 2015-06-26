@@ -1,6 +1,7 @@
 Promise = require('bluebird')
 m = require('mochainon')
 token = require('resin-token')
+johnDoeFixture = require('./tokens.json').johndoe
 utils = require('../lib/utils')
 
 describe 'Utils:', ->
@@ -9,16 +10,16 @@ describe 'Utils:', ->
 
 		describe 'given there is a token', ->
 
-			beforeEach (done) ->
-				token.set('asdf').then(done)
+			beforeEach  ->
+				token.set(johnDoeFixture.token)
 
 			it 'should eventually become the authorization header', ->
-				m.chai.expect(utils.getAuthorizationHeader()).to.eventually.equal('Bearer asdf')
+				m.chai.expect(utils.getAuthorizationHeader()).to.eventually.equal("Bearer #{johnDoeFixture.token}")
 
 		describe 'given there is no token', ->
 
-			beforeEach (done) ->
-				token.remove().then(done)
+			beforeEach ->
+				token.remove()
 
 			it 'should eventually be undefined', ->
 				m.chai.expect(utils.getAuthorizationHeader()).to.eventually.be.undefined
