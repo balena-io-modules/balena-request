@@ -19,7 +19,7 @@
   "scripts": {
     "test": "gulp test",
     "prepublish": "gulp build",
-		"readme": "jsdoc2md --template doc/README.hbs build/request.js > README.md"
+    "readme": "jsdoc2md --template doc/README.hbs build/request.js > README.md"
   },
   "author": "Juan Cruz Viotti <juanchiviotti@gmail.com>",
   "license": "MIT",

@@ -22,7 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
-var token;
+var Promise, token;
+
+Promise = require('bluebird');
 
 token = require('resin-token');
 
@@ -96,4 +98,32 @@ exports.getErrorMessageFromResponse = function(response) {
 
 exports.isErrorCode = function(statusCode) {
   return statusCode >= 400;
+};
+
+
+/**
+ * @summary Get stream data
+ * @function
+ * @protected
+ *
+ * @param {ReadableStream} stream - stream
+ * @returns {Promise<*>} stream data
+ *
+ * @example
+ * utils.getStreamData(myStream).then (data) ->
+ * 	console.log(data)
+ */
+
+exports.getStreamData = function(stream) {
+  return Promise.fromNode(function(callback) {
+    var chunks;
+    chunks = [];
+    stream.on('data', function(chunk) {
+      return chunks.push(chunk);
+    });
+    stream.on('end', function() {
+      return callback(null, Buffer.concat(chunks));
+    });
+    return stream.on('error', callback);
+  });
 };

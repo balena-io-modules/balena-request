@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ###
 
+Promise = require('bluebird')
 token = require('resin-token')
 
 ###*
@@ -81,3 +82,27 @@ exports.getErrorMessageFromResponse = (response) ->
 ###
 exports.isErrorCode = (statusCode) ->
 	return statusCode >= 400
+
+###*
+# @summary Get stream data
+# @function
+# @protected
+#
+# @param {ReadableStream} stream - stream
+# @returns {Promise<*>} stream data
+#
+# @example
+# utils.getStreamData(myStream).then (data) ->
+# 	console.log(data)
+###
+exports.getStreamData = (stream) ->
+	Promise.fromNode (callback) ->
+		chunks = []
+
+		stream.on 'data', (chunk) ->
+			chunks.push(chunk)
+
+		stream.on 'end', ->
+			return callback(null, Buffer.concat(chunks))
+
+		stream.on('error', callback)

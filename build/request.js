@@ -144,6 +144,17 @@ exports.stream = function(options) {
     options = {};
   }
   return prepareOptions(options).then(function(processedOptions) {
-    return progress(request(processedOptions));
+    return new Promise(function(resolve, reject) {
+      return progress(request(processedOptions)).on('response', function(response) {
+        if (!utils.isErrorCode(response.statusCode)) {
+          return resolve(this);
+        }
+        return utils.getStreamData(this).then(function(data) {
+          var responseError;
+          responseError = data || utils.getErrorMessageFromResponse(response);
+          return reject(new errors.ResinRequestError(responseError));
+        });
+      });
+    });
   });
 };
