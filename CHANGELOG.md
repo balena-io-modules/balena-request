@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.0] - 2016-06-29
+
+### Added
+
+- Reject `request.stream()` with the request body if response status code doesn't determine a success.
+
+### Changed
+
+- Upgrade `resin-token`, which now stops validating a token with the server.
+
 ## [2.0.0] - 2015-06-18
 
 ### Added
@@ -70,6 +80,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
+[2.1.0]: https://github.com/resin-io/resin-request/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/resin-io/resin-request/compare/v1.3.0...v2.0.0
 [1.3.0]: https://github.com/resin-io/resin-request/compare/v1.2.5...v1.3.0
 [1.2.5]: https://github.com/resin-io/resin-request/compare/v1.2.4...v1.2.5
