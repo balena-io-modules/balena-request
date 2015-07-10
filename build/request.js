@@ -26,7 +26,7 @@ THE SOFTWARE.
 /**
  * @module request
  */
-var Promise, errors, prepareOptions, progress, request, requestAsync, settings, url, utils, _;
+var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, url, utils, _;
 
 Promise = require('bluebird');
 
@@ -45,6 +45,8 @@ errors = require('resin-errors');
 settings = require('resin-settings-client');
 
 utils = require('./utils');
+
+estimate = require('./estimate');
 
 prepareOptions = function(options) {
   if (options == null) {
@@ -117,9 +119,12 @@ exports.send = function(options) {
  * @public
  *
  * @description
- * This function emits a `progress` event.
- * This is provided by [request-progress](https://github.com/IndigoUnited/node-request-progress).
- * Refer to that project for documentation of the `state` object.
+ * This function emits a `progress` event, passing an object with the following properties:
+ *
+ * - `Number percent`: from 0 to 100.
+ * - `Number total`: total bytes to be transmitted.
+ * - `Number received`: number of bytes transmitted.
+ * - `Number eta`: estimated remaining time, in seconds.
  *
  * @param {Object} options - options
  * @param {String} [options.method='GET'] - method
@@ -145,7 +150,19 @@ exports.stream = function(options) {
   }
   return prepareOptions(options).then(function(processedOptions) {
     return new Promise(function(resolve, reject) {
-      return progress(request(processedOptions)).on('response', function(response) {
+      var download, emit, estimator;
+      download = progress(request(processedOptions));
+      estimator = estimate.getEstimator();
+      emit = download.emit;
+      download.emit = function() {
+        var args;
+        args = Array.prototype.slice.apply(arguments);
+        if (args[0] === 'progress') {
+          args[1] = estimator(args[1]);
+        }
+        return emit.apply(download, args);
+      };
+      return download.on('response', function(response) {
         if (!utils.isErrorCode(response.statusCode)) {
           return resolve(this);
         }

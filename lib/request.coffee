@@ -36,6 +36,7 @@ _ = require('lodash')
 errors = require('resin-errors')
 settings = require('resin-settings-client')
 utils = require('./utils')
+estimate = require('./estimate')
 
 prepareOptions = (options = {}) ->
 
@@ -97,9 +98,12 @@ exports.send = (options = {}) ->
 # @public
 #
 # @description
-# This function emits a `progress` event.
-# This is provided by [request-progress](https://github.com/IndigoUnited/node-request-progress).
-# Refer to that project for documentation of the `state` object.
+# This function emits a `progress` event, passing an object with the following properties:
+#
+# - `Number percent`: from 0 to 100.
+# - `Number total`: total bytes to be transmitted.
+# - `Number received`: number of bytes transmitted.
+# - `Number eta`: estimated remaining time, in seconds.
 #
 # @param {Object} options - options
 # @param {String} [options.method='GET'] - method
@@ -123,8 +127,20 @@ exports.stream = (options = {}) ->
 
 		return new Promise (resolve, reject) ->
 
-			progress(request(processedOptions)).on 'response', (response) ->
-				return resolve(this) if not utils.isErrorCode(response.statusCode)
+			download = progress(request(processedOptions))
+
+			# Workaround to intercept the "progress" event emitted by
+			# request-progress with our custom "eta" property.
+			estimator = estimate.getEstimator()
+			emit = download.emit
+			download.emit = ->
+				args = Array::slice.apply(arguments)
+				args[1] = estimator(args[1]) if args[0] is 'progress'
+				emit.apply(download, args)
+
+			download.on 'response', (response) ->
+				if not utils.isErrorCode(response.statusCode)
+					return resolve(this)
 
 				# If status code is an error code, interpret
 				# the body of the request as an error.
