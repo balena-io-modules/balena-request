@@ -70,9 +70,12 @@ request.send
 ```
 <a name="module_request.stream"></a>
 ### request.stream(options) ⇒ <code>Promise.&lt;Stream&gt;</code>
-This function emits a `progress` event.
-This is provided by [request-progress](https://github.com/IndigoUnited/node-request-progress).
-Refer to that project for documentation of the `state` object.
+This function emits a `progress` event, passing an object with the following properties:
+
+- `Number percent`: from 0 to 100.
+- `Number total`: total bytes to be transmitted.
+- `Number received`: number of bytes transmitted.
+- `Number eta`: estimated remaining time, in seconds.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Stream an HTTP response from Resin.io.  
