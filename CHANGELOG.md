@@ -3,7 +3,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.1.0] - 2016-06-29
+## [2.2.0] - 2015-07-17
+
+### Added
+
+- Add `eta` property to progress state.
+- Refresh session token at an interval.
+
+## [2.1.0] - 2015-06-29
 
 ### Added
 
@@ -80,6 +87,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
+[2.2.0]: https://github.com/resin-io/resin-request/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/resin-io/resin-request/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/resin-io/resin-request/compare/v1.3.0...v2.0.0
 [1.3.0]: https://github.com/resin-io/resin-request/compare/v1.2.5...v1.3.0
