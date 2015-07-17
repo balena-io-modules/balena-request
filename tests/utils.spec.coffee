@@ -2,10 +2,49 @@ ReadableStream = require('stream').Readable
 Promise = require('bluebird')
 m = require('mochainon')
 token = require('resin-token')
+settings = require('resin-settings-client')
 johnDoeFixture = require('./tokens.json').johndoe
 utils = require('../lib/utils')
 
 describe 'Utils:', ->
+
+	describe '.shouldUpdateToken()', ->
+
+		describe 'given the token is older than the specified validity time', ->
+
+			beforeEach ->
+				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
+				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenValidityTime') + 1))
+
+			afterEach ->
+				@tokenGetAgeStub.restore()
+
+			it 'should return true', ->
+				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.true
+
+		describe 'given the token is newer than the specified validity time', ->
+
+			beforeEach ->
+				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
+				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenValidityTime') - 1))
+
+			afterEach ->
+				@tokenGetAgeStub.restore()
+
+			it 'should return false', ->
+				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.false
+
+		describe 'given the token is equal to the specified validity time', ->
+
+			beforeEach ->
+				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
+				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenValidityTime')))
+
+			afterEach ->
+				@tokenGetAgeStub.restore()
+
+			it 'should return true', ->
+				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.true
 
 	describe '.getAuthorizationHeader()', ->
 
