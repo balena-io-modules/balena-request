@@ -26,7 +26,7 @@ THE SOFTWARE.
 /**
  * @module request
  */
-var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, url, utils, _;
+var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, token, url, utils, _;
 
 Promise = require('bluebird');
 
@@ -44,6 +44,8 @@ errors = require('resin-errors');
 
 settings = require('resin-settings-client');
 
+token = require('resin-token');
+
 utils = require('./utils');
 
 estimate = require('./estimate');
@@ -56,10 +58,24 @@ prepareOptions = function(options) {
     method: 'GET',
     gzip: true,
     json: true,
-    headers: {}
+    headers: {},
+    refreshToken: true
   });
   options.url = url.resolve(settings.get('remoteUrl'), options.url);
-  return utils.getAuthorizationHeader().then(function(authorizationHeader) {
+  return Promise["try"](function() {
+    if (!options.refreshToken) {
+      return;
+    }
+    return utils.shouldUpdateToken().then(function(shouldUpdateToken) {
+      if (!shouldUpdateToken) {
+        return;
+      }
+      return exports.send({
+        url: '/whoami',
+        refreshToken: false
+      }).get('body').then(token.set);
+    });
+  }).then(utils.getAuthorizationHeader).then(function(authorizationHeader) {
     options.headers.Authorization = authorizationHeader;
     return options;
   });

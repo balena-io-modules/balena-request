@@ -23,7 +23,28 @@ THE SOFTWARE.
 ###
 
 Promise = require('bluebird')
+settings = require('resin-settings-client')
 token = require('resin-token')
+
+###*
+# @summary Determine if the token should be updated
+# @function
+# @protected
+#
+# @description
+# This function makes use of a soft user-configurable setting called tokenValidityTime.
+# That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
+#
+# @returns {Promise<Boolean>} the token should be updated
+#
+# @example
+# tokenUtils.shouldUpdateToken().then (shouldUpdateToken) ->
+# 	if shouldUpdateToken
+# 		console.log('Updating token!')
+###
+exports.shouldUpdateToken = ->
+	token.getAge().then (age) ->
+		return age >= settings.get('tokenValidityTime')
 
 ###*
 # @summary Get authorization header content

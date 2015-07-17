@@ -35,6 +35,7 @@ _ = require('lodash')
 
 errors = require('resin-errors')
 settings = require('resin-settings-client')
+token = require('resin-token')
 utils = require('./utils')
 estimate = require('./estimate')
 
@@ -45,10 +46,22 @@ prepareOptions = (options = {}) ->
 		gzip: true
 		json: true
 		headers: {}
+		refreshToken: true
 
 	options.url = url.resolve(settings.get('remoteUrl'), options.url)
 
-	utils.getAuthorizationHeader().then (authorizationHeader) ->
+	Promise.try ->
+		return if not options.refreshToken
+
+		utils.shouldUpdateToken().then (shouldUpdateToken) ->
+			return if not shouldUpdateToken
+
+			exports.send
+				url: '/whoami'
+				refreshToken: false
+			.get('body').then(token.set)
+
+	.then(utils.getAuthorizationHeader).then (authorizationHeader) ->
 		options.headers.Authorization = authorizationHeader
 		return options
 
