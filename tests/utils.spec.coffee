@@ -14,7 +14,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenValidityTime') + 1))
+				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval') + 1))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
@@ -26,7 +26,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenValidityTime') - 1))
+				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval') - 1))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
@@ -38,7 +38,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenValidityTime')))
+				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval')))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()

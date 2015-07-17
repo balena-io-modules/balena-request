@@ -32,7 +32,7 @@ token = require('resin-token')
 # @protected
 #
 # @description
-# This function makes use of a soft user-configurable setting called tokenValidityTime.
+# This function makes use of a soft user-configurable setting called `tokenRefreshInterval`.
 # That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
 #
 # @returns {Promise<Boolean>} the token should be updated
@@ -44,7 +44,7 @@ token = require('resin-token')
 ###
 exports.shouldUpdateToken = ->
 	token.getAge().then (age) ->
-		return age >= settings.get('tokenValidityTime')
+		return age >= settings.get('tokenRefreshInterval')
 
 ###*
 # @summary Get authorization header content
