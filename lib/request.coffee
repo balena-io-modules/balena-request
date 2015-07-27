@@ -62,7 +62,8 @@ prepareOptions = (options = {}) ->
 			.get('body').then(token.set)
 
 	.then(utils.getAuthorizationHeader).then (authorizationHeader) ->
-		options.headers.Authorization = authorizationHeader
+		if authorizationHeader?
+			options.headers.Authorization = authorizationHeader
 		return options
 
 ###*
