@@ -76,7 +76,9 @@ prepareOptions = function(options) {
       }).get('body').then(token.set);
     });
   }).then(utils.getAuthorizationHeader).then(function(authorizationHeader) {
-    options.headers.Authorization = authorizationHeader;
+    if (authorizationHeader != null) {
+      options.headers.Authorization = authorizationHeader;
+    }
     return options;
   });
 };
