@@ -118,12 +118,12 @@ exports.isErrorCode = (statusCode) ->
 ###
 exports.getStreamData = (stream) ->
 	Promise.fromNode (callback) ->
-		chunks = []
+		chunks = ''
 
 		stream.on 'data', (chunk) ->
-			chunks.push(chunk)
+			chunks += chunk
 
 		stream.on 'end', ->
-			return callback(null, Buffer.concat(chunks))
+			return callback(null, chunks)
 
 		stream.on('error', callback)
