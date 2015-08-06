@@ -143,12 +143,12 @@ exports.isErrorCode = function(statusCode) {
 exports.getStreamData = function(stream) {
   return Promise.fromNode(function(callback) {
     var chunks;
-    chunks = [];
+    chunks = '';
     stream.on('data', function(chunk) {
-      return chunks.push(chunk);
+      return chunks += chunk;
     });
     stream.on('end', function() {
-      return callback(null, Buffer.concat(chunks));
+      return callback(null, chunks);
     });
     return stream.on('error', callback);
   });
