@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.3] - 2015-08-07
+
+### Changed
+
+- Fix unit tests in Appveyor.
+- Upgrade `resin-token` to v2.4.1.
+
 ## [2.2.2] - 2015-07-27
 
 ### Changed
@@ -99,6 +106,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
+[2.2.3]: https://github.com/resin-io/resin-request/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/resin-io/resin-request/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/resin-io/resin-request/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/resin-io/resin-request/compare/v2.1.0...v2.2.0
