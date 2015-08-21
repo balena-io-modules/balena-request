@@ -1,6 +1,7 @@
 Promise = require('bluebird')
 m = require('mochainon')
 nock = require('nock')
+PassThrough = require('stream').PassThrough
 settings = require('resin-settings-client')
 token = require('resin-token')
 tokens = require('./tokens.json')
@@ -292,12 +293,23 @@ describe 'Request:', ->
 					request.stream
 						method: 'GET'
 						url: '/foo'
+					.then(utils.getStreamData).then (data) ->
+						m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
+					.nodeify(done)
+
+				it 'should be able to pipe the response after a delay', (done) ->
+					request.stream
+						method: 'GET'
+						url: '/foo'
 					.then (stream) ->
-						result = ''
-						stream.on 'data', (chunk) -> result += chunk
-						stream.on 'end', ->
-							m.chai.expect(result).to.equal('Lorem ipsum dolor sit amet')
-							done()
+						return Promise.delay(200).return(stream)
+					.then (stream) ->
+						pass = new PassThrough()
+						stream.pipe(pass)
+
+						utils.getStreamData(pass).then (data) ->
+							m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
+						.nodeify(done)
 
 				describe 'given there is a token', ->
 
@@ -311,7 +323,9 @@ describe 'Request:', ->
 						.then (stream) ->
 							stream.on 'response', (response) ->
 								m.chai.expect(response.request.headers.Authorization).to.equal("Bearer #{johnDoeFixture.token}")
-							stream.on('end', done)
+								done()
+
+							utils.getStreamData(stream).return(undefined).nodeify(done)
 
 				describe 'given there is no token', ->
 
@@ -325,7 +339,8 @@ describe 'Request:', ->
 						.then (stream) ->
 							stream.on 'response', (response) ->
 								m.chai.expect(response.request.headers.Authorization).to.not.exist
-							stream.on('end', done)
+
+							utils.getStreamData(stream).return(undefined).nodeify(done)
 
 			describe 'given multiple endpoints', ->
 
@@ -345,12 +360,9 @@ describe 'Request:', ->
 					it 'should default to GET', (done) ->
 						request.stream
 							url: '/foo'
-						.then (stream) ->
-							result = ''
-							stream.on 'data', (chunk) -> result += chunk
-							stream.on 'end', ->
-								m.chai.expect(result).to.equal('GET')
-								done()
+						.then(utils.getStreamData).then (data) ->
+							m.chai.expect(data).to.equal('GET')
+						.nodeify(done)
 
 	describe 'given the token needs to be updated', ->
 

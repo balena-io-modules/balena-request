@@ -26,9 +26,11 @@ THE SOFTWARE.
 /**
  * @module request
  */
-var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, token, url, utils, _;
+var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, stream, token, url, utils, _;
 
 Promise = require('bluebird');
+
+stream = require('stream');
 
 request = require('request');
 
@@ -168,23 +170,22 @@ exports.stream = function(options) {
   }
   return prepareOptions(options).then(function(processedOptions) {
     return new Promise(function(resolve, reject) {
-      var download, emit, estimator;
+      var download, estimator, pass;
       download = progress(request(processedOptions));
+      pass = new stream.PassThrough();
+      download.pipe(pass);
       estimator = estimate.getEstimator();
-      emit = download.emit;
-      download.emit = function() {
-        var args;
-        args = Array.prototype.slice.apply(arguments);
-        if (args[0] === 'progress') {
-          args[1] = estimator(args[1]);
-        }
-        return emit.apply(download, args);
-      };
-      return download.on('response', function(response) {
+      download.on('progress', function(state) {
+        return pass.emit('progress', estimator(state));
+      });
+      download.on('response', function(response) {
+        return pass.emit('response', response);
+      });
+      return pass.on('response', function(response) {
         if (!utils.isErrorCode(response.statusCode)) {
-          return resolve(this);
+          return resolve(pass);
         }
-        return utils.getStreamData(this).then(function(data) {
+        return utils.getStreamData(pass).then(function(data) {
           var responseError;
           responseError = data || utils.getErrorMessageFromResponse(response);
           return reject(new errors.ResinRequestError(responseError));
