@@ -183,6 +183,7 @@ exports.stream = function(options) {
       });
       return pass.on('response', function(response) {
         if (!utils.isErrorCode(response.statusCode)) {
+          pass.length = _.parseInt(response.headers['content-length']) || void 0;
           return resolve(pass);
         }
         return utils.getStreamData(pass).then(function(data) {
