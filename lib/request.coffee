@@ -157,6 +157,7 @@ exports.stream = (options = {}) ->
 
 			pass.on 'response', (response) ->
 				if not utils.isErrorCode(response.statusCode)
+					pass.length = _.parseInt(response.headers['content-length']) or undefined
 					return resolve(pass)
 
 				# If status code is an error code, interpret

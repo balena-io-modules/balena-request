@@ -364,6 +364,40 @@ describe 'Request:', ->
 							m.chai.expect(data).to.equal('GET')
 						.nodeify(done)
 
+			describe 'given an endpoint with a content-length header', ->
+
+				beforeEach ->
+					message = 'Lorem ipsum dolor sit amet'
+					nock(settings.get('remoteUrl'))
+						.get('/foo').reply(200, message, 'Content-Length': String(message.length))
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should become a stream with a length property', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						m.chai.expect(stream.length).to.equal(26)
+					.nodeify(done)
+
+			describe 'given an endpoint with an invalid content-length header', ->
+
+				beforeEach ->
+					message = 'Lorem ipsum dolor sit amet'
+					nock(settings.get('remoteUrl'))
+						.get('/foo').reply(200, message, 'Content-Length': 'Hello')
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should become a stream with an undefined length property', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						m.chai.expect(stream.length).to.be.undefined
+					.nodeify(done)
+
 	describe 'given the token needs to be updated', ->
 
 		beforeEach (done) ->
