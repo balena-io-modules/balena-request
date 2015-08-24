@@ -27,6 +27,7 @@ THE SOFTWARE.
 ###
 
 Promise = require('bluebird')
+stream = require('stream')
 request = require('request')
 requestAsync = Promise.promisify(request)
 progress = require('request-progress')
@@ -142,22 +143,24 @@ exports.stream = (options = {}) ->
 		return new Promise (resolve, reject) ->
 
 			download = progress(request(processedOptions))
+			pass = new stream.PassThrough()
 
-			# Workaround to intercept the "progress" event emitted by
-			# request-progress with our custom "eta" property.
+			download.pipe(pass)
+
 			estimator = estimate.getEstimator()
-			emit = download.emit
-			download.emit = ->
-				args = Array::slice.apply(arguments)
-				args[1] = estimator(args[1]) if args[0] is 'progress'
-				emit.apply(download, args)
+
+			download.on 'progress', (state) ->
+				pass.emit('progress', estimator(state))
 
 			download.on 'response', (response) ->
+				pass.emit('response', response)
+
+			pass.on 'response', (response) ->
 				if not utils.isErrorCode(response.statusCode)
-					return resolve(this)
+					return resolve(pass)
 
 				# If status code is an error code, interpret
 				# the body of the request as an error.
-				utils.getStreamData(this).then (data) ->
+				utils.getStreamData(pass).then (data) ->
 					responseError = data or utils.getErrorMessageFromResponse(response)
 					return reject(new errors.ResinRequestError(responseError))
