@@ -38,6 +38,10 @@ exports.getEstimator = function() {
     timeDelta = newTime - time;
     time = newTime;
     state.eta = Math.floor(remainingTicks * timeDelta) || void 0;
+    if (state.percent != null) {
+      state.percentage = state.percent;
+      delete state.percent;
+    }
     return state;
   };
 };
