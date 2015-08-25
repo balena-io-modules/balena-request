@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.0] - 2015-08-25
+
+### Added
+
+- Implement stream custom `.mime` property.
+
+### Changed
+
+- Document stream custom `.length` property.
+
 ## [2.2.5] - 2015-08-24
 
 ### Changed
@@ -118,6 +128,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
+[2.3.0]: https://github.com/resin-io/resin-request/compare/v2.2.5...v2.3.0
 [2.2.5]: https://github.com/resin-io/resin-request/compare/v2.2.4...v2.2.5
 [2.2.4]: https://github.com/resin-io/resin-request/compare/v2.2.3...v2.2.4
 [2.2.3]: https://github.com/resin-io/resin-request/compare/v2.2.2...v2.2.3
