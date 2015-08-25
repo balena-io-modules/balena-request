@@ -40,4 +40,8 @@ exports.getEstimator = ->
 
 		state.eta = Math.floor(remainingTicks * timeDelta) or undefined
 
+		if state.percent?
+			state.percentage = state.percent
+			delete state.percent
+
 		return state

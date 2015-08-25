@@ -4,6 +4,25 @@ estimate = require('../lib/estimate')
 
 describe 'Estimate:', ->
 
+	it 'should keep a percentage property', ->
+		estimator = estimate.getEstimator()
+		state = estimator
+			total: 1000
+			received: 500
+			percentage: 50
+
+		m.chai.expect(state.percentage).to.equal(50)
+
+	it 'should translate percent to percentage', ->
+		estimator = estimate.getEstimator()
+		state = estimator
+			total: 1000
+			received: 500
+			percent: 50
+
+		m.chai.expect(state.percentage).to.equal(50)
+		m.chai.expect(state.percent).to.not.exist
+
 	describe 'given updates various updates', ->
 
 		beforeEach ->
