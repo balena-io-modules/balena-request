@@ -123,6 +123,7 @@ exports.send = (options = {}) ->
 # The stream may also contain the following custom properties:
 #
 # - `Number .length`: Calculated from the `Content-Length` HTTP header.
+# - `String .mime`: Equals the value of the `Content-Type` HTTP header.
 #
 # @param {Object} options - options
 # @param {String} [options.method='GET'] - method
@@ -162,6 +163,7 @@ exports.stream = (options = {}) ->
 			pass.on 'response', (response) ->
 				if not utils.isErrorCode(response.statusCode)
 					pass.length = _.parseInt(response.headers['content-length']) or undefined
+					pass.mime = response.headers['content-type']
 					return resolve(pass)
 
 				# If status code is an error code, interpret

@@ -80,6 +80,7 @@ This function emits a `progress` event, passing an object with the following pro
 The stream may also contain the following custom properties:
 
 - `Number .length`: Calculated from the `Content-Length` HTTP header.
+- `String .mime`: Equals the value of the `Content-Type` HTTP header.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Stream an HTTP response from Resin.io.  
