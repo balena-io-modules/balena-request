@@ -146,6 +146,10 @@ exports.send = function(options) {
  * - `Number received`: number of bytes transmitted.
  * - `Number eta`: estimated remaining time, in seconds.
  *
+ * The stream may also contain the following custom properties:
+ *
+ * - `Number .length`: Calculated from the `Content-Length` HTTP header.
+ *
  * @param {Object} options - options
  * @param {String} [options.method='GET'] - method
  * @param {String} options.url - relative url
