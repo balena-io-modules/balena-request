@@ -149,6 +149,7 @@ exports.send = function(options) {
  * The stream may also contain the following custom properties:
  *
  * - `Number .length`: Calculated from the `Content-Length` HTTP header.
+ * - `String .mime`: Equals the value of the `Content-Type` HTTP header.
  *
  * @param {Object} options - options
  * @param {String} [options.method='GET'] - method
@@ -188,6 +189,7 @@ exports.stream = function(options) {
       return pass.on('response', function(response) {
         if (!utils.isErrorCode(response.statusCode)) {
           pass.length = _.parseInt(response.headers['content-length']) || void 0;
+          pass.mime = response.headers['content-type'];
           return resolve(pass);
         }
         return utils.getStreamData(pass).then(function(data) {

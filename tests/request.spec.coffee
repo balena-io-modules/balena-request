@@ -398,6 +398,23 @@ describe 'Request:', ->
 						m.chai.expect(stream.length).to.be.undefined
 					.nodeify(done)
 
+			describe 'given an endpoint with a content-type header', ->
+
+				beforeEach ->
+					message = 'Lorem ipsum dolor sit amet'
+					nock(settings.get('remoteUrl'))
+						.get('/foo').reply(200, message, 'Content-Type': 'application/octet-stream')
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should become a stream with a mime property', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						m.chai.expect(stream.mime).to.equal('application/octet-stream')
+					.nodeify(done)
+
 	describe 'given the token needs to be updated', ->
 
 		beforeEach (done) ->
