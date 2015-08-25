@@ -77,6 +77,10 @@ This function emits a `progress` event, passing an object with the following pro
 - `Number received`: number of bytes transmitted.
 - `Number eta`: estimated remaining time, in seconds.
 
+The stream may also contain the following custom properties:
+
+- `Number .length`: Calculated from the `Content-Length` HTTP header.
+
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Stream an HTTP response from Resin.io.  
 **Returns**: <code>Promise.&lt;Stream&gt;</code> - response  
