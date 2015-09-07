@@ -26,7 +26,7 @@ describe 'Request:', ->
 			describe 'given a simple GET endpoint', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl')).get('/foo').reply(200, from: 'resin')
+					nock(settings.get('apiUrl')).get('/foo').reply(200, from: 'resin')
 
 				afterEach ->
 					nock.cleanAll()
@@ -77,7 +77,7 @@ describe 'Request:', ->
 			describe 'given multiple endpoints', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl'))
+					nock(settings.get('apiUrl'))
 						.get('/foo').reply(200, method: 'GET')
 						.post('/foo').reply(200, method: 'POST')
 						.put('/foo').reply(200, method: 'PUT')
@@ -96,7 +96,7 @@ describe 'Request:', ->
 			describe 'given an endpoint that returns a non json response', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl')).get('/foo').reply(200, 'Hello World')
+					nock(settings.get('apiUrl')).get('/foo').reply(200, 'Hello World')
 
 				afterEach ->
 					nock.cleanAll()
@@ -111,7 +111,7 @@ describe 'Request:', ->
 			describe 'given an endpoint that accepts a non json body', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl')).post('/foo').reply 200, (uri, body) ->
+					nock(settings.get('apiUrl')).post('/foo').reply 200, (uri, body) ->
 						return "The body is: #{body}"
 
 				afterEach ->
@@ -132,7 +132,7 @@ describe 'Request:', ->
 					describe 'given no response error', ->
 
 						beforeEach ->
-							nock(settings.get('remoteUrl')).get('/foo').reply(200, hello: 'world')
+							nock(settings.get('apiUrl')).get('/foo').reply(200, hello: 'world')
 
 						afterEach ->
 							nock.cleanAll()
@@ -147,7 +147,7 @@ describe 'Request:', ->
 					describe 'given a response error', ->
 
 						beforeEach ->
-							nock(settings.get('remoteUrl')).get('/foo').reply(500, error: text: 'Server Error')
+							nock(settings.get('apiUrl')).get('/foo').reply(500, error: text: 'Server Error')
 
 						afterEach ->
 							nock.cleanAll()
@@ -163,7 +163,7 @@ describe 'Request:', ->
 					describe 'given no response error', ->
 
 						beforeEach ->
-							nock(settings.get('remoteUrl')).head('/foo').reply(200)
+							nock(settings.get('apiUrl')).head('/foo').reply(200)
 
 						afterEach ->
 							nock.cleanAll()
@@ -178,7 +178,7 @@ describe 'Request:', ->
 					describe 'given a response error', ->
 
 						beforeEach ->
-							nock(settings.get('remoteUrl')).head('/foo').reply(500)
+							nock(settings.get('apiUrl')).head('/foo').reply(500)
 
 						afterEach ->
 							nock.cleanAll()
@@ -195,7 +195,7 @@ describe 'Request:', ->
 				describe 'given a POST endpoint that mirrors the request body', ->
 
 					beforeEach ->
-						nock(settings.get('remoteUrl')).post('/foo').reply 200, (uri, body) ->
+						nock(settings.get('apiUrl')).post('/foo').reply 200, (uri, body) ->
 							return body
 
 					afterEach ->
@@ -213,7 +213,7 @@ describe 'Request:', ->
 				describe 'given a PUT endpoint that mirrors the request body', ->
 
 					beforeEach ->
-						nock(settings.get('remoteUrl')).put('/foo').reply 200, (uri, body) ->
+						nock(settings.get('apiUrl')).put('/foo').reply 200, (uri, body) ->
 							return body
 
 					afterEach ->
@@ -231,7 +231,7 @@ describe 'Request:', ->
 				describe 'given a PATCH endpoint that mirrors the request body', ->
 
 					beforeEach ->
-						nock(settings.get('remoteUrl')).patch('/foo').reply 200, (uri, body) ->
+						nock(settings.get('apiUrl')).patch('/foo').reply 200, (uri, body) ->
 							return body
 
 					afterEach ->
@@ -249,7 +249,7 @@ describe 'Request:', ->
 				describe 'given a DELETE endpoint that mirrors the request body', ->
 
 					beforeEach ->
-						nock(settings.get('remoteUrl')).delete('/foo').reply 200, (uri, body) ->
+						nock(settings.get('apiUrl')).delete('/foo').reply 200, (uri, body) ->
 							return body
 
 					afterEach ->
@@ -269,7 +269,7 @@ describe 'Request:', ->
 			describe 'given a simple endpoint that responds with an error', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl')).get('/foo').reply(400, 'Something happened')
+					nock(settings.get('apiUrl')).get('/foo').reply(400, 'Something happened')
 
 				afterEach ->
 					nock.cleanAll()
@@ -284,7 +284,7 @@ describe 'Request:', ->
 			describe 'given a simple endpoint that responds with a string', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl')).get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
+					nock(settings.get('apiUrl')).get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
 
 				afterEach ->
 					nock.cleanAll()
@@ -345,7 +345,7 @@ describe 'Request:', ->
 			describe 'given multiple endpoints', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl'))
+					nock(settings.get('apiUrl'))
 						.get('/foo').reply(200, 'GET')
 						.post('/foo').reply(200, 'POST')
 						.put('/foo').reply(200, 'PUT')
@@ -368,7 +368,7 @@ describe 'Request:', ->
 
 				beforeEach ->
 					message = 'Lorem ipsum dolor sit amet'
-					nock(settings.get('remoteUrl'))
+					nock(settings.get('apiUrl'))
 						.get('/foo').reply(200, message, 'Content-Length': String(message.length))
 
 				afterEach ->
@@ -385,7 +385,7 @@ describe 'Request:', ->
 
 				beforeEach ->
 					message = 'Lorem ipsum dolor sit amet'
-					nock(settings.get('remoteUrl'))
+					nock(settings.get('apiUrl'))
 						.get('/foo').reply(200, message, 'Content-Length': 'Hello')
 
 				afterEach ->
@@ -402,7 +402,7 @@ describe 'Request:', ->
 
 				beforeEach ->
 					message = 'Lorem ipsum dolor sit amet'
-					nock(settings.get('remoteUrl'))
+					nock(settings.get('apiUrl'))
 						.get('/foo').reply(200, message, 'Content-Type': 'application/octet-stream')
 
 				afterEach ->
@@ -430,7 +430,7 @@ describe 'Request:', ->
 		describe 'given a simplet GET endpoint', ->
 
 			beforeEach ->
-				nock(settings.get('remoteUrl')).get('/foo').reply(200, 'bar')
+				nock(settings.get('apiUrl')).get('/foo').reply(200, 'bar')
 
 			afterEach ->
 				nock.cleanAll()
@@ -438,7 +438,7 @@ describe 'Request:', ->
 			describe 'given a working /whoami endpoint', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl'))
+					nock(settings.get('apiUrl'))
 						.get('/whoami')
 						.reply(200, janeDoeFixture.token)
 
@@ -467,7 +467,7 @@ describe 'Request:', ->
 			describe 'given a non working /whoami endpoint', ->
 
 				beforeEach ->
-					nock(settings.get('remoteUrl'))
+					nock(settings.get('apiUrl'))
 						.get('/whoami')
 						.reply(401, 'Unauthorized')
 
