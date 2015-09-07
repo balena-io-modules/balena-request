@@ -42,7 +42,7 @@
     "request": "^2.53.0",
     "request-progress": "^0.3.1",
     "resin-errors": "^2.0.0",
-    "resin-settings-client": "^2.0.0",
+    "resin-settings-client": "^3.0.0",
     "resin-token": "^2.4.1"
   }
 }
