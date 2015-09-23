@@ -36,7 +36,6 @@ _ = require('lodash')
 
 errors = require('resin-errors')
 settings = require('resin-settings-client')
-token = require('resin-token')
 utils = require('./utils')
 estimate = require('./estimate')
 
@@ -46,26 +45,14 @@ prepareOptions = (options = {}) ->
 		method: 'GET'
 		gzip: true
 		json: true
-		headers: {}
-		refreshToken: true
+		baseUrl: settings.get('apiUrl')
+		qs:
+			apikey: process.env[settings.get('apiKeyVariable')]
 
-	options.url = url.resolve(settings.get('apiUrl'), options.url)
+	if url.parse(options.url).hostname?
+		delete options.baseUrl
 
-	Promise.try ->
-		return if not options.refreshToken
-
-		utils.shouldUpdateToken().then (shouldUpdateToken) ->
-			return if not shouldUpdateToken
-
-			exports.send
-				url: '/whoami'
-				refreshToken: false
-			.get('body').then(token.set)
-
-	.then(utils.getAuthorizationHeader).then (authorizationHeader) ->
-		if authorizationHeader?
-			options.headers.Authorization = authorizationHeader
-		return options
+	return options
 
 ###*
 # @summary Perform an HTTP request to Resin.io
@@ -73,8 +60,8 @@ prepareOptions = (options = {}) ->
 # @public
 #
 # @description
-# This function automatically handles authorizacion with Resin.io.
-# If you don't have a token, the request is made anonymously.
+# This function automatically handles authorization with Resin.io.
+# If you don't have an API key environment variable, the request is made anonymously.
 # This function automatically prepends the Resin.io host, therefore you should pass relative urls.
 #
 # @param {Object} options - options
@@ -99,7 +86,7 @@ prepareOptions = (options = {}) ->
 # .get('body')
 ###
 exports.send = (options = {}) ->
-	prepareOptions(options).then(requestAsync).spread (response) ->
+	requestAsync(prepareOptions(options)).spread (response) ->
 
 		if utils.isErrorCode(response.statusCode)
 			responseError = utils.getErrorMessageFromResponse(response)
@@ -143,31 +130,29 @@ exports.send = (options = {}) ->
 #		stream.pipe(fs.createWriteStream('/opt/download'))
 ###
 exports.stream = (options = {}) ->
-	prepareOptions(options).then (processedOptions) ->
+	download = progress(request(prepareOptions(options)))
+	pass = new stream.PassThrough()
 
-		return new Promise (resolve, reject) ->
+	download.pipe(pass)
 
-			download = progress(request(processedOptions))
-			pass = new stream.PassThrough()
+	estimator = estimate.getEstimator()
 
-			download.pipe(pass)
+	download.on 'progress', (state) ->
+		pass.emit('progress', estimator(state))
 
-			estimator = estimate.getEstimator()
+	return new Promise (resolve, reject) ->
+		download.on 'response', (response) ->
+			if not utils.isErrorCode(response.statusCode)
+				pass.length = _.parseInt(response.headers['content-length']) or undefined
+				pass.mime = response.headers['content-type']
 
-			download.on 'progress', (state) ->
-				pass.emit('progress', estimator(state))
+				# For testing purposes
+				pass.response = response
 
-			download.on 'response', (response) ->
-				pass.emit('response', response)
+				return resolve(pass)
 
-			pass.on 'response', (response) ->
-				if not utils.isErrorCode(response.statusCode)
-					pass.length = _.parseInt(response.headers['content-length']) or undefined
-					pass.mime = response.headers['content-type']
-					return resolve(pass)
-
-				# If status code is an error code, interpret
-				# the body of the request as an error.
-				utils.getStreamData(pass).then (data) ->
-					responseError = data or utils.getErrorMessageFromResponse(response)
-					return reject(new errors.ResinRequestError(responseError))
+			# If status code is an error code, interpret
+			# the body of the request as an error.
+			utils.getStreamData(pass).then (data) ->
+				responseError = data or utils.getErrorMessageFromResponse(response)
+				return reject(new errors.ResinRequestError(responseError))

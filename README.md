@@ -36,8 +36,8 @@ Documentation
 
 <a name="module_request.send"></a>
 ### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
-This function automatically handles authorizacion with Resin.io.
-If you don't have a token, the request is made anonymously.
+This function automatically handles authorization with Resin.io.
+If you don't have an API key environment variable, the request is made anonymously.
 This function automatically prepends the Resin.io host, therefore you should pass relative urls.
 
 **Kind**: static method of <code>[request](#module_request)</code>  

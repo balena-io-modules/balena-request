@@ -22,63 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
-var Promise, settings, token;
+var Promise;
 
 Promise = require('bluebird');
-
-settings = require('resin-settings-client');
-
-token = require('resin-token');
-
-
-/**
- * @summary Determine if the token should be updated
- * @function
- * @protected
- *
- * @description
- * This function makes use of a soft user-configurable setting called `tokenRefreshInterval`.
- * That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
- *
- * @returns {Promise<Boolean>} the token should be updated
- *
- * @example
- * tokenUtils.shouldUpdateToken().then (shouldUpdateToken) ->
- * 	if shouldUpdateToken
- * 		console.log('Updating token!')
- */
-
-exports.shouldUpdateToken = function() {
-  return token.getAge().then(function(age) {
-    return age >= settings.get('tokenRefreshInterval');
-  });
-};
-
-
-/**
- * @summary Get authorization header content
- * @function
- * @protected
- *
- * @description
- * This promise becomes undefined if no saved token.
- *
- * @returns {Promise<String>} authorization header
- *
- * @example
- * utils.getAuthorizationHeader().then (authorizationHeader) ->
- *		headers =
- *			Authorization: authorizationHeader
- */
-
-exports.getAuthorizationHeader = function() {
-  return token.get().then(function(sessionToken) {
-    if (sessionToken == null) {
-      return;
-    }
-    return "Bearer " + sessionToken;
-  });
-};
 
 
 /**

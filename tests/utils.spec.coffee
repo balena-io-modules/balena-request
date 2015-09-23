@@ -1,68 +1,8 @@
-ReadableStream = require('stream').Readable
-Promise = require('bluebird')
 m = require('mochainon')
-token = require('resin-token')
-settings = require('resin-settings-client')
-johnDoeFixture = require('./tokens.json').johndoe
+ReadableStream = require('stream').Readable
 utils = require('../lib/utils')
 
 describe 'Utils:', ->
-
-	describe '.shouldUpdateToken()', ->
-
-		describe 'given the token is older than the specified validity time', ->
-
-			beforeEach ->
-				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval') + 1))
-
-			afterEach ->
-				@tokenGetAgeStub.restore()
-
-			it 'should return true', ->
-				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.true
-
-		describe 'given the token is newer than the specified validity time', ->
-
-			beforeEach ->
-				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval') - 1))
-
-			afterEach ->
-				@tokenGetAgeStub.restore()
-
-			it 'should return false', ->
-				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.false
-
-		describe 'given the token is equal to the specified validity time', ->
-
-			beforeEach ->
-				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval')))
-
-			afterEach ->
-				@tokenGetAgeStub.restore()
-
-			it 'should return true', ->
-				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.true
-
-	describe '.getAuthorizationHeader()', ->
-
-		describe 'given there is a token', ->
-
-			beforeEach  ->
-				token.set(johnDoeFixture.token)
-
-			it 'should eventually become the authorization header', ->
-				m.chai.expect(utils.getAuthorizationHeader()).to.eventually.equal("Bearer #{johnDoeFixture.token}")
-
-		describe 'given there is no token', ->
-
-			beforeEach ->
-				token.remove()
-
-			it 'should eventually be undefined', ->
-				m.chai.expect(utils.getAuthorizationHeader()).to.eventually.be.undefined
 
 	describe '.getErrorMessageFromResponse()', ->
 

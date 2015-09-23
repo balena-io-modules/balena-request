@@ -26,7 +26,7 @@ THE SOFTWARE.
 /**
  * @module request
  */
-var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, stream, token, url, utils, _;
+var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, stream, url, utils, _;
 
 Promise = require('bluebird');
 
@@ -46,8 +46,6 @@ errors = require('resin-errors');
 
 settings = require('resin-settings-client');
 
-token = require('resin-token');
-
 utils = require('./utils');
 
 estimate = require('./estimate');
@@ -60,29 +58,15 @@ prepareOptions = function(options) {
     method: 'GET',
     gzip: true,
     json: true,
-    headers: {},
-    refreshToken: true
-  });
-  options.url = url.resolve(settings.get('apiUrl'), options.url);
-  return Promise["try"](function() {
-    if (!options.refreshToken) {
-      return;
+    baseUrl: settings.get('apiUrl'),
+    qs: {
+      apikey: process.env[settings.get('apiKeyVariable')]
     }
-    return utils.shouldUpdateToken().then(function(shouldUpdateToken) {
-      if (!shouldUpdateToken) {
-        return;
-      }
-      return exports.send({
-        url: '/whoami',
-        refreshToken: false
-      }).get('body').then(token.set);
-    });
-  }).then(utils.getAuthorizationHeader).then(function(authorizationHeader) {
-    if (authorizationHeader != null) {
-      options.headers.Authorization = authorizationHeader;
-    }
-    return options;
   });
+  if (url.parse(options.url).hostname != null) {
+    delete options.baseUrl;
+  }
+  return options;
 };
 
 
@@ -92,8 +76,8 @@ prepareOptions = function(options) {
  * @public
  *
  * @description
- * This function automatically handles authorizacion with Resin.io.
- * If you don't have a token, the request is made anonymously.
+ * This function automatically handles authorization with Resin.io.
+ * If you don't have an API key environment variable, the request is made anonymously.
  * This function automatically prepends the Resin.io host, therefore you should pass relative urls.
  *
  * @param {Object} options - options
@@ -122,7 +106,7 @@ exports.send = function(options) {
   if (options == null) {
     options = {};
   }
-  return prepareOptions(options).then(requestAsync).spread(function(response) {
+  return requestAsync(prepareOptions(options)).spread(function(response) {
     var responseError;
     if (utils.isErrorCode(response.statusCode)) {
       responseError = utils.getErrorMessageFromResponse(response);
@@ -170,33 +154,29 @@ exports.send = function(options) {
  */
 
 exports.stream = function(options) {
+  var download, estimator, pass;
   if (options == null) {
     options = {};
   }
-  return prepareOptions(options).then(function(processedOptions) {
-    return new Promise(function(resolve, reject) {
-      var download, estimator, pass;
-      download = progress(request(processedOptions));
-      pass = new stream.PassThrough();
-      download.pipe(pass);
-      estimator = estimate.getEstimator();
-      download.on('progress', function(state) {
-        return pass.emit('progress', estimator(state));
-      });
-      download.on('response', function(response) {
-        return pass.emit('response', response);
-      });
-      return pass.on('response', function(response) {
-        if (!utils.isErrorCode(response.statusCode)) {
-          pass.length = _.parseInt(response.headers['content-length']) || void 0;
-          pass.mime = response.headers['content-type'];
-          return resolve(pass);
-        }
-        return utils.getStreamData(pass).then(function(data) {
-          var responseError;
-          responseError = data || utils.getErrorMessageFromResponse(response);
-          return reject(new errors.ResinRequestError(responseError));
-        });
+  download = progress(request(prepareOptions(options)));
+  pass = new stream.PassThrough();
+  download.pipe(pass);
+  estimator = estimate.getEstimator();
+  download.on('progress', function(state) {
+    return pass.emit('progress', estimator(state));
+  });
+  return new Promise(function(resolve, reject) {
+    return download.on('response', function(response) {
+      if (!utils.isErrorCode(response.statusCode)) {
+        pass.length = _.parseInt(response.headers['content-length']) || void 0;
+        pass.mime = response.headers['content-type'];
+        pass.response = response;
+        return resolve(pass);
+      }
+      return utils.getStreamData(pass).then(function(data) {
+        var responseError;
+        responseError = data || utils.getErrorMessageFromResponse(response);
+        return reject(new errors.ResinRequestError(responseError));
       });
     });
   });
