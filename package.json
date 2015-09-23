@@ -33,7 +33,7 @@
     "jsdoc-to-markdown": "^1.1.1",
     "mocha": "~2.0.1",
     "mochainon": "^1.0.0",
-    "nock": "^1.2.0",
+    "nock": "^2.12.0",
     "timekeeper": "0.0.5"
   },
   "dependencies": {
@@ -42,7 +42,6 @@
     "request": "^2.53.0",
     "request-progress": "^0.3.1",
     "resin-errors": "^2.0.0",
-    "resin-settings-client": "^3.0.0",
-    "resin-token": "^2.4.1"
+    "resin-settings-client": "^3.2.0"
   }
 }
