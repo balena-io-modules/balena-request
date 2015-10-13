@@ -41,16 +41,11 @@ describe 'Request:', ->
 
 			describe 'given there is an api key', ->
 
-				beforeEach ->
-					process.env[settings.get('apiKeyVariable')] = 'asdf'
-
-				afterEach ->
-					delete process.env[settings.get('apiKeyVariable')]
-
 				it 'should not send an Authorization header', ->
 					promise = request.send
 						method: 'GET'
 						url: '/foo'
+						apikey: 'asdf'
 					.get('request')
 					.get('headers')
 					.get('Authorization')
@@ -60,6 +55,7 @@ describe 'Request:', ->
 					promise = request.send
 						method: 'GET'
 						url: '/foo'
+						apikey: 'asdf'
 					.get('request')
 					.get('uri')
 					.get('query')
@@ -324,16 +320,11 @@ describe 'Request:', ->
 
 			describe 'given there is an api key', ->
 
-				beforeEach ->
-					process.env[settings.get('apiKeyVariable')] = 'asdf'
-
-				afterEach ->
-					delete process.env[settings.get('apiKeyVariable')]
-
 				it 'should not send an Authorization header', (done) ->
 					request.stream
 						method: 'GET'
 						url: '/foo'
+						apikey: 'asdf'
 					.then (stream) ->
 						m.chai.expect(stream.response.request.headers.Authorization).to.be.undefined
 						utils.getStreamData(stream).return(undefined).nodeify(done)
@@ -342,14 +333,12 @@ describe 'Request:', ->
 					request.stream
 						method: 'GET'
 						url: '/foo'
+						apikey: 'asdf'
 					.then (stream) ->
 						m.chai.expect(stream.response.request.uri.query).to.equal('apikey=asdf')
 						utils.getStreamData(stream).return(undefined).nodeify(done)
 
 			describe 'given there is no api key', ->
-
-				beforeEach ->
-					delete process.env[settings.get('apiKeyVariable')]
 
 				it 'should not send an apikey query string', (done) ->
 					request.stream

@@ -37,7 +37,7 @@ Documentation
 <a name="module_request.send"></a>
 ### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
 This function automatically handles authorization with Resin.io.
-If you don't have an API key environment variable, the request is made anonymously.
+If you don't pass an API key, the request is made anonymously.
 This function automatically prepends the Resin.io host, therefore you should pass relative urls.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
@@ -50,6 +50,7 @@ This function automatically prepends the Resin.io host, therefore you should pas
 | options | <code>Object</code> |  | options |
 | [options.method] | <code>String</code> | <code>&#x27;GET&#x27;</code> | method |
 | options.url | <code>String</code> |  | relative url |
+| [options.apikey] | <code>String</code> |  | API key |
 | [options.body] | <code>\*</code> |  | body |
 
 **Example**  
