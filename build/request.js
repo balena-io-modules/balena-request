@@ -86,7 +86,8 @@ prepareOptions = function(options) {
  * @param {String} [options.apikey] - API key
  * @param {*} [options.body] - body
  *
- * @returns {Promise<Object>} response
+ * @fulfil {Object} - response
+ * @returns {Promise}
  *
  * @example
  * request.send
@@ -142,7 +143,8 @@ exports.send = function(options) {
  * @param {String} options.url - relative url
  * @param {*} [options.body] - body
  *
- * @returns {Promise<Stream>} response
+ * @fulfil {Stream} - response
+ * @returns {Promise}
  *
  * @example
  * request.stream

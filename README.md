@@ -31,19 +31,19 @@ Documentation
 
 
 * [request](#module_request)
-  * [.send(options)](#module_request.send) ⇒ <code>Promise.&lt;Object&gt;</code>
-  * [.stream(options)](#module_request.stream) ⇒ <code>Promise.&lt;Stream&gt;</code>
+  * [.send(options)](#module_request.send) ⇒ <code>Promise</code>
+  * [.stream(options)](#module_request.stream) ⇒ <code>Promise</code>
 
 <a name="module_request.send"></a>
-### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
+### request.send(options) ⇒ <code>Promise</code>
 This function automatically handles authorization with Resin.io.
 If you don't pass an API key, the request is made anonymously.
 This function automatically prepends the Resin.io host, therefore you should pass relative urls.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Perform an HTTP request to Resin.io  
-**Returns**: <code>Promise.&lt;Object&gt;</code> - response  
 **Access:** public  
+**Fulfil**: <code>Object</code> - response  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -71,7 +71,7 @@ request.send
 .get('body')
 ```
 <a name="module_request.stream"></a>
-### request.stream(options) ⇒ <code>Promise.&lt;Stream&gt;</code>
+### request.stream(options) ⇒ <code>Promise</code>
 This function emits a `progress` event, passing an object with the following properties:
 
 - `Number percent`: from 0 to 100.
@@ -86,8 +86,8 @@ The stream may also contain the following custom properties:
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Stream an HTTP response from Resin.io.  
-**Returns**: <code>Promise.&lt;Stream&gt;</code> - response  
 **Access:** public  
+**Fulfil**: <code>Stream</code> - response  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
