@@ -61,6 +61,18 @@ describe 'Request:', ->
 					.get('query')
 					m.chai.expect(promise).to.eventually.equal('apikey=asdf')
 
+				it 'should allow to set custom query string while preserving the api key', ->
+					promise = request.send
+						method: 'GET'
+						url: '/foo'
+						apikey: 'asdf'
+						qs:
+							foo: 'bar'
+					.get('request')
+					.get('uri')
+					.get('query')
+					m.chai.expect(promise).to.eventually.equal('foo=bar&apikey=asdf')
+
 			describe 'given there is no api key', ->
 
 				beforeEach ->
@@ -336,6 +348,17 @@ describe 'Request:', ->
 						apikey: 'asdf'
 					.then (stream) ->
 						m.chai.expect(stream.response.request.uri.query).to.equal('apikey=asdf')
+						utils.getStreamData(stream).return(undefined).nodeify(done)
+
+				it 'should allow to set custom query string while preserving the api key', (done) ->
+					request.stream
+						method: 'GET'
+						url: '/foo'
+						apikey: 'asdf'
+						qs:
+							foo: 'bar'
+					.then (stream) ->
+						m.chai.expect(stream.response.request.uri.query).to.equal('foo=bar&apikey=asdf')
 						utils.getStreamData(stream).return(undefined).nodeify(done)
 
 			describe 'given there is no api key', ->

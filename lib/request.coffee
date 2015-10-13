@@ -41,7 +41,7 @@ estimate = require('./estimate')
 
 prepareOptions = (options = {}) ->
 
-	_.defaults options,
+	_.defaultsDeep options,
 		method: 'GET'
 		gzip: true
 		json: true
