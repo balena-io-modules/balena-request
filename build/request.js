@@ -54,7 +54,7 @@ prepareOptions = function(options) {
   if (options == null) {
     options = {};
   }
-  _.defaults(options, {
+  _.defaultsDeep(options, {
     method: 'GET',
     gzip: true,
     json: true,
