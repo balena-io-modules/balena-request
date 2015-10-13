@@ -47,7 +47,7 @@ prepareOptions = (options = {}) ->
 		json: true
 		baseUrl: settings.get('apiUrl')
 		qs:
-			apikey: process.env[settings.get('apiKeyVariable')]
+			apikey: options.apikey
 
 	if url.parse(options.url).hostname?
 		delete options.baseUrl
@@ -61,12 +61,13 @@ prepareOptions = (options = {}) ->
 #
 # @description
 # This function automatically handles authorization with Resin.io.
-# If you don't have an API key environment variable, the request is made anonymously.
+# If you don't pass an API key, the request is made anonymously.
 # This function automatically prepends the Resin.io host, therefore you should pass relative urls.
 #
 # @param {Object} options - options
 # @param {String} [options.method='GET'] - method
 # @param {String} options.url - relative url
+# @param {String} [options.apikey] - API key
 # @param {*} [options.body] - body
 #
 # @returns {Promise<Object>} response
