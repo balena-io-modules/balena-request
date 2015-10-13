@@ -98,6 +98,7 @@ prepareOptions = function(options) {
  * request.send
  * 	method: 'POST'
  * 	url: '/bar'
+ * 	apikey: 'Py6Ebiokt64LJFQQdV56bkOmmhGlqd7U'
  * 	data:
  * 		hello: 'world'
  * .get('body')
@@ -147,6 +148,7 @@ exports.send = function(options) {
  * request.stream
  * 	method: 'GET'
  * 	url: '/download/foo'
+ * 	apikey: 'Py6Ebiokt64LJFQQdV56bkOmmhGlqd7U'
  * .then (stream) ->
  * 	stream.on 'progress', (state) ->
  * 		console.log(state)
