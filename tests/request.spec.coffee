@@ -1,10 +1,10 @@
 Promise = require('bluebird')
 m = require('mochainon')
 nock = require('nock')
+rindle = require('rindle')
 PassThrough = require('stream').PassThrough
 settings = require('resin-settings-client')
 request = require('../lib/request')
-utils = require('../lib/utils')
 
 describe 'Request:', ->
 
@@ -312,7 +312,7 @@ describe 'Request:', ->
 				request.stream
 					method: 'GET'
 					url: '/foo'
-				.then(utils.getStreamData).then (data) ->
+				.then(rindle.extract).then (data) ->
 					m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
 				.nodeify(done)
 
@@ -326,7 +326,7 @@ describe 'Request:', ->
 					pass = new PassThrough()
 					stream.pipe(pass)
 
-					utils.getStreamData(pass).then (data) ->
+					rindle.extract(pass).then (data) ->
 						m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
 					.nodeify(done)
 
@@ -339,7 +339,7 @@ describe 'Request:', ->
 						apikey: 'asdf'
 					.then (stream) ->
 						m.chai.expect(stream.response.request.headers.Authorization).to.be.undefined
-						utils.getStreamData(stream).return(undefined).nodeify(done)
+						rindle.extract(stream).return(undefined).nodeify(done)
 
 				it 'should send an apikey query string', (done) ->
 					request.stream
@@ -348,7 +348,7 @@ describe 'Request:', ->
 						apikey: 'asdf'
 					.then (stream) ->
 						m.chai.expect(stream.response.request.uri.query).to.equal('apikey=asdf')
-						utils.getStreamData(stream).return(undefined).nodeify(done)
+						rindle.extract(stream).return(undefined).nodeify(done)
 
 				it 'should allow to set custom query string while preserving the api key', (done) ->
 					request.stream
@@ -359,7 +359,7 @@ describe 'Request:', ->
 							foo: 'bar'
 					.then (stream) ->
 						m.chai.expect(stream.response.request.uri.query).to.equal('foo=bar&apikey=asdf')
-						utils.getStreamData(stream).return(undefined).nodeify(done)
+						rindle.extract(stream).return(undefined).nodeify(done)
 
 			describe 'given there is no api key', ->
 
@@ -369,7 +369,7 @@ describe 'Request:', ->
 						url: '/foo'
 					.then (stream) ->
 						m.chai.expect(stream.response.request.uri.query).to.not.exist
-						utils.getStreamData(stream).return(undefined).nodeify(done)
+						rindle.extract(stream).return(undefined).nodeify(done)
 
 		describe 'given multiple endpoints', ->
 
@@ -389,7 +389,7 @@ describe 'Request:', ->
 				it 'should default to GET', (done) ->
 					request.stream
 						url: '/foo'
-					.then(utils.getStreamData).then (data) ->
+					.then(rindle.extract).then (data) ->
 						m.chai.expect(data).to.equal('GET')
 					.nodeify(done)
 
