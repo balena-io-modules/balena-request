@@ -50,35 +50,3 @@ describe 'Utils:', ->
 
 		it 'should return true for 500', ->
 			m.chai.expect(utils.isErrorCode(500)).to.be.true
-
-	describe '.getStreamData()', ->
-
-		describe 'given no error', ->
-
-			beforeEach ->
-				@stream = new ReadableStream(encoding: 'utf8')
-				@stream._read = ->
-					@push('Hello')
-					@push(null)
-
-			it 'should eventually equal the stream data', ->
-				promise = utils.getStreamData(@stream)
-				m.chai.expect(promise).to.eventually.equal('Hello')
-
-		describe 'given an error', ->
-
-			beforeEach ->
-				@stream = new ReadableStream(encoding: 'utf8')
-				@stream._read = ->
-
-					# If we don't emit an error event with a slight timeout
-					# then the error is emitted before an error listener
-					# is attached. This causes the error to be thrown
-					# directly in Node v0.10.
-					setTimeout =>
-						@emit('error', new Error('stream error'))
-					, 1
-
-			it 'should be rejected with the correct error message', ->
-				promise = utils.getStreamData(@stream)
-				m.chai.expect(promise).to.be.rejectedWith('stream error')

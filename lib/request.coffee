@@ -31,6 +31,7 @@ stream = require('stream')
 request = require('request')
 requestAsync = Promise.promisify(request)
 progress = require('request-progress')
+rindle = require('rindle')
 url = require('url')
 _ = require('lodash')
 
@@ -158,6 +159,6 @@ exports.stream = (options = {}) ->
 
 			# If status code is an error code, interpret
 			# the body of the request as an error.
-			utils.getStreamData(pass).then (data) ->
+			rindle.extract(pass).then (data) ->
 				responseError = data or utils.getErrorMessageFromResponse(response)
 				return reject(new errors.ResinRequestError(responseError))

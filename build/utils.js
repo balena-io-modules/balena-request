@@ -71,31 +71,3 @@ exports.getErrorMessageFromResponse = function(response) {
 exports.isErrorCode = function(statusCode) {
   return statusCode >= 400;
 };
-
-
-/**
- * @summary Get stream data
- * @function
- * @protected
- *
- * @param {ReadableStream} stream - stream
- * @returns {Promise<*>} stream data
- *
- * @example
- * utils.getStreamData(myStream).then (data) ->
- * 	console.log(data)
- */
-
-exports.getStreamData = function(stream) {
-  return Promise.fromNode(function(callback) {
-    var chunks;
-    chunks = '';
-    stream.on('data', function(chunk) {
-      return chunks += chunk;
-    });
-    stream.on('end', function() {
-      return callback(null, chunks);
-    });
-    return stream.on('error', callback);
-  });
-};

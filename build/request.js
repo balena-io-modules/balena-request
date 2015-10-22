@@ -26,7 +26,7 @@ THE SOFTWARE.
 /**
  * @module request
  */
-var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, stream, url, utils, _;
+var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, rindle, settings, stream, url, utils, _;
 
 Promise = require('bluebird');
 
@@ -37,6 +37,8 @@ request = require('request');
 requestAsync = Promise.promisify(request);
 
 progress = require('request-progress');
+
+rindle = require('rindle');
 
 url = require('url');
 
@@ -178,7 +180,7 @@ exports.stream = function(options) {
         pass.response = response;
         return resolve(pass);
       }
-      return utils.getStreamData(pass).then(function(data) {
+      return rindle.extract(pass).then(function(data) {
         var responseError;
         responseError = data || utils.getErrorMessageFromResponse(response);
         return reject(new errors.ResinRequestError(responseError));
