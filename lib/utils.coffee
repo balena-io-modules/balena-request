@@ -23,8 +23,13 @@ THE SOFTWARE.
 ###
 
 Promise = require('bluebird')
+_ = require('lodash')
+request = require('request')
+stream = require('stream')
+progress = require('progress-stream')
 settings = require('resin-settings-client')
 token = require('resin-token')
+rindle = require('rindle')
 
 ###*
 # @summary Determine if the token should be updated
@@ -105,25 +110,48 @@ exports.isErrorCode = (statusCode) ->
 	return statusCode >= 400
 
 ###*
-# @summary Get stream data
+# @summary Make a node request with progress
 # @function
 # @protected
 #
-# @param {ReadableStream} stream - stream
-# @returns {Promise<*>} stream data
+# @param {Object} options - request options
+# @returns {Promise<Stream>} request stream
 #
 # @example
-# utils.getStreamData(myStream).then (data) ->
-# 	console.log(data)
+# utils.requestProgress(options).then (stream) ->
+# 	stream.pipe(fs.createWriteStream('foo/bar'))
+# 	stream.on 'progress', (state) ->
+# 		console.log(state)
 ###
-exports.getStreamData = (stream) ->
-	Promise.fromNode (callback) ->
-		chunks = ''
+exports.requestProgress = (options) ->
+	requestStream = request(options)
 
-		stream.on 'data', (chunk) ->
-			chunks += chunk
+	rindle.onEvent(requestStream, 'response').tap (response) ->
+		headers = response.headers
 
-		stream.on 'end', ->
-			return callback(null, chunks)
+		# X-Transfer-Length equals the compressed size of the body.
+		# This header is sent by Image Maker when downloading OS images.
+		response.length = headers['content-length'] or headers['x-transfer-length']
+		response.length = _.parseInt(response.length) or undefined
 
-		stream.on('error', callback)
+	.then (response) ->
+		progressStream = progress
+			time: 500
+			length: response.length
+
+		# Pipe to a pass through stream to modify
+		# the state properties for backwards compatibility
+		pass = new stream.PassThrough()
+		progressStream.on 'progress', (state) ->
+			if state.length is 0
+				return pass.emit('progress', undefined)
+
+			pass.emit 'progress',
+				total: state.length
+				received: state.transferred
+				eta: state.eta
+				percentage: state.percentage
+		response.pipe(progressStream).pipe(pass)
+		pass.response = response
+
+		return pass

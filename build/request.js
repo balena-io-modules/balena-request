@@ -26,21 +26,19 @@ THE SOFTWARE.
 /**
  * @module request
  */
-var Promise, errors, estimate, prepareOptions, progress, request, requestAsync, settings, stream, token, url, utils, _;
+var Promise, errors, prepareOptions, request, requestAsync, rindle, settings, token, url, utils, _;
 
 Promise = require('bluebird');
-
-stream = require('stream');
 
 request = require('request');
 
 requestAsync = Promise.promisify(request);
 
-progress = require('request-progress');
-
 url = require('url');
 
 _ = require('lodash');
+
+rindle = require('rindle');
 
 errors = require('resin-errors');
 
@@ -49,8 +47,6 @@ settings = require('resin-settings-client');
 token = require('resin-token');
 
 utils = require('./utils');
-
-estimate = require('./estimate');
 
 prepareOptions = function(options) {
   if (options == null) {
@@ -173,31 +169,16 @@ exports.stream = function(options) {
   if (options == null) {
     options = {};
   }
-  return prepareOptions(options).then(function(processedOptions) {
-    return new Promise(function(resolve, reject) {
-      var download, estimator, pass;
-      download = progress(request(processedOptions));
-      pass = new stream.PassThrough();
-      download.pipe(pass);
-      estimator = estimate.getEstimator();
-      download.on('progress', function(state) {
-        return pass.emit('progress', estimator(state));
-      });
-      download.on('response', function(response) {
-        return pass.emit('response', response);
-      });
-      return pass.on('response', function(response) {
-        if (!utils.isErrorCode(response.statusCode)) {
-          pass.length = _.parseInt(response.headers['content-length']) || void 0;
-          pass.mime = response.headers['content-type'];
-          return resolve(pass);
-        }
-        return utils.getStreamData(pass).then(function(data) {
-          var responseError;
-          responseError = data || utils.getErrorMessageFromResponse(response);
-          return reject(new errors.ResinRequestError(responseError));
-        });
-      });
+  return prepareOptions(options).then(utils.requestProgress).then(function(download) {
+    if (!utils.isErrorCode(download.response.statusCode)) {
+      download.length = download.response.length;
+      download.mime = download.response.headers['content-type'];
+      return download;
+    }
+    return rindle.extract(download).then(function(data) {
+      var responseError;
+      responseError = data || utils.getErrorMessageFromResponse(download.response);
+      throw new errors.ResinRequestError(responseError);
     });
   });
 };

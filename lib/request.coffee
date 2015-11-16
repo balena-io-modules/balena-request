@@ -27,18 +27,16 @@ THE SOFTWARE.
 ###
 
 Promise = require('bluebird')
-stream = require('stream')
 request = require('request')
 requestAsync = Promise.promisify(request)
-progress = require('request-progress')
 url = require('url')
 _ = require('lodash')
+rindle = require('rindle')
 
 errors = require('resin-errors')
 settings = require('resin-settings-client')
 token = require('resin-token')
 utils = require('./utils')
-estimate = require('./estimate')
 
 prepareOptions = (options = {}) ->
 
@@ -143,31 +141,17 @@ exports.send = (options = {}) ->
 #		stream.pipe(fs.createWriteStream('/opt/download'))
 ###
 exports.stream = (options = {}) ->
-	prepareOptions(options).then (processedOptions) ->
+	prepareOptions(options).then(utils.requestProgress).then (download) ->
+		if not utils.isErrorCode(download.response.statusCode)
 
-		return new Promise (resolve, reject) ->
+			# TODO: Move this to resin-image-manager
+			download.length = download.response.length
+			download.mime = download.response.headers['content-type']
 
-			download = progress(request(processedOptions))
-			pass = new stream.PassThrough()
+			return download
 
-			download.pipe(pass)
-
-			estimator = estimate.getEstimator()
-
-			download.on 'progress', (state) ->
-				pass.emit('progress', estimator(state))
-
-			download.on 'response', (response) ->
-				pass.emit('response', response)
-
-			pass.on 'response', (response) ->
-				if not utils.isErrorCode(response.statusCode)
-					pass.length = _.parseInt(response.headers['content-length']) or undefined
-					pass.mime = response.headers['content-type']
-					return resolve(pass)
-
-				# If status code is an error code, interpret
-				# the body of the request as an error.
-				utils.getStreamData(pass).then (data) ->
-					responseError = data or utils.getErrorMessageFromResponse(response)
-					return reject(new errors.ResinRequestError(responseError))
+		# If status code is an error code, interpret
+		# the body of the request as an error.
+		return rindle.extract(download).then (data) ->
+			responseError = data or utils.getErrorMessageFromResponse(download.response)
+			throw new errors.ResinRequestError(responseError)
