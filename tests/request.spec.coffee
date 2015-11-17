@@ -3,6 +3,7 @@ m = require('mochainon')
 nock = require('nock')
 PassThrough = require('stream').PassThrough
 settings = require('resin-settings-client')
+rindle = require('rindle')
 token = require('resin-token')
 tokens = require('./tokens.json')
 johnDoeFixture = tokens.johndoe
@@ -293,7 +294,7 @@ describe 'Request:', ->
 					request.stream
 						method: 'GET'
 						url: '/foo'
-					.then(utils.getStreamData).then (data) ->
+					.then(rindle.extract).then (data) ->
 						m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
 					.nodeify(done)
 
@@ -307,7 +308,7 @@ describe 'Request:', ->
 						pass = new PassThrough()
 						stream.pipe(pass)
 
-						utils.getStreamData(pass).then (data) ->
+						rindle.extract(pass).then (data) ->
 							m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
 						.nodeify(done)
 
@@ -325,7 +326,7 @@ describe 'Request:', ->
 								m.chai.expect(response.request.headers.Authorization).to.equal("Bearer #{johnDoeFixture.token}")
 								done()
 
-							utils.getStreamData(stream).return(undefined).nodeify(done)
+							rindle.extract(stream).return(undefined).nodeify(done)
 
 				describe 'given there is no token', ->
 
@@ -340,7 +341,7 @@ describe 'Request:', ->
 							stream.on 'response', (response) ->
 								m.chai.expect(response.request.headers.Authorization).to.not.exist
 
-							utils.getStreamData(stream).return(undefined).nodeify(done)
+							rindle.extract(stream).return(undefined).nodeify(done)
 
 			describe 'given multiple endpoints', ->
 
@@ -360,7 +361,7 @@ describe 'Request:', ->
 					it 'should default to GET', (done) ->
 						request.stream
 							url: '/foo'
-						.then(utils.getStreamData).then (data) ->
+						.then(rindle.extract).then (data) ->
 							m.chai.expect(data).to.equal('GET')
 						.nodeify(done)
 
@@ -370,6 +371,23 @@ describe 'Request:', ->
 					message = 'Lorem ipsum dolor sit amet'
 					nock(settings.get('apiUrl'))
 						.get('/foo').reply(200, message, 'Content-Length': String(message.length))
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should become a stream with a length property', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						m.chai.expect(stream.length).to.equal(26)
+					.nodeify(done)
+
+			describe 'given an endpoint with a x-transfer-length header', ->
+
+				beforeEach ->
+					message = 'Lorem ipsum dolor sit amet'
+					nock(settings.get('apiUrl'))
+						.get('/foo').reply(200, message, 'X-Transfer-Length': String(message.length))
 
 				afterEach ->
 					nock.cleanAll()
