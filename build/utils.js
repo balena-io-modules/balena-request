@@ -161,7 +161,7 @@ exports.requestProgress = function(options) {
     response.length = headers['content-length'] || headers['x-transfer-length'];
     return response.length = _.parseInt(response.length) || void 0;
   }).then(function(response) {
-    var pass, progressStream;
+    var pass, progressStream, responseData;
     progressStream = progress({
       time: 500,
       length: response.length
@@ -178,7 +178,12 @@ exports.requestProgress = function(options) {
         percentage: state.percentage
       });
     });
-    response.pipe(progressStream).pipe(pass);
+    if (response.headers['x-transfer-length'] != null) {
+      responseData = response;
+    } else {
+      responseData = requestStream;
+    }
+    responseData.pipe(progressStream).pipe(pass);
     pass.response = response;
     return pass;
   });
