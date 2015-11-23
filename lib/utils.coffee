@@ -151,7 +151,14 @@ exports.requestProgress = (options) ->
 				received: state.transferred
 				eta: state.eta
 				percentage: state.percentage
-		response.pipe(progressStream).pipe(pass)
+
+		if response.headers['x-transfer-length']?
+			responseData = response
+		else
+			responseData = requestStream
+
+		responseData.pipe(progressStream).pipe(pass)
+
 		pass.response = response
 
 		return pass
