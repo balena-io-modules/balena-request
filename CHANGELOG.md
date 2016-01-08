@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.4.2] - 2016-01-08
+
+### Changed
+
+- Fix `X-Transfer-Length` decompression bug.
+
 ## [2.4.1] - 2015-11-23
 
 ### Changed
@@ -152,6 +158,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
+[2.4.2]: https://github.com/resin-io/resin-request/compare/v2.4.1...v2.4.2
 [2.4.1]: https://github.com/resin-io/resin-request/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/resin-io/resin-request/compare/v2.3.2...v2.4.0
 [2.3.2]: https://github.com/resin-io/resin-request/compare/v2.3.1...v2.3.2
