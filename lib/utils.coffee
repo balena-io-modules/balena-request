@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+	 http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,8 @@ limitations under the License.
 
 Promise = require('bluebird')
 _ = require('lodash')
-request = require('request')
-stream = require('stream')
-progress = require('progress-stream')
 settings = require('resin-settings-client')
 token = require('resin-token')
-rindle = require('rindle')
 
 ###*
 # @summary Determine if the token should be updated
@@ -36,8 +32,8 @@ rindle = require('rindle')
 #
 # @example
 # tokenUtils.shouldUpdateToken().then (shouldUpdateToken) ->
-# 	if shouldUpdateToken
-# 		console.log('Updating token!')
+#		if shouldUpdateToken
+#			console.log('Updating token!')
 ###
 exports.shouldUpdateToken = ->
 	token.getAge().then (age) ->
@@ -102,55 +98,38 @@ exports.isErrorCode = (statusCode) ->
 	return statusCode >= 400
 
 ###*
-# @summary Make a node request with progress
+# @summary Check whether a response body is compressed
 # @function
 # @protected
 #
-# @param {Object} options - request options
-# @returns {Promise<Stream>} request stream
+# @param {Object} response - request response object
+# @returns {Boolean} whether the response body is compressed
 #
 # @example
-# utils.requestProgress(options).then (stream) ->
-# 	stream.pipe(fs.createWriteStream('foo/bar'))
-# 	stream.on 'progress', (state) ->
-# 		console.log(state)
+# if utils.isResponseCompressed(response)
+# 	console.log('The response body is compressed')
 ###
-exports.requestProgress = (options) ->
-	requestStream = request(options)
+exports.isResponseCompressed = (response) ->
+	return response.headers['content-encoding'] is 'gzip'
 
-	rindle.onEvent(requestStream, 'response').tap (response) ->
-		headers = response.headers
+###*
+# @summary Get response compressed/uncompressed length
+# @function
+# @protected
+#
+# @param {Object} response - request response object
+# @returns {Object} response length
+#
+# @example
+# responseLength = utils.getResponseLength(response)
+# console.log(responseLength.compressed)
+# console.log(responseLength.uncompressed)
+###
+exports.getResponseLength = (response) ->
+	return {
+		uncompressed: _.parseInt(response.headers['content-length']) or undefined
 
 		# X-Transfer-Length equals the compressed size of the body.
 		# This header is sent by Image Maker when downloading OS images.
-		response.length = headers['content-length'] or headers['x-transfer-length']
-		response.length = _.parseInt(response.length) or undefined
-
-	.then (response) ->
-		progressStream = progress
-			time: 500
-			length: response.length
-
-		# Pipe to a pass through stream to modify
-		# the state properties for backwards compatibility
-		pass = new stream.PassThrough()
-		progressStream.on 'progress', (state) ->
-			if state.length is 0
-				return pass.emit('progress', undefined)
-
-			pass.emit 'progress',
-				total: state.length
-				received: state.transferred
-				eta: state.eta
-				percentage: state.percentage
-
-		if response.headers['x-transfer-length']?
-			responseData = response
-		else
-			responseData = requestStream
-
-		responseData.pipe(progressStream).pipe(pass)
-
-		pass.response = response
-
-		return pass
+		compressed: _.parseInt(response.headers['x-transfer-length']) or undefined
+	}

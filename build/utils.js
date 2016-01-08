@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+	 http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,23 +14,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise, progress, request, rindle, settings, stream, token, _;
+var Promise, settings, token, _;
 
 Promise = require('bluebird');
 
 _ = require('lodash');
 
-request = require('request');
-
-stream = require('stream');
-
-progress = require('progress-stream');
-
 settings = require('resin-settings-client');
 
 token = require('resin-token');
-
-rindle = require('rindle');
 
 
 /**
@@ -46,8 +38,8 @@ rindle = require('rindle');
  *
  * @example
  * tokenUtils.shouldUpdateToken().then (shouldUpdateToken) ->
- * 	if shouldUpdateToken
- * 		console.log('Updating token!')
+ *		if shouldUpdateToken
+ *			console.log('Updating token!')
  */
 
 exports.shouldUpdateToken = function() {
@@ -130,53 +122,40 @@ exports.isErrorCode = function(statusCode) {
 
 
 /**
- * @summary Make a node request with progress
+ * @summary Check whether a response body is compressed
  * @function
  * @protected
  *
- * @param {Object} options - request options
- * @returns {Promise<Stream>} request stream
+ * @param {Object} response - request response object
+ * @returns {Boolean} whether the response body is compressed
  *
  * @example
- * utils.requestProgress(options).then (stream) ->
- * 	stream.pipe(fs.createWriteStream('foo/bar'))
- * 	stream.on 'progress', (state) ->
- * 		console.log(state)
+ * if utils.isResponseCompressed(response)
+ * 	console.log('The response body is compressed')
  */
 
-exports.requestProgress = function(options) {
-  var requestStream;
-  requestStream = request(options);
-  return rindle.onEvent(requestStream, 'response').tap(function(response) {
-    var headers;
-    headers = response.headers;
-    response.length = headers['content-length'] || headers['x-transfer-length'];
-    return response.length = _.parseInt(response.length) || void 0;
-  }).then(function(response) {
-    var pass, progressStream, responseData;
-    progressStream = progress({
-      time: 500,
-      length: response.length
-    });
-    pass = new stream.PassThrough();
-    progressStream.on('progress', function(state) {
-      if (state.length === 0) {
-        return pass.emit('progress', void 0);
-      }
-      return pass.emit('progress', {
-        total: state.length,
-        received: state.transferred,
-        eta: state.eta,
-        percentage: state.percentage
-      });
-    });
-    if (response.headers['x-transfer-length'] != null) {
-      responseData = response;
-    } else {
-      responseData = requestStream;
-    }
-    responseData.pipe(progressStream).pipe(pass);
-    pass.response = response;
-    return pass;
-  });
+exports.isResponseCompressed = function(response) {
+  return response.headers['content-encoding'] === 'gzip';
+};
+
+
+/**
+ * @summary Get response compressed/uncompressed length
+ * @function
+ * @protected
+ *
+ * @param {Object} response - request response object
+ * @returns {Object} response length
+ *
+ * @example
+ * responseLength = utils.getResponseLength(response)
+ * console.log(responseLength.compressed)
+ * console.log(responseLength.uncompressed)
+ */
+
+exports.getResponseLength = function(response) {
+  return {
+    uncompressed: _.parseInt(response.headers['content-length']) || void 0,
+    compressed: _.parseInt(response.headers['x-transfer-length']) || void 0
+  };
 };

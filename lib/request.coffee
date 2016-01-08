@@ -29,15 +29,19 @@ errors = require('resin-errors')
 settings = require('resin-settings-client')
 token = require('resin-token')
 utils = require('./utils')
+progress = require('./progress')
 
 prepareOptions = (options = {}) ->
 
 	_.defaults options,
 		method: 'GET'
-		gzip: true
 		json: true
 		headers: {}
 		refreshToken: true
+
+	# Disable gzip support. We manually handle compression
+	# given the need of finer control.
+	options.gzip = false
 
 	options.url = url.resolve(settings.get('apiUrl'), options.url)
 
@@ -133,7 +137,7 @@ exports.send = (options = {}) ->
 #		stream.pipe(fs.createWriteStream('/opt/download'))
 ###
 exports.stream = (options = {}) ->
-	prepareOptions(options).then(utils.requestProgress).then (download) ->
+	prepareOptions(options).then(progress.estimate).then (download) ->
 		if not utils.isErrorCode(download.response.statusCode)
 
 			# TODO: Move this to resin-image-manager
