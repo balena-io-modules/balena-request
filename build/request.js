@@ -18,7 +18,7 @@ limitations under the License.
 /**
  * @module request
  */
-var Promise, errors, prepareOptions, request, requestAsync, rindle, settings, token, url, utils, _;
+var Promise, errors, prepareOptions, progress, request, requestAsync, rindle, settings, token, url, utils, _;
 
 Promise = require('bluebird');
 
@@ -40,17 +40,19 @@ token = require('resin-token');
 
 utils = require('./utils');
 
+progress = require('./progress');
+
 prepareOptions = function(options) {
   if (options == null) {
     options = {};
   }
   _.defaults(options, {
     method: 'GET',
-    gzip: true,
     json: true,
     headers: {},
     refreshToken: true
   });
+  options.gzip = false;
   options.url = url.resolve(settings.get('apiUrl'), options.url);
   return Promise["try"](function() {
     if (!options.refreshToken) {
@@ -161,7 +163,7 @@ exports.stream = function(options) {
   if (options == null) {
     options = {};
   }
-  return prepareOptions(options).then(utils.requestProgress).then(function(download) {
+  return prepareOptions(options).then(progress.estimate).then(function(download) {
     if (!utils.isErrorCode(download.response.statusCode)) {
       download.length = download.response.length;
       download.mime = download.response.headers['content-type'];

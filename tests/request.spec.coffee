@@ -1,6 +1,7 @@
 Promise = require('bluebird')
 m = require('mochainon')
 nock = require('nock')
+zlib = require('zlib')
 PassThrough = require('stream').PassThrough
 settings = require('resin-settings-client')
 rindle = require('rindle')
@@ -382,17 +383,101 @@ describe 'Request:', ->
 						m.chai.expect(stream.length).to.equal(26)
 					.nodeify(done)
 
-			describe 'given an endpoint with a x-transfer-length header', ->
+			describe 'given an gzip endpoint with a x-transfer-length header', ->
 
-				beforeEach ->
+				beforeEach (done) ->
 					message = 'Lorem ipsum dolor sit amet'
-					nock(settings.get('apiUrl'))
-						.get('/foo').reply(200, message, 'X-Transfer-Length': String(message.length))
+					zlib.gzip message, (error, compressedMessage) ->
+						return done(error) if error?
+						nock(settings.get('apiUrl'))
+							.get('/foo')
+							.reply 200, compressedMessage,
+								'X-Transfer-Length': String(compressedMessage.length)
+								'Content-Length': undefined
+								'Content-Encoding': 'gzip'
+						done()
 
 				afterEach ->
 					nock.cleanAll()
 
-				it 'should become a stream with a length property', (done) ->
+				it 'should correctly uncompress the body', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						return rindle.extract(stream)
+					.then (data) ->
+						m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
+						m.chai.expect(data.length).to.equal(26)
+					.nodeify(done)
+
+				it 'should set no .length property', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						m.chai.expect(stream.length).to.be.undefined
+					.nodeify(done)
+
+			describe 'given an gzip endpoint with a content-length header', ->
+
+				beforeEach (done) ->
+					message = 'Lorem ipsum dolor sit amet'
+					zlib.gzip message, (error, compressedMessage) ->
+						return done(error) if error?
+						nock(settings.get('apiUrl'))
+							.get('/foo')
+							.reply 200, compressedMessage,
+								'Content-Length': String(message.length)
+								'Content-Encoding': 'gzip'
+						done()
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should correctly uncompress the body', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						return rindle.extract(stream)
+					.then (data) ->
+						m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
+						m.chai.expect(data.length).to.equal(26)
+					.nodeify(done)
+
+				it 'should set a .length property', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						m.chai.expect(stream.length).to.equal(26)
+					.nodeify(done)
+
+			describe 'given an gzip endpoint with a content-length and x-transfer-length headers', ->
+
+				beforeEach (done) ->
+					message = 'Lorem ipsum dolor sit amet'
+					zlib.gzip message, (error, compressedMessage) ->
+						return done(error) if error?
+						nock(settings.get('apiUrl'))
+							.get('/foo')
+							.reply 200, compressedMessage,
+								'X-Transfer-Length': String(compressedMessage.length)
+								'Content-Length': String(message.length)
+								'Content-Encoding': 'gzip'
+						done()
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should correctly uncompress the body', (done) ->
+					request.stream
+						url: '/foo'
+					.then (stream) ->
+						return rindle.extract(stream)
+					.then (data) ->
+						m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
+						m.chai.expect(data.length).to.equal(26)
+					.nodeify(done)
+
+				it 'should set a .length property', (done) ->
 					request.stream
 						url: '/foo'
 					.then (stream) ->
