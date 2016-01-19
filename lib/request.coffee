@@ -37,12 +37,9 @@ prepareOptions = (options = {}) ->
 		method: 'GET'
 		json: true
 		strictSSL: true
+		gzip: true
 		headers: {}
 		refreshToken: true
-
-	# Disable gzip support. We manually handle compression
-	# given the need of finer control.
-	options.gzip = false
 
 	options.url = url.resolve(settings.get('apiUrl'), options.url)
 
@@ -138,7 +135,13 @@ exports.send = (options = {}) ->
 #		stream.pipe(fs.createWriteStream('/opt/download'))
 ###
 exports.stream = (options = {}) ->
-	prepareOptions(options).then(progress.estimate).then (download) ->
+	prepareOptions(options).tap (preparedOptions) ->
+
+		# Disable gzip support. We manually handle compression
+		# given the need of finer control.
+		preparedOptions.gzip = false
+
+	.then(progress.estimate).then (download) ->
 		if not utils.isErrorCode(download.response.statusCode)
 
 			# TODO: Move this to resin-image-manager
