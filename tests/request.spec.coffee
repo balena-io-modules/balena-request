@@ -125,7 +125,7 @@ describe 'Request:', ->
 						url: '/foo'
 						body: 'Qux'
 					.get('body')
-					m.chai.expect(promise).to.eventually.equal('The body is: "Qux"')
+					m.chai.expect(promise).to.eventually.equal('The body is: Qux')
 
 			describe 'given simple read only endpoints', ->
 
