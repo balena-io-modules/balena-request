@@ -50,10 +50,10 @@ prepareOptions = function(options) {
     method: 'GET',
     json: true,
     strictSSL: true,
+    gzip: true,
     headers: {},
     refreshToken: true
   });
-  options.gzip = false;
   options.url = url.resolve(settings.get('apiUrl'), options.url);
   return Promise["try"](function() {
     if (!options.refreshToken) {
@@ -164,7 +164,9 @@ exports.stream = function(options) {
   if (options == null) {
     options = {};
   }
-  return prepareOptions(options).then(progress.estimate).then(function(download) {
+  return prepareOptions(options).tap(function(preparedOptions) {
+    return preparedOptions.gzip = false;
+  }).then(progress.estimate).then(function(download) {
     if (!utils.isErrorCode(download.response.statusCode)) {
       download.length = download.response.length;
       download.mime = download.response.headers['content-type'];
