@@ -114,7 +114,6 @@ exports.send = (options = {}) ->
 #
 # The stream may also contain the following custom properties:
 #
-# - `Number .length`: Calculated from the `Content-Length` HTTP header.
 # - `String .mime`: Equals the value of the `Content-Type` HTTP header.
 #
 # @param {Object} options - options
@@ -139,7 +138,6 @@ exports.stream = (options = {}) ->
 		if not utils.isErrorCode(download.response.statusCode)
 
 			# TODO: Move this to resin-image-manager
-			download.length = download.response.length
 			download.mime = download.response.headers['content-type']
 
 			return download

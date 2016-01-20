@@ -366,23 +366,6 @@ describe 'Request:', ->
 							m.chai.expect(data).to.equal('GET')
 						.nodeify(done)
 
-			describe 'given an endpoint with a content-length header', ->
-
-				beforeEach ->
-					message = 'Lorem ipsum dolor sit amet'
-					nock(settings.get('apiUrl'))
-						.get('/foo').reply(200, message, 'Content-Length': String(message.length))
-
-				afterEach ->
-					nock.cleanAll()
-
-				it 'should become a stream with a length property', (done) ->
-					request.stream
-						url: '/foo'
-					.then (stream) ->
-						m.chai.expect(stream.length).to.equal(26)
-					.nodeify(done)
-
 			describe 'given an gzip endpoint with a x-transfer-length header', ->
 
 				beforeEach (done) ->
@@ -443,13 +426,6 @@ describe 'Request:', ->
 						m.chai.expect(data.length).to.equal(26)
 					.nodeify(done)
 
-				it 'should set a .length property', (done) ->
-					request.stream
-						url: '/foo'
-					.then (stream) ->
-						m.chai.expect(stream.length).to.equal(26)
-					.nodeify(done)
-
 			describe 'given an gzip endpoint with a content-length and x-transfer-length headers', ->
 
 				beforeEach (done) ->
@@ -475,13 +451,6 @@ describe 'Request:', ->
 					.then (data) ->
 						m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
 						m.chai.expect(data.length).to.equal(26)
-					.nodeify(done)
-
-				it 'should set a .length property', (done) ->
-					request.stream
-						url: '/foo'
-					.then (stream) ->
-						m.chai.expect(stream.length).to.equal(26)
 					.nodeify(done)
 
 			describe 'given an endpoint with an invalid content-length header', ->
