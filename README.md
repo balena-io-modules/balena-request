@@ -33,26 +33,25 @@ Documentation
 
 
 * [request](#module_request)
-    * [.send(options)](#module_request.send) ⇒ <code>Promise</code>
-    * [.stream(options)](#module_request.stream) ⇒ <code>Promise</code>
+    * [.send(options)](#module_request.send) ⇒ <code>Promise.&lt;Object&gt;</code>
+    * [.stream(options)](#module_request.stream) ⇒ <code>Promise.&lt;Stream&gt;</code>
 
 <a name="module_request.send"></a>
-### request.send(options) ⇒ <code>Promise</code>
-This function automatically handles authorization with Resin.io.
-If you don't pass an API key, the request is made anonymously.
+### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
+This function automatically handles authorizacion with Resin.io.
+If you don't have a token, the request is made anonymously.
 This function automatically prepends the Resin.io host, therefore you should pass relative urls.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Perform an HTTP request to Resin.io  
+**Returns**: <code>Promise.&lt;Object&gt;</code> - response  
 **Access:** public  
-**Fulfil**: <code>Object</code> - response  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | options | <code>Object</code> |  | options |
 | [options.method] | <code>String</code> | <code>&#x27;GET&#x27;</code> | method |
 | options.url | <code>String</code> |  | relative url |
-| [options.apikey] | <code>String</code> |  | API key |
 | [options.body] | <code>\*</code> |  | body |
 
 **Example**  
@@ -67,13 +66,12 @@ request.send
 request.send
 	method: 'POST'
 	url: '/bar'
-	apikey: 'Py6Ebiokt64LJFQQdV56bkOmmhGlqd7U'
 	data:
 		hello: 'world'
 .get('body')
 ```
 <a name="module_request.stream"></a>
-### request.stream(options) ⇒ <code>Promise</code>
+### request.stream(options) ⇒ <code>Promise.&lt;Stream&gt;</code>
 This function emits a `progress` event, passing an object with the following properties:
 
 - `Number percent`: from 0 to 100.
@@ -83,13 +81,12 @@ This function emits a `progress` event, passing an object with the following pro
 
 The stream may also contain the following custom properties:
 
-- `Number .length`: Calculated from the `Content-Length` HTTP header.
 - `String .mime`: Equals the value of the `Content-Type` HTTP header.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Stream an HTTP response from Resin.io.  
+**Returns**: <code>Promise.&lt;Stream&gt;</code> - response  
 **Access:** public  
-**Fulfil**: <code>Stream</code> - response  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -103,7 +100,6 @@ The stream may also contain the following custom properties:
 request.stream
 	method: 'GET'
 	url: '/download/foo'
-	apikey: 'Py6Ebiokt64LJFQQdV56bkOmmhGlqd7U'
 .then (stream) ->
 	stream.on 'progress', (state) ->
 		console.log(state)

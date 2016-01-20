@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+	 http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,9 +14,65 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise;
+var Promise, settings, token, _;
 
 Promise = require('bluebird');
+
+_ = require('lodash');
+
+settings = require('resin-settings-client');
+
+token = require('resin-token');
+
+
+/**
+ * @summary Determine if the token should be updated
+ * @function
+ * @protected
+ *
+ * @description
+ * This function makes use of a soft user-configurable setting called `tokenRefreshInterval`.
+ * That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
+ *
+ * @returns {Promise<Boolean>} the token should be updated
+ *
+ * @example
+ * tokenUtils.shouldUpdateToken().then (shouldUpdateToken) ->
+ *		if shouldUpdateToken
+ *			console.log('Updating token!')
+ */
+
+exports.shouldUpdateToken = function() {
+  return token.getAge().then(function(age) {
+    return age >= settings.get('tokenRefreshInterval');
+  });
+};
+
+
+/**
+ * @summary Get authorization header content
+ * @function
+ * @protected
+ *
+ * @description
+ * This promise becomes undefined if no saved token.
+ *
+ * @returns {Promise<String>} authorization header
+ *
+ * @example
+ * utils.getAuthorizationHeader().then (authorizationHeader) ->
+ *		headers =
+ *			Authorization: authorizationHeader
+ */
+
+exports.getAuthorizationHeader = function() {
+  return token.get().then(function(sessionToken) {
+    if (sessionToken == null) {
+      return;
+    }
+    return "Bearer " + sessionToken;
+  });
+};
 
 
 /**
@@ -62,4 +118,44 @@ exports.getErrorMessageFromResponse = function(response) {
 
 exports.isErrorCode = function(statusCode) {
   return statusCode >= 400;
+};
+
+
+/**
+ * @summary Check whether a response body is compressed
+ * @function
+ * @protected
+ *
+ * @param {Object} response - request response object
+ * @returns {Boolean} whether the response body is compressed
+ *
+ * @example
+ * if utils.isResponseCompressed(response)
+ * 	console.log('The response body is compressed')
+ */
+
+exports.isResponseCompressed = function(response) {
+  return response.headers['content-encoding'] === 'gzip';
+};
+
+
+/**
+ * @summary Get response compressed/uncompressed length
+ * @function
+ * @protected
+ *
+ * @param {Object} response - request response object
+ * @returns {Object} response length
+ *
+ * @example
+ * responseLength = utils.getResponseLength(response)
+ * console.log(responseLength.compressed)
+ * console.log(responseLength.uncompressed)
+ */
+
+exports.getResponseLength = function(response) {
+  return {
+    uncompressed: _.parseInt(response.headers['content-length']) || void 0,
+    compressed: _.parseInt(response.headers['x-transfer-length']) || void 0
+  };
 };

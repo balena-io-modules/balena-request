@@ -3,21 +3,33 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.0] - 2015-09-23
-
-### Added
-
-- Send `apikey` query string.
+## [2.4.3] - 2016-01-20
 
 ### Changed
 
-- Read API key from environment variable configured by `apiKeyVariable`.
+- Make sure we send an `Accept-Encoding` header on streaming requests.
+- Only disable `gzip` on streaming requests.
+- Enable `strictSSL` by default.
+- Change license to Apache 2.0.
+- Fix `X-Transfer-Length` header not being interpreted correctly.
 
-### Removed
+## [2.4.2] - 2016-01-08
 
-- Remove `resin-token`.
-- Remove `Authorization` HTTP header.
-- Remove session token auto update functionality.
+### Changed
+
+- Fix `X-Transfer-Length` decompression bug.
+
+## [2.4.1] - 2015-11-23
+
+### Changed
+
+- Fix compressed/uncompressed data piping bug.
+
+## [2.4.0] - 2015-11-17
+
+### Added
+
+- Fallback to `X-Transfer-Length` if no `Content-Length`.
 
 ## [2.3.2] - 2015-09-07
 
@@ -156,7 +168,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
-[3.0.0]: https://github.com/resin-io/resin-request/compare/v2.3.2...v3.0.0
+[2.4.3]: https://github.com/resin-io/resin-request/compare/v2.4.2...v2.4.3
+[2.4.2]: https://github.com/resin-io/resin-request/compare/v2.4.1...v2.4.2
+[2.4.1]: https://github.com/resin-io/resin-request/compare/v2.4.0...v2.4.1
+[2.4.0]: https://github.com/resin-io/resin-request/compare/v2.3.2...v2.4.0
 [2.3.2]: https://github.com/resin-io/resin-request/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/resin-io/resin-request/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/resin-io/resin-request/compare/v2.2.5...v2.3.0
