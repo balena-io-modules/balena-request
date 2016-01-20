@@ -49,6 +49,7 @@ prepareOptions = function(options) {
   _.defaults(options, {
     method: 'GET',
     json: true,
+    strictSSL: true,
     headers: {},
     refreshToken: true
   });
