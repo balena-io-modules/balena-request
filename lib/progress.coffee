@@ -70,6 +70,17 @@ getProgressStream = (response, total, onState = _.noop) ->
 #			console.log(state)
 ###
 exports.estimate = (options) ->
+
+	# Disable gzip support. We manually handle compression
+	# given the need of finer control.
+	options.gzip = false
+
+	# Disabling gzip makes request omit an Accept-Encoding: gzip
+	# completely. We disable automatic gzip decompression
+	# but still want to receive the gzip encoded response to handle
+	# it ourselves, therefore we pass the HTTP header manually.
+	options.headers['Accept-Encoding'] = 'gzip, deflate'
+
 	requestStream = request(options)
 
 	# Instantly pipe the response to a PassThrough stream

@@ -89,6 +89,8 @@ getProgressStream = function(response, total, onState) {
 
 exports.estimate = function(options) {
   var passStream, requestStream;
+  options.gzip = false;
+  options.headers['Accept-Encoding'] = 'gzip, deflate';
   requestStream = request(options);
   passStream = new stream.PassThrough();
   requestStream.pipe(passStream);
