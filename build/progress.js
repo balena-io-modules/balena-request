@@ -99,7 +99,6 @@ exports.estimate = function(options) {
     responseLength = utils.getResponseLength(response);
     output = new stream.PassThrough();
     output.response = response;
-    output.response.length = responseLength.uncompressed;
     total = responseLength.uncompressed || responseLength.compressed;
     progressStream = getProgressStream(response, total, function(state) {
       return output.emit('progress', state);

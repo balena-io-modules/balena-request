@@ -139,7 +139,6 @@ exports.send = function(options) {
  *
  * The stream may also contain the following custom properties:
  *
- * - `Number .length`: Calculated from the `Content-Length` HTTP header.
  * - `String .mime`: Equals the value of the `Content-Type` HTTP header.
  *
  * @param {Object} options - options
@@ -166,7 +165,6 @@ exports.stream = function(options) {
   }
   return prepareOptions(options).then(progress.estimate).then(function(download) {
     if (!utils.isErrorCode(download.response.statusCode)) {
-      download.length = download.response.length;
       download.mime = download.response.headers['content-type'];
       return download;
     }

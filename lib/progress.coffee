@@ -93,7 +93,6 @@ exports.estimate = (options) ->
 
 		output = new stream.PassThrough()
 		output.response = response
-		output.response.length = responseLength.uncompressed
 
 		total = responseLength.uncompressed or responseLength.compressed
 		progressStream = getProgressStream response, total, (state) ->
