@@ -117,7 +117,7 @@ exports.send = function(options) {
     var responseError;
     if (utils.isErrorCode(response.statusCode)) {
       responseError = utils.getErrorMessageFromResponse(response);
-      throw new errors.ResinRequestError(responseError);
+      throw new errors.ResinRequestError(responseError, response.statusCode);
     }
     return response;
   });
@@ -171,7 +171,7 @@ exports.stream = function(options) {
     return rindle.extract(download).then(function(data) {
       var responseError;
       responseError = data || utils.getErrorMessageFromResponse(download.response);
-      throw new errors.ResinRequestError(responseError);
+      throw new errors.ResinRequestError(responseError, download.response.statusCode);
     });
   });
 };
