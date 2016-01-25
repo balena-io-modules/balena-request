@@ -160,6 +160,14 @@ describe 'Request:', ->
 								url: '/foo'
 							m.chai.expect(promise).to.be.rejectedWith('Server Error')
 
+						it 'should have the status code in the error object', (done) ->
+							request.send
+								method: 'GET'
+								url: '/foo'
+							.catch (error) ->
+								m.chai.expect(error.statusCode).to.equal(500)
+								done()
+
 				describe 'given a HEAD endpoint', ->
 
 					describe 'given no response error', ->
@@ -282,6 +290,14 @@ describe 'Request:', ->
 						url: '/foo'
 
 					m.chai.expect(promise).to.be.rejectedWith('Something happened')
+
+				it 'should have the status code in the error object', (done) ->
+					request.stream
+						method: 'GET'
+						url: '/foo'
+					.catch (error) ->
+						m.chai.expect(error.statusCode).to.equal(400)
+						done()
 
 			describe 'given a simple endpoint that responds with a string', ->
 
