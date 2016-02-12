@@ -54,7 +54,9 @@ prepareOptions = function(options) {
     headers: {},
     refreshToken: true
   });
-  options.url = url.resolve(settings.get('apiUrl'), options.url);
+  if (options.baseUrl == null) {
+    options.url = url.resolve(settings.get('apiUrl'), options.url);
+  }
   return Promise["try"](function() {
     if (!options.refreshToken) {
       return;
