@@ -16,8 +16,10 @@ limitations under the License.
 
 Promise = require('bluebird')
 _ = require('lodash')
-settings = require('resin-settings-client')
 token = require('resin-token')
+
+# Expose for testing purposes
+exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 
 ###*
 # @summary Determine if the token should be updated
@@ -37,7 +39,7 @@ token = require('resin-token')
 ###
 exports.shouldUpdateToken = ->
 	token.getAge().then (age) ->
-		return age >= settings.get('tokenRefreshInterval')
+		return age >= exports.TOKEN_REFRESH_INTERVAL
 
 ###*
 # @summary Get authorization header content

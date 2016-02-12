@@ -2,7 +2,6 @@ ReadableStream = require('stream').Readable
 Promise = require('bluebird')
 m = require('mochainon')
 token = require('resin-token')
-settings = require('resin-settings-client')
 johnDoeFixture = require('./tokens.json').johndoe
 utils = require('../lib/utils')
 
@@ -14,7 +13,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval') + 1))
+				@tokenGetAgeStub.returns(Promise.resolve(utils.TOKEN_REFRESH_INTERVAL + 1))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
@@ -26,7 +25,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval') - 1))
+				@tokenGetAgeStub.returns(Promise.resolve(utils.TOKEN_REFRESH_INTERVAL - 1))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
@@ -38,7 +37,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(settings.get('tokenRefreshInterval')))
+				@tokenGetAgeStub.returns(Promise.resolve(utils.TOKEN_REFRESH_INTERVAL))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
