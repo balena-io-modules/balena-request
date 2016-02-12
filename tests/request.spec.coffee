@@ -48,6 +48,14 @@ describe 'Request:', ->
 						.get('body')
 						m.chai.expect(promise).to.eventually.become(from: 'foobar')
 
+					it 'should allow passing a baseUrl', ->
+						promise = request.send
+							method: 'GET'
+							baseUrl: 'https://foobar.baz'
+							url: '/foo'
+						.get('body')
+						m.chai.expect(promise).to.eventually.become(from: 'foobar')
+
 				describe 'given there is a token', ->
 
 					beforeEach ->

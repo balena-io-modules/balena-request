@@ -41,7 +41,8 @@ prepareOptions = (options = {}) ->
 		headers: {}
 		refreshToken: true
 
-	options.url = url.resolve(settings.get('apiUrl'), options.url)
+	if not options.baseUrl?
+		options.url = url.resolve(settings.get('apiUrl'), options.url)
 
 	Promise.try ->
 		return if not options.refreshToken
