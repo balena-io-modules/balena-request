@@ -14,15 +14,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise, settings, token, _;
+var Promise, token, _;
 
 Promise = require('bluebird');
 
 _ = require('lodash');
 
-settings = require('resin-settings-client');
-
 token = require('resin-token');
+
+exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60;
 
 
 /**
@@ -44,7 +44,7 @@ token = require('resin-token');
 
 exports.shouldUpdateToken = function() {
   return token.getAge().then(function(age) {
-    return age >= settings.get('tokenRefreshInterval');
+    return age >= exports.TOKEN_REFRESH_INTERVAL;
   });
 };
 
