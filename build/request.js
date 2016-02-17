@@ -52,7 +52,8 @@ prepareOptions = function(options) {
     strictSSL: true,
     gzip: true,
     headers: {},
-    refreshToken: true
+    refreshToken: true,
+    timeout: 30000
   });
   if (options.baseUrl == null) {
     options.url = url.resolve(settings.get('apiUrl'), options.url);

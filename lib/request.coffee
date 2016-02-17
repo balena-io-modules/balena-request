@@ -40,6 +40,7 @@ prepareOptions = (options = {}) ->
 		gzip: true
 		headers: {}
 		refreshToken: true
+		timeout: 30000
 
 	if not options.baseUrl?
 		options.url = url.resolve(settings.get('apiUrl'), options.url)
