@@ -159,3 +159,30 @@ exports.getResponseLength = function(response) {
     compressed: _.parseInt(response.headers['x-transfer-length']) || void 0
   };
 };
+
+
+/**
+ * @summary Print debug information about a request/response
+ * @function
+ * @protected
+ *
+ * @param {Object} options - request options
+ * @param {Object} response - request response
+ *
+ * @example
+ * options = {
+ * 	method: 'GET'
+ *   url: '/foo'
+ * }
+ *
+ * request(options).spread (response) ->
+ * 	utils.debugRequest(options, response)
+ */
+
+exports.debugRequest = function(options, response) {
+  if (!process.env.DEBUG) {
+    return;
+  }
+  options.statusCode = response.statusCode;
+  return console.error(options);
+};
