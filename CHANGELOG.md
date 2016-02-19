@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.4] - 2016-02-18
+
+### Added
+
+- Show debug information when passing `DEBUG=true`.
+
+### Changed
+
+- Only set a timeout default on non-streaming HTTP requests.
+
 ## [4.0.3] - 2016-02-17
 
 ### Changed
@@ -194,6 +204,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
+[4.0.4]: https://github.com/resin-io/resin-request/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/resin-io/resin-request/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/resin-io/resin-request/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/resin-io/resin-request/compare/v4.0.0...v4.0.1
