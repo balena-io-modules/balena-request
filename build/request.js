@@ -120,6 +120,7 @@ exports.send = function(options) {
     var responseError;
     if (utils.isErrorCode(response.statusCode)) {
       responseError = utils.getErrorMessageFromResponse(response);
+      utils.debugRequest(options, response);
       throw new errors.ResinRequestError(responseError, response.statusCode);
     }
     return response;
@@ -174,6 +175,7 @@ exports.stream = function(options) {
     return rindle.extract(download).then(function(data) {
       var responseError;
       responseError = data || utils.getErrorMessageFromResponse(download.response);
+      utils.debugRequest(options, download.response);
       throw new errors.ResinRequestError(responseError, download.response.statusCode);
     });
   });

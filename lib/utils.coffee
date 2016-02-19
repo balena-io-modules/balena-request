@@ -135,3 +135,25 @@ exports.getResponseLength = (response) ->
 		# This header is sent by Image Maker when downloading OS images.
 		compressed: _.parseInt(response.headers['x-transfer-length']) or undefined
 	}
+
+###*
+# @summary Print debug information about a request/response
+# @function
+# @protected
+#
+# @param {Object} options - request options
+# @param {Object} response - request response
+#
+# @example
+# options = {
+# 	method: 'GET'
+#   url: '/foo'
+# }
+#
+# request(options).spread (response) ->
+# 	utils.debugRequest(options, response)
+###
+exports.debugRequest = (options, response) ->
+	return if not process.env.DEBUG
+	options.statusCode = response.statusCode
+	console.error(options)

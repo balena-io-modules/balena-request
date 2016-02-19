@@ -97,6 +97,7 @@ exports.send = (options = {}) ->
 
 		if utils.isErrorCode(response.statusCode)
 			responseError = utils.getErrorMessageFromResponse(response)
+			utils.debugRequest(options, response)
 			throw new errors.ResinRequestError(responseError, response.statusCode)
 
 		return response
@@ -148,4 +149,5 @@ exports.stream = (options = {}) ->
 		# the body of the request as an error.
 		return rindle.extract(download).then (data) ->
 			responseError = data or utils.getErrorMessageFromResponse(download.response)
+			utils.debugRequest(options, download.response)
 			throw new errors.ResinRequestError(responseError, download.response.statusCode)
