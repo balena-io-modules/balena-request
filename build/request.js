@@ -52,8 +52,7 @@ prepareOptions = function(options) {
     strictSSL: true,
     gzip: true,
     headers: {},
-    refreshToken: true,
-    timeout: 30000
+    refreshToken: true
   });
   if (options.baseUrl == null) {
     options.url = url.resolve(settings.get('apiUrl'), options.url);
@@ -115,6 +114,9 @@ prepareOptions = function(options) {
 exports.send = function(options) {
   if (options == null) {
     options = {};
+  }
+  if (options.timeout == null) {
+    options.timeout = 30000;
   }
   return prepareOptions(options).then(requestAsync).spread(function(response) {
     var responseError;

@@ -40,7 +40,6 @@ prepareOptions = (options = {}) ->
 		gzip: true
 		headers: {}
 		refreshToken: true
-		timeout: 30000
 
 	if not options.baseUrl?
 		options.url = url.resolve(settings.get('apiUrl'), options.url)
@@ -93,6 +92,12 @@ prepareOptions = (options = {}) ->
 # .get('body')
 ###
 exports.send = (options = {}) ->
+
+	# Only set a default timeout when doing a normal HTTP
+	# request and not also when streaming since in the latter
+	# case we might cause unnecessary ESOCKETTIMEDOUT errors.
+	options.timeout ?= 30000
+
 	prepareOptions(options).then(requestAsync).spread (response) ->
 
 		if utils.isErrorCode(response.statusCode)
