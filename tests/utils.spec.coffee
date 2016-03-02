@@ -45,6 +45,18 @@ describe 'Utils:', ->
 			it 'should return true', ->
 				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.true
 
+		describe 'given no token', ->
+
+			beforeEach ->
+				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
+				@tokenGetAgeStub.returns(Promise.resolve(undefined))
+
+			afterEach ->
+				@tokenGetAgeStub.restore()
+
+			it 'should return false', ->
+				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.false
+
 	describe '.getAuthorizationHeader()', ->
 
 		describe 'given there is a token', ->
