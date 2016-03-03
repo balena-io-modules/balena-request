@@ -68,6 +68,13 @@ prepareOptions = function(options) {
       return exports.send({
         url: '/whoami',
         refreshToken: false
+      })["catch"](function(error) {
+        if (error instanceof errors.ResinRequestError && error.statusCode === 401) {
+          return token.get().then(function(sessionToken) {
+            throw new errors.ResinExpiredToken(sessionToken);
+          });
+        }
+        throw error;
       }).get('body').then(token.set);
     });
   }).then(utils.getAuthorizationHeader).then(function(authorizationHeader) {
