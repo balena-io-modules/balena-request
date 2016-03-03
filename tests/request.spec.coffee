@@ -4,6 +4,7 @@ nock = require('nock')
 zlib = require('zlib')
 PassThrough = require('stream').PassThrough
 settings = require('resin-settings-client')
+errors = require('resin-errors')
 rindle = require('rindle')
 token = require('resin-token')
 tokens = require('./tokens.json')
@@ -560,7 +561,7 @@ describe 'Request:', ->
 						m.chai.expect(authorizationHeader).to.equal("Bearer #{janeDoeFixture.token}")
 					.nodeify(done)
 
-			describe 'given a non working /whoami endpoint', ->
+			describe 'given /whoami returns 401', ->
 
 				beforeEach ->
 					nock(settings.get('apiUrl'))
@@ -570,6 +571,25 @@ describe 'Request:', ->
 				afterEach ->
 					nock.cleanAll()
 
-				it 'should be rejected with an error', ->
+				it 'should be rejected with an expiration error', ->
 					promise = request.send(url: '/foo')
-					m.chai.expect(promise).to.be.eventually.rejectedWith('Unauthorized')
+					m.chai.expect(promise).to.be.rejectedWith(errors.ResinExpiredToken)
+
+				it 'should have the session token as an error attribute', (done) ->
+					request.send(url: '/foo').catch (error) ->
+						m.chai.expect(error.token).to.equal(johnDoeFixture.token)
+					.nodeify(done)
+
+			describe 'given /whoami returns a non 401 status code', ->
+
+				beforeEach ->
+					nock(settings.get('apiUrl'))
+						.get('/whoami')
+						.reply(500)
+
+				afterEach ->
+					nock.cleanAll()
+
+				it 'should be rejected with a request error', ->
+					promise = request.send(url: '/foo')
+					m.chai.expect(promise).to.be.rejectedWith(errors.ResinRequestError)

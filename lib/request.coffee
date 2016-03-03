@@ -53,7 +53,18 @@ prepareOptions = (options = {}) ->
 			exports.send
 				url: '/whoami'
 				refreshToken: false
-			.get('body').then(token.set)
+			.catch (error) ->
+
+				# At this point we're sure there is a saved token,
+				# however the fact that /whoami returns 401 allows
+				# us to safely assume the token is expired
+				if error instanceof errors.ResinRequestError and error.statusCode is 401
+					return token.get().then (sessionToken) ->
+						throw new errors.ResinExpiredToken(sessionToken)
+
+				throw error
+			.get('body')
+			.then(token.set)
 
 	.then(utils.getAuthorizationHeader).then (authorizationHeader) ->
 		if authorizationHeader?
