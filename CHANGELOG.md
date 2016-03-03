@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.5] - 2016-03-03
+
+### Changed
+
+- Throw `ResinExpiredToken` if there is a saved token but its expired.
+
 ## [4.0.4] - 2016-02-18
 
 ### Added
@@ -204,6 +210,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
 
+[4.0.5]: https://github.com/resin-io/resin-request/compare/v4.0.4...v4.0.5
 [4.0.4]: https://github.com/resin-io/resin-request/compare/v4.0.3...v4.0.4
 [4.0.3]: https://github.com/resin-io/resin-request/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/resin-io/resin-request/compare/v4.0.1...v4.0.2
