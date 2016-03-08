@@ -202,40 +202,40 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Make use of [resin-settings-client](https://github.com/resin-io/resin-settings-client) to retrieve `options.remoteUrl`.
+- Make use of [resin-settings-client](https://github.com/resin-io-modules/resin-settings-client) to retrieve `options.remoteUrl`.
 
 ## [1.1.0] - 2015-03-18
 
 ### Removed
 
-- `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io/resin-token).
+- `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
-[4.0.5]: https://github.com/resin-io/resin-request/compare/v4.0.4...v4.0.5
-[4.0.4]: https://github.com/resin-io/resin-request/compare/v4.0.3...v4.0.4
-[4.0.3]: https://github.com/resin-io/resin-request/compare/v4.0.2...v4.0.3
-[4.0.2]: https://github.com/resin-io/resin-request/compare/v4.0.1...v4.0.2
-[4.0.1]: https://github.com/resin-io/resin-request/compare/v4.0.0...v4.0.1
-[4.0.0]: https://github.com/resin-io/resin-request/compare/v2.4.3...v4.0.0
-[2.4.3]: https://github.com/resin-io/resin-request/compare/v2.4.2...v2.4.3
-[2.4.2]: https://github.com/resin-io/resin-request/compare/v2.4.1...v2.4.2
-[2.4.1]: https://github.com/resin-io/resin-request/compare/v2.4.0...v2.4.1
-[2.4.0]: https://github.com/resin-io/resin-request/compare/v2.3.2...v2.4.0
-[2.3.2]: https://github.com/resin-io/resin-request/compare/v2.3.1...v2.3.2
-[2.3.1]: https://github.com/resin-io/resin-request/compare/v2.3.0...v2.3.1
-[2.3.0]: https://github.com/resin-io/resin-request/compare/v2.2.5...v2.3.0
-[2.2.5]: https://github.com/resin-io/resin-request/compare/v2.2.4...v2.2.5
-[2.2.4]: https://github.com/resin-io/resin-request/compare/v2.2.3...v2.2.4
-[2.2.3]: https://github.com/resin-io/resin-request/compare/v2.2.2...v2.2.3
-[2.2.2]: https://github.com/resin-io/resin-request/compare/v2.2.1...v2.2.2
-[2.2.1]: https://github.com/resin-io/resin-request/compare/v2.2.0...v2.2.1
-[2.2.0]: https://github.com/resin-io/resin-request/compare/v2.1.0...v2.2.0
-[2.1.0]: https://github.com/resin-io/resin-request/compare/v2.0.0...v2.1.0
-[2.0.0]: https://github.com/resin-io/resin-request/compare/v1.3.0...v2.0.0
-[1.3.0]: https://github.com/resin-io/resin-request/compare/v1.2.5...v1.3.0
-[1.2.5]: https://github.com/resin-io/resin-request/compare/v1.2.4...v1.2.5
-[1.2.4]: https://github.com/resin-io/resin-request/compare/v1.2.3...v1.2.4
-[1.2.3]: https://github.com/resin-io/resin-request/compare/v1.2.2...v1.2.3
-[1.2.2]: https://github.com/resin-io/resin-request/compare/v1.2.1...v1.2.2
-[1.2.1]: https://github.com/resin-io/resin-request/compare/v1.2.0...v1.2.1
-[1.2.0]: https://github.com/resin-io/resin-request/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/resin-io/resin-request/compare/v1.0.0...v1.1.0
+[4.0.5]: https://github.com/resin-io-modules/resin-request/compare/v4.0.4...v4.0.5
+[4.0.4]: https://github.com/resin-io-modules/resin-request/compare/v4.0.3...v4.0.4
+[4.0.3]: https://github.com/resin-io-modules/resin-request/compare/v4.0.2...v4.0.3
+[4.0.2]: https://github.com/resin-io-modules/resin-request/compare/v4.0.1...v4.0.2
+[4.0.1]: https://github.com/resin-io-modules/resin-request/compare/v4.0.0...v4.0.1
+[4.0.0]: https://github.com/resin-io-modules/resin-request/compare/v2.4.3...v4.0.0
+[2.4.3]: https://github.com/resin-io-modules/resin-request/compare/v2.4.2...v2.4.3
+[2.4.2]: https://github.com/resin-io-modules/resin-request/compare/v2.4.1...v2.4.2
+[2.4.1]: https://github.com/resin-io-modules/resin-request/compare/v2.4.0...v2.4.1
+[2.4.0]: https://github.com/resin-io-modules/resin-request/compare/v2.3.2...v2.4.0
+[2.3.2]: https://github.com/resin-io-modules/resin-request/compare/v2.3.1...v2.3.2
+[2.3.1]: https://github.com/resin-io-modules/resin-request/compare/v2.3.0...v2.3.1
+[2.3.0]: https://github.com/resin-io-modules/resin-request/compare/v2.2.5...v2.3.0
+[2.2.5]: https://github.com/resin-io-modules/resin-request/compare/v2.2.4...v2.2.5
+[2.2.4]: https://github.com/resin-io-modules/resin-request/compare/v2.2.3...v2.2.4
+[2.2.3]: https://github.com/resin-io-modules/resin-request/compare/v2.2.2...v2.2.3
+[2.2.2]: https://github.com/resin-io-modules/resin-request/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/resin-io-modules/resin-request/compare/v2.2.0...v2.2.1
+[2.2.0]: https://github.com/resin-io-modules/resin-request/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/resin-io-modules/resin-request/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/resin-io-modules/resin-request/compare/v1.3.0...v2.0.0
+[1.3.0]: https://github.com/resin-io-modules/resin-request/compare/v1.2.5...v1.3.0
+[1.2.5]: https://github.com/resin-io-modules/resin-request/compare/v1.2.4...v1.2.5
+[1.2.4]: https://github.com/resin-io-modules/resin-request/compare/v1.2.3...v1.2.4
+[1.2.3]: https://github.com/resin-io-modules/resin-request/compare/v1.2.2...v1.2.3
+[1.2.2]: https://github.com/resin-io-modules/resin-request/compare/v1.2.1...v1.2.2
+[1.2.1]: https://github.com/resin-io-modules/resin-request/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/resin-io-modules/resin-request/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/resin-io-modules/resin-request/compare/v1.0.0...v1.1.0

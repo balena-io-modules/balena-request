@@ -3,10 +3,10 @@
   "version": "4.0.5",
   "description": "Resin.io HTTP client",
   "main": "build/request.js",
-  "homepage": "https://github.com/resin-io/resin-request",
+  "homepage": "https://github.com/resin-io-modules/resin-request",
   "repository": {
     "type": "git",
-    "url": "git://github.com/resin-io/resin-request.git"
+    "url": "git://github.com/resin-io-modules/resin-request.git"
   },
   "keywords": [
     "resin",
