@@ -2,9 +2,9 @@ resin-request
 -------------
 
 [![npm version](https://badge.fury.io/js/resin-request.svg)](http://badge.fury.io/js/resin-request)
-[![dependencies](https://david-dm.org/resin-io/resin-request.png)](https://david-dm.org/resin-io/resin-request.png)
-[![Build Status](https://travis-ci.org/resin-io/resin-request.svg?branch=master)](https://travis-ci.org/resin-io/resin-request)
-[![Build status](https://ci.appveyor.com/api/projects/status/8qmwhh1vhm27otn4?svg=true)](https://ci.appveyor.com/project/jviotti/resin-request)
+[![dependencies](https://david-dm.org/resin-io-modules/resin-request.png)](https://david-dm.org/resin-io-modules/resin-request.png)
+[![Build Status](https://travis-ci.org/resin-io-modules/resin-request.svg?branch=master)](https://travis-ci.org/resin-io-modules/resin-request)
+[![Build status](https://ci.appveyor.com/api/projects/status/8qmwhh1vhm27otn4/branch/master?svg=true)](https://ci.appveyor.com/project/resin-io/resin-request/branch/master)
 
 Join our online chat at [![Gitter chat](https://badges.gitter.im/resin-io/chat.png)](https://gitter.im/resin-io/chat)
 
@@ -110,7 +110,7 @@ request.stream
 Support
 -------
 
-If you're having any problem, please [raise an issue](https://github.com/resin-io/resin-request/issues/new) on GitHub and the Resin.io team will be happy to help.
+If you're having any problem, please [raise an issue](https://github.com/resin-io-modules/resin-request/issues/new) on GitHub and the Resin.io team will be happy to help.
 
 Tests
 -----
@@ -124,8 +124,8 @@ $ gulp test
 Contribute
 ----------
 
-- Issue Tracker: [github.com/resin-io/resin-request/issues](https://github.com/resin-io/resin-request/issues)
-- Source Code: [github.com/resin-io/resin-request](https://github.com/resin-io/resin-request)
+- Issue Tracker: [github.com/resin-io-modules/resin-request/issues](https://github.com/resin-io-modules/resin-request/issues)
+- Source Code: [github.com/resin-io-modules/resin-request](https://github.com/resin-io-modules/resin-request)
 
 Before submitting a PR, please make sure that you include tests, and that [coffeelint](http://www.coffeelint.org/) runs without any warning:
 
