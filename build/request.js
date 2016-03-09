@@ -68,8 +68,9 @@ prepareOptions = function(options) {
       return exports.send({
         url: '/whoami',
         refreshToken: false
-      })["catch"](function(error) {
-        return error instanceof errors.ResinRequestError && error.statusCode === 401;
+      })["catch"]({
+        name: 'ResinRequestError',
+        statusCode: 401
       }, function() {
         return token.get().tap(token.remove).then(function(sessionToken) {
           throw new errors.ResinExpiredToken(sessionToken);

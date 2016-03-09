@@ -53,13 +53,13 @@ prepareOptions = (options = {}) ->
 			exports.send
 				url: '/whoami'
 				refreshToken: false
-			.catch (error) ->
 
-				# At this point we're sure there is a saved token,
-				# however the fact that /whoami returns 401 allows
-				# us to safely assume the token is expired
-				return error instanceof errors.ResinRequestError and error.statusCode is 401
-
+			# At this point we're sure there is a saved token,
+			# however the fact that /whoami returns 401 allows
+			# us to safely assume the token is expired
+			.catch
+				name: 'ResinRequestError'
+				statusCode: 401
 			, ->
 
 				return token.get().tap(token.remove).then (sessionToken) ->
