@@ -58,12 +58,13 @@ prepareOptions = (options = {}) ->
 				# At this point we're sure there is a saved token,
 				# however the fact that /whoami returns 401 allows
 				# us to safely assume the token is expired
-				if error instanceof errors.ResinRequestError and error.statusCode is 401
-					return token.get().then (sessionToken) ->
-						token.remove().then ->
-							throw new errors.ResinExpiredToken(sessionToken)
+				return error instanceof errors.ResinRequestError and error.statusCode is 401
 
-				throw error
+			, ->
+
+				return token.get().tap(token.remove).then (sessionToken) ->
+					throw new errors.ResinExpiredToken(sessionToken)
+
 			.get('body')
 			.then(token.set)
 
