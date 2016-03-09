@@ -1,14 +1,13 @@
 resin-request
--------------
+=============
+
+> Resin.io HTTP client.
 
 [![npm version](https://badge.fury.io/js/resin-request.svg)](http://badge.fury.io/js/resin-request)
-[![dependencies](https://david-dm.org/resin-io-modules/resin-request.png)](https://david-dm.org/resin-io-modules/resin-request.png)
+[![dependencies](https://david-dm.org/resin-io-modules/resin-request.svg)](https://david-dm.org/resin-io-modules/resin-request.svg)
 [![Build Status](https://travis-ci.org/resin-io-modules/resin-request.svg?branch=master)](https://travis-ci.org/resin-io-modules/resin-request)
 [![Build status](https://ci.appveyor.com/api/projects/status/8qmwhh1vhm27otn4/branch/master?svg=true)](https://ci.appveyor.com/project/resin-io/resin-request/branch/master)
-
-Join our online chat at [![Gitter chat](https://badges.gitter.im/resin-io/chat.png)](https://gitter.im/resin-io/chat)
-
-Resin.io HTTP client.
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/resin-io/chat)
 
 Role
 ----
