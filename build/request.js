@@ -18,7 +18,7 @@ limitations under the License.
 /**
  * @module request
  */
-var Promise, errors, prepareOptions, progress, request, requestAsync, rindle, settings, token, url, utils, _;
+var Promise, _, errors, prepareOptions, progress, request, requestAsync, rindle, settings, token, url, utils;
 
 Promise = require('bluebird');
 
