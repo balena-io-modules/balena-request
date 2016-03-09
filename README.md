@@ -103,7 +103,7 @@ request.stream
 	stream.on 'progress', (state) ->
 		console.log(state)
 
-		stream.pipe(fs.createWriteStream('/opt/download'))
+	stream.pipe(fs.createWriteStream('/opt/download'))
 ```
 
 Support

@@ -152,7 +152,7 @@ exports.send = (options = {}) ->
 # 	stream.on 'progress', (state) ->
 # 		console.log(state)
 #
-#		stream.pipe(fs.createWriteStream('/opt/download'))
+# 	stream.pipe(fs.createWriteStream('/opt/download'))
 ###
 exports.stream = (options = {}) ->
 	prepareOptions(options).then(progress.estimate).then (download) ->
