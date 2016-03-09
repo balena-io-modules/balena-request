@@ -15,6 +15,8 @@ utils = require('../lib/utils')
 
 describe 'Request:', ->
 
+	@timeout(10000)
+
 	describe 'given the token is always fresh', ->
 
 		beforeEach ->
