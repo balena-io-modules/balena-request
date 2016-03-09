@@ -110,7 +110,7 @@ exports.send = (options = {}) ->
 	# case we might cause unnecessary ESOCKETTIMEDOUT errors.
 	options.timeout ?= 30000
 
-	prepareOptions(options).then(requestAsync).spread (response) ->
+	prepareOptions(options).then(requestAsync).then (response) ->
 
 		if utils.isErrorCode(response.statusCode)
 			responseError = utils.getErrorMessageFromResponse(response)

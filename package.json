@@ -37,7 +37,7 @@
     "timekeeper": "0.0.5"
   },
   "dependencies": {
-    "bluebird": "^2.9.30",
+    "bluebird": "^3.3.4",
     "lodash": "^3.5.0",
     "progress-stream": "^1.1.1",
     "request": "^2.53.0",
