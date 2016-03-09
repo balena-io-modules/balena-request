@@ -15,6 +15,8 @@ utils = require('../lib/utils')
 
 describe 'Request:', ->
 
+	@timeout(10000)
+
 	describe 'given the token is always fresh', ->
 
 		beforeEach ->
@@ -578,6 +580,12 @@ describe 'Request:', ->
 				it 'should have the session token as an error attribute', (done) ->
 					request.send(url: '/foo').catch (error) ->
 						m.chai.expect(error.token).to.equal(johnDoeFixture.token)
+					.nodeify(done)
+
+				it 'should clear the token', (done) ->
+					request.send(url: '/foo').catch ->
+						token.has().then (hasToken) ->
+							m.chai.expect(hasToken).to.be.false
 					.nodeify(done)
 
 			describe 'given /whoami returns a non 401 status code', ->

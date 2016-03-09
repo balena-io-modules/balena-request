@@ -60,7 +60,8 @@ prepareOptions = (options = {}) ->
 				# us to safely assume the token is expired
 				if error instanceof errors.ResinRequestError and error.statusCode is 401
 					return token.get().then (sessionToken) ->
-						throw new errors.ResinExpiredToken(sessionToken)
+						token.remove().then ->
+							throw new errors.ResinExpiredToken(sessionToken)
 
 				throw error
 			.get('body')
