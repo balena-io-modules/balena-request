@@ -69,14 +69,11 @@ prepareOptions = function(options) {
         url: '/whoami',
         refreshToken: false
       })["catch"](function(error) {
-        if (error instanceof errors.ResinRequestError && error.statusCode === 401) {
-          return token.get().then(function(sessionToken) {
-            return token.remove().then(function() {
-              throw new errors.ResinExpiredToken(sessionToken);
-            });
-          });
-        }
-        throw error;
+        return error instanceof errors.ResinRequestError && error.statusCode === 401;
+      }, function() {
+        return token.get().tap(token.remove).then(function(sessionToken) {
+          throw new errors.ResinExpiredToken(sessionToken);
+        });
       }).get('body').then(token.set);
     });
   }).then(utils.getAuthorizationHeader).then(function(authorizationHeader) {
@@ -127,7 +124,7 @@ exports.send = function(options) {
   if (options.timeout == null) {
     options.timeout = 30000;
   }
-  return prepareOptions(options).then(requestAsync).spread(function(response) {
+  return prepareOptions(options).then(requestAsync).then(function(response) {
     var responseError;
     if (utils.isErrorCode(response.statusCode)) {
       responseError = utils.getErrorMessageFromResponse(response);
