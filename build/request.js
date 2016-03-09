@@ -71,7 +71,9 @@ prepareOptions = function(options) {
       })["catch"](function(error) {
         if (error instanceof errors.ResinRequestError && error.statusCode === 401) {
           return token.get().then(function(sessionToken) {
-            throw new errors.ResinExpiredToken(sessionToken);
+            return token.remove().then(function() {
+              throw new errors.ResinExpiredToken(sessionToken);
+            });
           });
         }
         throw error;

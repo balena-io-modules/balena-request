@@ -580,6 +580,12 @@ describe 'Request:', ->
 						m.chai.expect(error.token).to.equal(johnDoeFixture.token)
 					.nodeify(done)
 
+				it 'should clear the token', (done) ->
+					request.send(url: '/foo').catch ->
+						token.has().then (hasToken) ->
+							m.chai.expect(hasToken).to.be.false
+					.nodeify(done)
+
 			describe 'given /whoami returns a non 401 status code', ->
 
 				beforeEach ->
