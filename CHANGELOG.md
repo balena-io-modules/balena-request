@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.7] - 2016-03-09
+
+### Changed
+
+- Upgrade dependencies.
+- Fix README example indentation.
+
 ## [4.0.6] - 2016-03-09
 
 ### Changed
@@ -216,6 +223,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
+[4.0.7]: https://github.com/resin-io-modules/resin-request/compare/v4.0.6...v4.0.7
 [4.0.6]: https://github.com/resin-io-modules/resin-request/compare/v4.0.5...v4.0.6
 [4.0.5]: https://github.com/resin-io-modules/resin-request/compare/v4.0.4...v4.0.5
 [4.0.4]: https://github.com/resin-io-modules/resin-request/compare/v4.0.3...v4.0.4
