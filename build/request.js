@@ -168,7 +168,7 @@ exports.send = function(options) {
  * 	stream.on 'progress', (state) ->
  * 		console.log(state)
  *
- *		stream.pipe(fs.createWriteStream('/opt/download'))
+ * 	stream.pipe(fs.createWriteStream('/opt/download'))
  */
 
 exports.stream = function(options) {
