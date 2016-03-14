@@ -72,7 +72,8 @@ prepareOptions = (options = {}) ->
 		if authorizationHeader?
 			options.headers.Authorization = authorizationHeader
 
-		_.set(options, 'qs.api_key', process.env.RESIN_API_KEY or undefined)
+		if not _.isEmpty(process.env.RESIN_API_KEY)
+			_.set(options, 'qs.api_key', process.env.RESIN_API_KEY)
 
 		return options
 
