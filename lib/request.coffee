@@ -71,6 +71,9 @@ prepareOptions = (options = {}) ->
 	.then(utils.getAuthorizationHeader).then (authorizationHeader) ->
 		if authorizationHeader?
 			options.headers.Authorization = authorizationHeader
+
+		_.set(options, 'qs.api_key', process.env.RESIN_API_KEY or undefined)
+
 		return options
 
 ###*
