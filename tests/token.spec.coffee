@@ -174,11 +174,8 @@ describe 'Request (token):', ->
 							method: 'GET'
 							url: '/foo'
 						.then (stream) ->
-							stream.on 'response', (response) ->
-								headers = response.request.headers
-								m.chai.expect(headers.Authorization).to.equal("Bearer #{johnDoeFixture.token}")
-								done()
-
+							headers = stream.response.request.headers
+							m.chai.expect(headers.Authorization).to.equal("Bearer #{johnDoeFixture.token}")
 							rindle.extract(stream).nodeify(done)
 
 				describe 'given there is no token', ->
@@ -191,8 +188,6 @@ describe 'Request (token):', ->
 							method: 'GET'
 							url: '/foo'
 						.then (stream) ->
-							stream.on 'response', (response) ->
-								headers = response.request.headers
-								m.chai.expect(headers.Authorization).to.not.exist
-
+							headers = stream.response.request.headers
+							m.chai.expect(headers.Authorization).to.not.exist
 							rindle.extract(stream).nodeify(done)
