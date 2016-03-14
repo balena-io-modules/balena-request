@@ -3,11 +3,15 @@ m = require('mochainon')
 nock = require('nock')
 zlib = require('zlib')
 PassThrough = require('stream').PassThrough
+token = require('resin-token')
 settings = require('resin-settings-client')
 rindle = require('rindle')
 request = require('../lib/request')
 
 describe 'Request (stream):', ->
+
+	beforeEach ->
+		token.remove()
 
 	describe 'given a simple endpoint that responds with an error', ->
 
