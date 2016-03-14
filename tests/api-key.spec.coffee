@@ -21,6 +21,30 @@ describe 'Request (api key):', ->
 		afterEach ->
 			@utilsShouldUpdateToken.restore()
 
+		describe 'given a simple GET endpoint containing special characters in query strings', ->
+
+			beforeEach ->
+				nock(settings.get('apiUrl'))
+					.get('/foo?$bar=baz')
+					.reply(200)
+
+			afterEach ->
+				nock.cleanAll()
+
+			describe 'given no api key', ->
+
+				beforeEach ->
+					process.env.RESIN_API_KEY = ''
+
+				it 'should not encode special characters automatically', ->
+					promise = request.send
+						method: 'GET'
+						url: '/foo?$bar=baz'
+					.get('request')
+					.get('uri')
+					.get('path')
+					m.chai.expect(promise).to.eventually.equal('/foo?$bar=baz')
+
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
