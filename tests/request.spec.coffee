@@ -1,11 +1,15 @@
 m = require('mochainon')
 nock = require('nock')
+token = require('resin-token')
 settings = require('resin-settings-client')
 request = require('../lib/request')
 
 describe 'Request:', ->
 
 	@timeout(10000)
+
+	beforeEach ->
+		token.remove()
 
 	describe '.send()', ->
 

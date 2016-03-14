@@ -37,9 +37,9 @@ Documentation
 
 <a name="module_request.send"></a>
 ### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
-This function automatically handles authorizacion with Resin.io.
-If you don't have a token, the request is made anonymously.
-This function automatically prepends the Resin.io host, therefore you should pass relative urls.
+This function automatically handles authorization with Resin.io and automatically prepends the Resin.io host, therefore you should pass relative urls.
+
+The module scans your environment for a saved session token, or an environment variable called `RESIN_API_KEY`. If none of these are found, the request is made anonymously.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Perform an HTTP request to Resin.io  
@@ -81,6 +81,8 @@ This function emits a `progress` event, passing an object with the following pro
 The stream may also contain the following custom properties:
 
 - `String .mime`: Equals the value of the `Content-Type` HTTP header.
+
+See `request.send()` for an explanation on how this function handles authentication.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Stream an HTTP response from Resin.io.  

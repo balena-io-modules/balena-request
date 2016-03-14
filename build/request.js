@@ -81,6 +81,7 @@ prepareOptions = function(options) {
     if (authorizationHeader != null) {
       options.headers.Authorization = authorizationHeader;
     }
+    _.set(options, 'qs.api_key', process.env.RESIN_API_KEY || void 0);
     return options;
   });
 };
@@ -92,9 +93,9 @@ prepareOptions = function(options) {
  * @public
  *
  * @description
- * This function automatically handles authorizacion with Resin.io.
- * If you don't have a token, the request is made anonymously.
- * This function automatically prepends the Resin.io host, therefore you should pass relative urls.
+ * This function automatically handles authorization with Resin.io and automatically prepends the Resin.io host, therefore you should pass relative urls.
+ *
+ * The module scans your environment for a saved session token, or an environment variable called `RESIN_API_KEY`. If none of these are found, the request is made anonymously.
  *
  * @param {Object} options - options
  * @param {String} [options.method='GET'] - method
@@ -153,6 +154,8 @@ exports.send = function(options) {
  * The stream may also contain the following custom properties:
  *
  * - `String .mime`: Equals the value of the `Content-Type` HTTP header.
+ *
+ * See `request.send()` for an explanation on how this function handles authentication.
  *
  * @param {Object} options - options
  * @param {String} [options.method='GET'] - method
