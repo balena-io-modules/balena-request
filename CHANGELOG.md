@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.1.1] - 2016-03-14
+
+### Changed
+
+- Prevent passing an undefined `api_key` query string.
+
 ## [4.1.0] - 2016-03-13
 
 ### Added
@@ -229,6 +235,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
+[4.1.1]: https://github.com/resin-io-modules/resin-request/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/resin-io-modules/resin-request/compare/v4.0.7...v4.1.0
 [4.0.7]: https://github.com/resin-io-modules/resin-request/compare/v4.0.6...v4.0.7
 [4.0.6]: https://github.com/resin-io-modules/resin-request/compare/v4.0.5...v4.0.6
