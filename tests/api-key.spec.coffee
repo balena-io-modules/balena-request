@@ -25,7 +25,8 @@ describe 'Request (api key):', ->
 
 			beforeEach ->
 				nock(settings.get('apiUrl'))
-					.get('/foo?$bar=baz')
+					.get('/foo')
+					.query(true)
 					.reply(200)
 
 			afterEach ->
@@ -44,6 +45,23 @@ describe 'Request (api key):', ->
 					.get('uri')
 					.get('path')
 					m.chai.expect(promise).to.eventually.equal('/foo?$bar=baz')
+
+			describe 'given an api key', ->
+
+				beforeEach ->
+					process.env.RESIN_API_KEY = '123456789'
+
+				afterEach ->
+					process.env.RESIN_API_KEY = ''
+
+				it 'should not encode special characters automatically', ->
+					promise = request.send
+						method: 'GET'
+						url: '/foo?$bar=baz'
+					.get('request')
+					.get('uri')
+					.get('path')
+					m.chai.expect(promise).to.eventually.equal('/foo?$bar=baz&api_key=123456789')
 
 		describe 'given a simple GET endpoint', ->
 

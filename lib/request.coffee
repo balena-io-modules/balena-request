@@ -73,7 +73,15 @@ prepareOptions = (options = {}) ->
 			options.headers.Authorization = authorizationHeader
 
 		if not _.isEmpty(process.env.RESIN_API_KEY)
-			_.set(options, 'qs.api_key', process.env.RESIN_API_KEY)
+
+			# Using `request` qs object results in dollar signs, or other
+			# special characters used to query our OData API, being escaped
+			# and thus leading to all sort of weird error.
+			# The workaround is to append the `api_key` query string manually
+			# to prevent affecting the rest of the query strings.
+			# See https://github.com/request/request/issues/2129
+			options.url += if url.parse(options.url).query? then '&' else '?'
+			options.url += "api_key=#{process.env.RESIN_API_KEY}"
 
 		return options
 
