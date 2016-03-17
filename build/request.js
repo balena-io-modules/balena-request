@@ -82,7 +82,8 @@ prepareOptions = function(options) {
       options.headers.Authorization = authorizationHeader;
     }
     if (!_.isEmpty(process.env.RESIN_API_KEY)) {
-      _.set(options, 'qs.api_key', process.env.RESIN_API_KEY);
+      options.url += url.parse(options.url).query != null ? '&' : '?';
+      options.url += "api_key=" + process.env.RESIN_API_KEY;
     }
     return options;
   });
