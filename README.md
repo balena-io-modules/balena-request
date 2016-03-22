@@ -36,8 +36,9 @@ Documentation
     * [.stream(options)](#module_request.stream) ⇒ <code>Promise.&lt;Stream&gt;</code>
 
 <a name="module_request.send"></a>
+
 ### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
-This function automatically handles authorization with Resin.io and automatically prepends the Resin.io host, therefore you should pass relative urls.
+This function automatically handles authorization with Resin.io.
 
 The module scans your environment for a saved session token, or an environment variable called `RESIN_API_KEY`. If none of these are found, the request is made anonymously.
 
@@ -57,6 +58,7 @@ The module scans your environment for a saved session token, or an environment v
 ```js
 request.send
 	method: 'GET'
+	baseUrl: 'https://api.resin.io'
 	url: '/foo'
 .get('body')
 ```
@@ -64,12 +66,14 @@ request.send
 ```js
 request.send
 	method: 'POST'
+	baseUrl: 'https://api.resin.io'
 	url: '/bar'
 	data:
 		hello: 'world'
 .get('body')
 ```
 <a name="module_request.stream"></a>
+
 ### request.stream(options) ⇒ <code>Promise.&lt;Stream&gt;</code>
 This function emits a `progress` event, passing an object with the following properties:
 
@@ -100,6 +104,7 @@ See `request.send()` for an explanation on how this function handles authenticat
 ```js
 request.stream
 	method: 'GET'
+	baseUrl: 'https://img.resin.io'
 	url: '/download/foo'
 .then (stream) ->
 	stream.on 'progress', (state) ->

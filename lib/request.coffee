@@ -26,7 +26,6 @@ _ = require('lodash')
 rindle = require('rindle')
 
 errors = require('resin-errors')
-settings = require('resin-settings-client')
 token = require('resin-token')
 utils = require('./utils')
 progress = require('./progress')
@@ -41,9 +40,6 @@ prepareOptions = (options = {}) ->
 		headers: {}
 		refreshToken: true
 
-	if not options.baseUrl?
-		options.url = url.resolve(settings.get('apiUrl'), options.url)
-
 	Promise.try ->
 		return if not options.refreshToken
 
@@ -52,6 +48,7 @@ prepareOptions = (options = {}) ->
 
 			exports.send
 				url: '/whoami'
+				baseUrl: options.baseUrl
 				refreshToken: false
 
 			# At this point we're sure there is a saved token,
@@ -91,7 +88,7 @@ prepareOptions = (options = {}) ->
 # @public
 #
 # @description
-# This function automatically handles authorization with Resin.io and automatically prepends the Resin.io host, therefore you should pass relative urls.
+# This function automatically handles authorization with Resin.io.
 #
 # The module scans your environment for a saved session token, or an environment variable called `RESIN_API_KEY`. If none of these are found, the request is made anonymously.
 #
@@ -105,12 +102,14 @@ prepareOptions = (options = {}) ->
 # @example
 # request.send
 # 	method: 'GET'
+# 	baseUrl: 'https://api.resin.io'
 # 	url: '/foo'
 # .get('body')
 #
 # @example
 # request.send
 # 	method: 'POST'
+# 	baseUrl: 'https://api.resin.io'
 # 	url: '/bar'
 # 	data:
 # 		hello: 'world'
@@ -161,6 +160,7 @@ exports.send = (options = {}) ->
 # @example
 # request.stream
 # 	method: 'GET'
+# 	baseUrl: 'https://img.resin.io'
 # 	url: '/download/foo'
 # .then (stream) ->
 # 	stream.on 'progress', (state) ->

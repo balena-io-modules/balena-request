@@ -18,7 +18,7 @@ limitations under the License.
 /**
  * @module request
  */
-var Promise, _, errors, prepareOptions, progress, request, requestAsync, rindle, settings, token, url, utils;
+var Promise, _, errors, prepareOptions, progress, request, requestAsync, rindle, token, url, utils;
 
 Promise = require('bluebird');
 
@@ -33,8 +33,6 @@ _ = require('lodash');
 rindle = require('rindle');
 
 errors = require('resin-errors');
-
-settings = require('resin-settings-client');
 
 token = require('resin-token');
 
@@ -54,9 +52,6 @@ prepareOptions = function(options) {
     headers: {},
     refreshToken: true
   });
-  if (options.baseUrl == null) {
-    options.url = url.resolve(settings.get('apiUrl'), options.url);
-  }
   return Promise["try"](function() {
     if (!options.refreshToken) {
       return;
@@ -67,6 +62,7 @@ prepareOptions = function(options) {
       }
       return exports.send({
         url: '/whoami',
+        baseUrl: options.baseUrl,
         refreshToken: false
       })["catch"]({
         name: 'ResinRequestError',
@@ -96,7 +92,7 @@ prepareOptions = function(options) {
  * @public
  *
  * @description
- * This function automatically handles authorization with Resin.io and automatically prepends the Resin.io host, therefore you should pass relative urls.
+ * This function automatically handles authorization with Resin.io.
  *
  * The module scans your environment for a saved session token, or an environment variable called `RESIN_API_KEY`. If none of these are found, the request is made anonymously.
  *
@@ -110,12 +106,14 @@ prepareOptions = function(options) {
  * @example
  * request.send
  * 	method: 'GET'
+ * 	baseUrl: 'https://api.resin.io'
  * 	url: '/foo'
  * .get('body')
  *
  * @example
  * request.send
  * 	method: 'POST'
+ * 	baseUrl: 'https://api.resin.io'
  * 	url: '/bar'
  * 	data:
  * 		hello: 'world'
@@ -170,6 +168,7 @@ exports.send = function(options) {
  * @example
  * request.stream
  * 	method: 'GET'
+ * 	baseUrl: 'https://img.resin.io'
  * 	url: '/download/foo'
  * .then (stream) ->
  * 	stream.on 'progress', (state) ->
