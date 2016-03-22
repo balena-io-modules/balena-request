@@ -4,7 +4,6 @@ nock = require('nock')
 zlib = require('zlib')
 PassThrough = require('stream').PassThrough
 token = require('resin-token')
-settings = require('resin-settings-client')
 rindle = require('rindle')
 request = require('../lib/request')
 
@@ -16,7 +15,7 @@ describe 'Request (stream):', ->
 	describe 'given a simple endpoint that responds with an error', ->
 
 		beforeEach ->
-			nock(settings.get('apiUrl')).get('/foo').reply(400, 'Something happened')
+			nock('https://api.resin.io').get('/foo').reply(400, 'Something happened')
 
 		afterEach ->
 			nock.cleanAll()
@@ -24,6 +23,7 @@ describe 'Request (stream):', ->
 		it 'should reject with the error message', ->
 			promise = request.stream
 				method: 'GET'
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 
 			m.chai.expect(promise).to.be.rejectedWith('Something happened')
@@ -31,6 +31,7 @@ describe 'Request (stream):', ->
 		it 'should have the status code in the error object', (done) ->
 			request.stream
 				method: 'GET'
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.catch (error) ->
 				m.chai.expect(error.statusCode).to.equal(400)
@@ -39,7 +40,7 @@ describe 'Request (stream):', ->
 	describe 'given a simple endpoint that responds with a string', ->
 
 		beforeEach ->
-			nock(settings.get('apiUrl')).get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
+			nock('https://api.resin.io').get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
 
 		afterEach ->
 			nock.cleanAll()
@@ -47,6 +48,7 @@ describe 'Request (stream):', ->
 		it 'should be able to pipe the response', (done) ->
 			request.stream
 				method: 'GET'
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then(rindle.extract).then (data) ->
 				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
@@ -55,6 +57,7 @@ describe 'Request (stream):', ->
 		it 'should be able to pipe the response after a delay', (done) ->
 			request.stream
 				method: 'GET'
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				return Promise.delay(200).return(stream)
@@ -69,7 +72,7 @@ describe 'Request (stream):', ->
 	describe 'given multiple endpoints', ->
 
 		beforeEach ->
-			nock(settings.get('apiUrl'))
+			nock('https://api.resin.io')
 				.get('/foo').reply(200, 'GET')
 				.post('/foo').reply(200, 'POST')
 				.put('/foo').reply(200, 'PUT')
@@ -83,6 +86,7 @@ describe 'Request (stream):', ->
 
 			it 'should default to GET', (done) ->
 				request.stream
+					baseUrl: 'https://api.resin.io'
 					url: '/foo'
 				.then(rindle.extract).then (data) ->
 					m.chai.expect(data).to.equal('GET')
@@ -94,7 +98,7 @@ describe 'Request (stream):', ->
 			message = 'Lorem ipsum dolor sit amet'
 			zlib.gzip message, (error, compressedMessage) ->
 				return done(error) if error?
-				nock(settings.get('apiUrl'))
+				nock('https://api.resin.io')
 					.get('/foo')
 					.reply 200, compressedMessage,
 						'X-Transfer-Length': String(compressedMessage.length)
@@ -107,6 +111,7 @@ describe 'Request (stream):', ->
 
 		it 'should correctly uncompress the body', (done) ->
 			request.stream
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				return rindle.extract(stream)
@@ -117,6 +122,7 @@ describe 'Request (stream):', ->
 
 		it 'should set no .length property', (done) ->
 			request.stream
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				m.chai.expect(stream.length).to.be.undefined
@@ -128,7 +134,7 @@ describe 'Request (stream):', ->
 			message = 'Lorem ipsum dolor sit amet'
 			zlib.gzip message, (error, compressedMessage) ->
 				return done(error) if error?
-				nock(settings.get('apiUrl'))
+				nock('https://api.resin.io')
 					.get('/foo')
 					.reply 200, compressedMessage,
 						'Content-Length': String(message.length)
@@ -140,6 +146,7 @@ describe 'Request (stream):', ->
 
 		it 'should correctly uncompress the body', (done) ->
 			request.stream
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				return rindle.extract(stream)
@@ -154,7 +161,7 @@ describe 'Request (stream):', ->
 			message = 'Lorem ipsum dolor sit amet'
 			zlib.gzip message, (error, compressedMessage) ->
 				return done(error) if error?
-				nock(settings.get('apiUrl'))
+				nock('https://api.resin.io')
 					.get('/foo')
 					.reply 200, compressedMessage,
 						'X-Transfer-Length': String(compressedMessage.length)
@@ -167,6 +174,7 @@ describe 'Request (stream):', ->
 
 		it 'should correctly uncompress the body', (done) ->
 			request.stream
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				return rindle.extract(stream)
@@ -179,7 +187,7 @@ describe 'Request (stream):', ->
 
 		beforeEach ->
 			message = 'Lorem ipsum dolor sit amet'
-			nock(settings.get('apiUrl'))
+			nock('https://api.resin.io')
 				.get('/foo').reply(200, message, 'Content-Length': 'Hello')
 
 		afterEach ->
@@ -187,6 +195,7 @@ describe 'Request (stream):', ->
 
 		it 'should become a stream with an undefined length property', (done) ->
 			request.stream
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				m.chai.expect(stream.length).to.be.undefined
@@ -196,7 +205,7 @@ describe 'Request (stream):', ->
 
 		beforeEach ->
 			message = 'Lorem ipsum dolor sit amet'
-			nock(settings.get('apiUrl'))
+			nock('https://api.resin.io')
 				.get('/foo').reply(200, message, 'Content-Type': 'application/octet-stream')
 
 		afterEach ->
@@ -204,6 +213,7 @@ describe 'Request (stream):', ->
 
 		it 'should become a stream with a mime property', (done) ->
 			request.stream
+				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				m.chai.expect(stream.mime).to.equal('application/octet-stream')

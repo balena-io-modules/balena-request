@@ -1,7 +1,6 @@
 Promise = require('bluebird')
 m = require('mochainon')
 nock = require('nock')
-settings = require('resin-settings-client')
 errors = require('resin-errors')
 rindle = require('rindle')
 token = require('resin-token')
@@ -20,7 +19,7 @@ describe 'Request (token):', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				nock(settings.get('apiUrl')).get('/foo').reply(200, 'bar')
+				nock('https://api.resin.io').get('/foo').reply(200, 'bar')
 
 			afterEach ->
 				nock.cleanAll()
@@ -42,6 +41,7 @@ describe 'Request (token):', ->
 					it 'should send an Authorization header', ->
 						promise = request.send
 							method: 'GET'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.get('request')
 						.get('headers')
@@ -56,6 +56,7 @@ describe 'Request (token):', ->
 					it 'should not send an Authorization header', ->
 						promise = request.send
 							method: 'GET'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.get('request')
 						.get('headers')
@@ -77,7 +78,7 @@ describe 'Request (token):', ->
 				describe 'given a working /whoami endpoint', ->
 
 					beforeEach ->
-						nock(settings.get('apiUrl'))
+						nock('https://api.resin.io')
 							.get('/whoami')
 							.reply(200, janeDoeFixture.token)
 
@@ -87,7 +88,9 @@ describe 'Request (token):', ->
 					it 'should refresh the token', (done) ->
 						token.get().then (savedToken) ->
 							m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
-							return request.send(url: '/foo')
+							return request.send
+								baseUrl: 'https://api.resin.io'
+								url: '/foo'
 						.then (response) ->
 							m.chai.expect(response.body).to.equal('bar')
 							return token.get()
@@ -101,7 +104,10 @@ describe 'Request (token):', ->
 					# to simplicity.
 					it 'should use the new token in the same request', (done) ->
 						m.chai.expect(token.get()).to.eventually.equal(johnDoeFixture.token)
-						request.send(url: '/foo').then (response) ->
+						request.send
+							baseUrl: 'https://api.resin.io'
+							url: '/foo'
+						.then (response) ->
 							authorizationHeader = response.request.headers.Authorization
 							m.chai.expect(authorizationHeader).to.equal("Bearer #{janeDoeFixture.token}")
 						.nodeify(done)
@@ -109,7 +115,7 @@ describe 'Request (token):', ->
 				describe 'given /whoami returns 401', ->
 
 					beforeEach ->
-						nock(settings.get('apiUrl'))
+						nock('https://api.resin.io')
 							.get('/whoami')
 							.reply(401, 'Unauthorized')
 
@@ -117,16 +123,24 @@ describe 'Request (token):', ->
 						nock.cleanAll()
 
 					it 'should be rejected with an expiration error', ->
-						promise = request.send(url: '/foo')
+						promise = request.send
+							baseUrl: 'https://api.resin.io'
+							url: '/foo'
 						m.chai.expect(promise).to.be.rejectedWith(errors.ResinExpiredToken)
 
 					it 'should have the session token as an error attribute', (done) ->
-						request.send(url: '/foo').catch (error) ->
+						request.send
+							baseUrl: 'https://api.resin.io'
+							url: '/foo'
+						.catch (error) ->
 							m.chai.expect(error.token).to.equal(johnDoeFixture.token)
 						.nodeify(done)
 
 					it 'should clear the token', (done) ->
-						request.send(url: '/foo').catch ->
+						request.send
+							baseUrl: 'https://api.resin.io'
+							url: '/foo'
+						.catch ->
 							token.has().then (hasToken) ->
 								m.chai.expect(hasToken).to.be.false
 						.nodeify(done)
@@ -134,7 +148,7 @@ describe 'Request (token):', ->
 				describe 'given /whoami returns a non 401 status code', ->
 
 					beforeEach ->
-						nock(settings.get('apiUrl'))
+						nock('https://api.resin.io')
 							.get('/whoami')
 							.reply(500)
 
@@ -142,7 +156,9 @@ describe 'Request (token):', ->
 						nock.cleanAll()
 
 					it 'should be rejected with a request error', ->
-						promise = request.send(url: '/foo')
+						promise = request.send
+							baseUrl: 'https://api.resin.io'
+							url: '/foo'
 						m.chai.expect(promise).to.be.rejectedWith(errors.ResinRequestError)
 
 	describe '.stream()', ->
@@ -150,7 +166,7 @@ describe 'Request (token):', ->
 		describe 'given a simple endpoint that responds with a string', ->
 
 			beforeEach ->
-				nock(settings.get('apiUrl')).get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
+				nock('https://api.resin.io').get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
 
 			afterEach ->
 				nock.cleanAll()
@@ -172,6 +188,7 @@ describe 'Request (token):', ->
 					it 'should send an Authorization header', (done) ->
 						request.stream
 							method: 'GET'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.then (stream) ->
 							headers = stream.response.request.headers
@@ -186,6 +203,7 @@ describe 'Request (token):', ->
 					it 'should not send an Authorization header', (done) ->
 						request.stream
 							method: 'GET'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.then (stream) ->
 							headers = stream.response.request.headers

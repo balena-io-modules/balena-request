@@ -2,7 +2,6 @@ Promise = require('bluebird')
 m = require('mochainon')
 nock = require('nock')
 rindle = require('rindle')
-settings = require('resin-settings-client')
 token = require('resin-token')
 johnDoeFixture = require('./tokens.json').johndoe
 request = require('../lib/request')
@@ -24,7 +23,7 @@ describe 'Request (api key):', ->
 		describe 'given a simple GET endpoint containing special characters in query strings', ->
 
 			beforeEach ->
-				nock(settings.get('apiUrl'))
+				nock('https://api.resin.io')
 					.get('/foo')
 					.query(true)
 					.reply(200)
@@ -40,6 +39,7 @@ describe 'Request (api key):', ->
 				it 'should not encode special characters automatically', ->
 					promise = request.send
 						method: 'GET'
+						baseUrl: 'https://api.resin.io'
 						url: '/foo?$bar=baz'
 					.get('request')
 					.get('uri')
@@ -57,6 +57,7 @@ describe 'Request (api key):', ->
 				it 'should not encode special characters automatically', ->
 					promise = request.send
 						method: 'GET'
+						baseUrl: 'https://api.resin.io'
 						url: '/foo?$bar=baz'
 					.get('request')
 					.get('uri')
@@ -66,7 +67,7 @@ describe 'Request (api key):', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				nock(settings.get('apiUrl')).get('/foo').query(true).reply(200, 'Foo Bar')
+				nock('https://api.resin.io').get('/foo').query(true).reply(200, 'Foo Bar')
 
 			afterEach ->
 				nock.cleanAll()
@@ -89,6 +90,7 @@ describe 'Request (api key):', ->
 						it 'should pass an api_key query string', ->
 							promise = request.send
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.get('request')
 							.get('uri')
@@ -100,6 +102,7 @@ describe 'Request (api key):', ->
 						it 'should pass an api_key query string', (done) ->
 							request.stream
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.equal('api_key=123456789')
@@ -115,6 +118,7 @@ describe 'Request (api key):', ->
 						it 'should pass an api_key query string', ->
 							promise = request.send
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.get('request')
 							.get('uri')
@@ -124,6 +128,7 @@ describe 'Request (api key):', ->
 						it 'should still send an Authorization header', ->
 							promise = request.send
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.get('request')
 							.get('headers')
@@ -135,6 +140,7 @@ describe 'Request (api key):', ->
 						it 'should pass an api_key query string', (done) ->
 							request.stream
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.equal('api_key=123456789')
@@ -143,6 +149,7 @@ describe 'Request (api key):', ->
 						it 'should still send an Authorization header', (done) ->
 							request.stream
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.then (stream) ->
 								headers = stream.response.request.headers
@@ -164,6 +171,7 @@ describe 'Request (api key):', ->
 						it 'should not pass an api_key query string', ->
 							promise = request.send
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.get('request')
 							.get('uri')
@@ -173,6 +181,7 @@ describe 'Request (api key):', ->
 						it 'should not pass an api_key query string', ->
 							promise = request.send
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.get('request')
 							.get('uri')
@@ -184,6 +193,7 @@ describe 'Request (api key):', ->
 						it 'should not pass an api_key query string', (done) ->
 							request.stream
 								method: 'GET'
+								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.not.exist

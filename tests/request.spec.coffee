@@ -1,7 +1,6 @@
 m = require('mochainon')
 nock = require('nock')
 token = require('resin-token')
-settings = require('resin-settings-client')
 request = require('../lib/request')
 
 describe 'Request:', ->
@@ -16,7 +15,7 @@ describe 'Request:', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				nock(settings.get('apiUrl')).get('/foo').reply(200, from: 'resin')
+				nock('https://api.resin.io').get('/foo').reply(200, from: 'resin')
 
 			afterEach ->
 				nock.cleanAll()
@@ -47,7 +46,7 @@ describe 'Request:', ->
 		describe 'given multiple endpoints', ->
 
 			beforeEach ->
-				nock(settings.get('apiUrl'))
+				nock('https://api.resin.io')
 					.get('/foo').reply(200, method: 'GET')
 					.post('/foo').reply(200, method: 'POST')
 					.put('/foo').reply(200, method: 'PUT')
@@ -59,6 +58,7 @@ describe 'Request:', ->
 
 			it 'should default to GET', ->
 				promise = request.send
+					baseUrl: 'https://api.resin.io'
 					url: '/foo'
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(method: 'GET')
@@ -66,7 +66,7 @@ describe 'Request:', ->
 		describe 'given an endpoint that returns a non json response', ->
 
 			beforeEach ->
-				nock(settings.get('apiUrl')).get('/foo').reply(200, 'Hello World')
+				nock('https://api.resin.io').get('/foo').reply(200, 'Hello World')
 
 			afterEach ->
 				nock.cleanAll()
@@ -74,6 +74,7 @@ describe 'Request:', ->
 			it 'should resolve with the plain body', ->
 				promise = request.send
 					method: 'GET'
+					baseUrl: 'https://api.resin.io'
 					url: '/foo'
 				.get('body')
 				m.chai.expect(promise).to.eventually.equal('Hello World')
@@ -81,7 +82,7 @@ describe 'Request:', ->
 		describe 'given an endpoint that accepts a non json body', ->
 
 			beforeEach ->
-				nock(settings.get('apiUrl')).post('/foo').reply 200, (uri, body) ->
+				nock('https://api.resin.io').post('/foo').reply 200, (uri, body) ->
 					return "The body is: #{body}"
 
 			afterEach ->
@@ -90,6 +91,7 @@ describe 'Request:', ->
 			it 'should take the plain body successfully', ->
 				promise = request.send
 					method: 'POST'
+					baseUrl: 'https://api.resin.io'
 					url: '/foo'
 					body: 'Qux'
 				.get('body')
@@ -102,7 +104,7 @@ describe 'Request:', ->
 				describe 'given no response error', ->
 
 					beforeEach ->
-						nock(settings.get('apiUrl')).get('/foo').reply(200, hello: 'world')
+						nock('https://api.resin.io').get('/foo').reply(200, hello: 'world')
 
 					afterEach ->
 						nock.cleanAll()
@@ -110,6 +112,7 @@ describe 'Request:', ->
 					it 'should correctly make the request', ->
 						promise = request.send
 							method: 'GET'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.get('body')
 						m.chai.expect(promise).to.eventually.become(hello: 'world')
@@ -117,7 +120,7 @@ describe 'Request:', ->
 				describe 'given a response error', ->
 
 					beforeEach ->
-						nock(settings.get('apiUrl')).get('/foo').reply(500, error: text: 'Server Error')
+						nock('https://api.resin.io').get('/foo').reply(500, error: text: 'Server Error')
 
 					afterEach ->
 						nock.cleanAll()
@@ -125,12 +128,14 @@ describe 'Request:', ->
 					it 'should be rejected with the error message', ->
 						promise = request.send
 							method: 'GET'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						m.chai.expect(promise).to.be.rejectedWith('Server Error')
 
 					it 'should have the status code in the error object', (done) ->
 						request.send
 							method: 'GET'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.catch (error) ->
 							m.chai.expect(error.statusCode).to.equal(500)
@@ -141,7 +146,7 @@ describe 'Request:', ->
 				describe 'given no response error', ->
 
 					beforeEach ->
-						nock(settings.get('apiUrl')).head('/foo').reply(200)
+						nock('https://api.resin.io').head('/foo').reply(200)
 
 					afterEach ->
 						nock.cleanAll()
@@ -149,6 +154,7 @@ describe 'Request:', ->
 					it 'should correctly make the request', ->
 						promise = request.send
 							method: 'HEAD'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.get('statusCode')
 						m.chai.expect(promise).to.eventually.equal(200)
@@ -156,7 +162,7 @@ describe 'Request:', ->
 				describe 'given a response error', ->
 
 					beforeEach ->
-						nock(settings.get('apiUrl')).head('/foo').reply(500)
+						nock('https://api.resin.io').head('/foo').reply(500)
 
 					afterEach ->
 						nock.cleanAll()
@@ -164,6 +170,7 @@ describe 'Request:', ->
 					it 'should be rejected with a generic error message', ->
 						promise = request.send
 							method: 'HEAD'
+							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.get('statusCode')
 						m.chai.expect(promise).to.be.rejectedWith('The request was unsuccessful')
@@ -173,7 +180,7 @@ describe 'Request:', ->
 			describe 'given a POST endpoint that mirrors the request body', ->
 
 				beforeEach ->
-					nock(settings.get('apiUrl')).post('/foo').reply 200, (uri, body) ->
+					nock('https://api.resin.io').post('/foo').reply 200, (uri, body) ->
 						return body
 
 				afterEach ->
@@ -182,6 +189,7 @@ describe 'Request:', ->
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'POST'
+						baseUrl: 'https://api.resin.io'
 						url: '/foo'
 						body:
 							foo: 'bar'
@@ -191,7 +199,7 @@ describe 'Request:', ->
 			describe 'given a PUT endpoint that mirrors the request body', ->
 
 				beforeEach ->
-					nock(settings.get('apiUrl')).put('/foo').reply 200, (uri, body) ->
+					nock('https://api.resin.io').put('/foo').reply 200, (uri, body) ->
 						return body
 
 				afterEach ->
@@ -200,6 +208,7 @@ describe 'Request:', ->
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'PUT'
+						baseUrl: 'https://api.resin.io'
 						url: '/foo'
 						body:
 							foo: 'bar'
@@ -209,7 +218,7 @@ describe 'Request:', ->
 			describe 'given a PATCH endpoint that mirrors the request body', ->
 
 				beforeEach ->
-					nock(settings.get('apiUrl')).patch('/foo').reply 200, (uri, body) ->
+					nock('https://api.resin.io').patch('/foo').reply 200, (uri, body) ->
 						return body
 
 				afterEach ->
@@ -218,6 +227,7 @@ describe 'Request:', ->
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'PATCH'
+						baseUrl: 'https://api.resin.io'
 						url: '/foo'
 						body:
 							foo: 'bar'
@@ -227,7 +237,7 @@ describe 'Request:', ->
 			describe 'given a DELETE endpoint that mirrors the request body', ->
 
 				beforeEach ->
-					nock(settings.get('apiUrl')).delete('/foo').reply 200, (uri, body) ->
+					nock('https://api.resin.io').delete('/foo').reply 200, (uri, body) ->
 						return body
 
 				afterEach ->
@@ -236,6 +246,7 @@ describe 'Request:', ->
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'DELETE'
+						baseUrl: 'https://api.resin.io'
 						url: '/foo'
 						body:
 							foo: 'bar'
