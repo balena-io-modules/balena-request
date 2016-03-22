@@ -77,9 +77,9 @@ prepareOptions = function(options) {
     if (authorizationHeader != null) {
       options.headers.Authorization = authorizationHeader;
     }
-    if (!_.isEmpty(process.env.RESIN_API_KEY)) {
+    if (!_.isEmpty(options.apiKey)) {
       options.url += url.parse(options.url).query != null ? '&' : '?';
-      options.url += "api_key=" + process.env.RESIN_API_KEY;
+      options.url += "api_key=" + options.apiKey;
     }
     return options;
   });
@@ -94,11 +94,12 @@ prepareOptions = function(options) {
  * @description
  * This function automatically handles authorization with Resin.io.
  *
- * The module scans your environment for a saved session token, or an environment variable called `RESIN_API_KEY`. If none of these are found, the request is made anonymously.
+ * The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
  *
  * @param {Object} options - options
  * @param {String} [options.method='GET'] - method
  * @param {String} options.url - relative url
+ * @param {String} [options.apiKey] - api key
  * @param {*} [options.body] - body
  *
  * @returns {Promise<Object>} response

@@ -40,7 +40,7 @@ Documentation
 ### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
 This function automatically handles authorization with Resin.io.
 
-The module scans your environment for a saved session token, or an environment variable called `RESIN_API_KEY`. If none of these are found, the request is made anonymously.
+The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
 
 **Kind**: static method of <code>[request](#module_request)</code>  
 **Summary**: Perform an HTTP request to Resin.io  
@@ -52,6 +52,7 @@ The module scans your environment for a saved session token, or an environment v
 | options | <code>Object</code> |  | options |
 | [options.method] | <code>String</code> | <code>&#x27;GET&#x27;</code> | method |
 | options.url | <code>String</code> |  | relative url |
+| [options.apiKey] | <code>String</code> |  | api key |
 | [options.body] | <code>\*</code> |  | body |
 
 **Example**  

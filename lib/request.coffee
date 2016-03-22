@@ -69,7 +69,7 @@ prepareOptions = (options = {}) ->
 		if authorizationHeader?
 			options.headers.Authorization = authorizationHeader
 
-		if not _.isEmpty(process.env.RESIN_API_KEY)
+		if not _.isEmpty(options.apiKey)
 
 			# Using `request` qs object results in dollar signs, or other
 			# special characters used to query our OData API, being escaped
@@ -78,7 +78,7 @@ prepareOptions = (options = {}) ->
 			# to prevent affecting the rest of the query strings.
 			# See https://github.com/request/request/issues/2129
 			options.url += if url.parse(options.url).query? then '&' else '?'
-			options.url += "api_key=#{process.env.RESIN_API_KEY}"
+			options.url += "api_key=#{options.apiKey}"
 
 		return options
 
@@ -90,11 +90,12 @@ prepareOptions = (options = {}) ->
 # @description
 # This function automatically handles authorization with Resin.io.
 #
-# The module scans your environment for a saved session token, or an environment variable called `RESIN_API_KEY`. If none of these are found, the request is made anonymously.
+# The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
 #
 # @param {Object} options - options
 # @param {String} [options.method='GET'] - method
 # @param {String} options.url - relative url
+# @param {String} [options.apiKey] - api key
 # @param {*} [options.body] - body
 #
 # @returns {Promise<Object>} response

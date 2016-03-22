@@ -33,14 +33,12 @@ describe 'Request (api key):', ->
 
 			describe 'given no api key', ->
 
-				beforeEach ->
-					process.env.RESIN_API_KEY = ''
-
 				it 'should not encode special characters automatically', ->
 					promise = request.send
 						method: 'GET'
 						baseUrl: 'https://api.resin.io'
 						url: '/foo?$bar=baz'
+						apiKey: undefined
 					.get('request')
 					.get('uri')
 					.get('path')
@@ -48,17 +46,12 @@ describe 'Request (api key):', ->
 
 			describe 'given an api key', ->
 
-				beforeEach ->
-					process.env.RESIN_API_KEY = '123456789'
-
-				afterEach ->
-					process.env.RESIN_API_KEY = ''
-
 				it 'should not encode special characters automatically', ->
 					promise = request.send
 						method: 'GET'
 						baseUrl: 'https://api.resin.io'
 						url: '/foo?$bar=baz'
+						apiKey: '123456789'
 					.get('request')
 					.get('uri')
 					.get('path')
@@ -74,12 +67,6 @@ describe 'Request (api key):', ->
 
 			describe 'given an api key', ->
 
-				beforeEach ->
-					process.env.RESIN_API_KEY = '123456789'
-
-				afterEach ->
-					process.env.RESIN_API_KEY = ''
-
 				describe 'given no token', ->
 
 					beforeEach ->
@@ -92,6 +79,7 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: '123456789'
 							.get('request')
 							.get('uri')
 							.get('query')
@@ -104,6 +92,7 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: '123456789'
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.equal('api_key=123456789')
 								rindle.extract(stream).nodeify(done)
@@ -120,6 +109,7 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: '123456789'
 							.get('request')
 							.get('uri')
 							.get('query')
@@ -130,6 +120,7 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: '123456789'
 							.get('request')
 							.get('headers')
 							.get('Authorization')
@@ -142,6 +133,7 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: '123456789'
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.equal('api_key=123456789')
 								rindle.extract(stream).nodeify(done)
@@ -151,15 +143,13 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: '123456789'
 							.then (stream) ->
 								headers = stream.response.request.headers
 								m.chai.expect(headers.Authorization).to.equal("Bearer #{johnDoeFixture.token}")
 								rindle.extract(stream).nodeify(done)
 
 			describe 'given an empty api key', ->
-
-				beforeEach ->
-					process.env.RESIN_API_KEY = ''
 
 				describe 'given no token', ->
 
@@ -173,6 +163,7 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: ''
 							.get('request')
 							.get('uri')
 							.get('query')
@@ -183,6 +174,7 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: ''
 							.get('request')
 							.get('uri')
 							.get('query')
@@ -195,6 +187,7 @@ describe 'Request (api key):', ->
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
+								apiKey: ''
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.not.exist
 								rindle.extract(stream).nodeify(done)
