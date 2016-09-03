@@ -19,8 +19,8 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
-request = require('request')
-requestAsync = Promise.promisify(request)
+fetch = require('isomorphic-fetch')
+
 url = require('url')
 _ = require('lodash')
 rindle = require('rindle')
@@ -30,15 +30,51 @@ token = require('resin-token')
 utils = require('./utils')
 progress = require('./progress')
 
+# move to utils
+isJson = (str) ->
+  try
+  	JSON.parse(str)
+  catch e
+  	return false
+  return true
+
+prepareResponse = (response, options) ->
+
+	# request has a get method so add one
+	(response.get = (key) ->
+		_.get(this, key)).bind(this)
+	response.request = {}
+	response.request.headers = options.headers
+	response.statusCode = response.status
+
+	if response.headers._headers['content-type']
+		response.json().then (body) ->
+			# rea
+			response.body = body
+			response.from = response.body.from
+			response.method = response.body.method
+			return response
+	else
+		response.text().then (body) ->
+			response.body = body
+			response.from = response.body.from
+			response.method = response.body.method
+			if not body
+				response.body = options.body
+			else
+				response.body = body
+			return response
+
 prepareOptions = (options = {}) ->
 
 	_.defaults options,
 		method: 'GET'
-		json: true
-		strictSSL: true
-		gzip: true
-		headers: {}
+		headers: {
+	    "Content-Type": "application/json",
+			"Accept-Encoding": "compress, gzip"
+	  },
 		refreshToken: true
+
 
 	Promise.try ->
 		return if not options.refreshToken
@@ -47,8 +83,7 @@ prepareOptions = (options = {}) ->
 			return if not shouldUpdateToken
 
 			exports.send
-				url: '/whoami'
-				baseUrl: options.baseUrl
+				url: options.baseUrl + '/whoami'
 				refreshToken: false
 
 			# At this point we're sure there is a saved token,
@@ -58,14 +93,12 @@ prepareOptions = (options = {}) ->
 				name: 'ResinRequestError'
 				statusCode: 401
 			, ->
-
 				return token.get().tap(token.remove).then (sessionToken) ->
 					throw new errors.ResinExpiredToken(sessionToken)
-
-			.get('body')
 			.then(token.set)
 
 	.then(utils.getAuthorizationHeader).then (authorizationHeader) ->
+		# console.log 'authheader', authorizationHeader
 		if authorizationHeader?
 			options.headers.Authorization = authorizationHeader
 
@@ -80,6 +113,13 @@ prepareOptions = (options = {}) ->
 			options.url += if url.parse(options.url).query? then '&' else '?'
 			options.url += "api_key=#{options.apiKey}"
 
+		# fetch doesn't support baseUrl
+		if options.baseUrl
+			options.url = options.baseUrl + options.url
+
+		# check if body is plain text
+		if !isJson(options.body)
+			delete options.headers['Content-Type']
 		return options
 
 ###*
@@ -123,14 +163,14 @@ exports.send = (options = {}) ->
 	# case we might cause unnecessary ESOCKETTIMEDOUT errors.
 	options.timeout ?= 30000
 
-	prepareOptions(options).then(requestAsync).then (response) ->
-
-		if utils.isErrorCode(response.statusCode)
-			responseError = utils.getErrorMessageFromResponse(response)
-			utils.debugRequest(options, response)
-			throw new errors.ResinRequestError(responseError, response.statusCode)
-
-		return response
+	prepareOptions(options).then((options) ->
+		fetch(options.url, options)
+		).then (response) ->
+			if utils.isErrorCode(response.status)
+				utils.getErrorMessageFromResponse(response).then (responseError) ->
+					throw new errors.ResinRequestError(responseError, response.status)
+			else
+				return prepareResponse(response, options)
 
 ###*
 # @summary Stream an HTTP response from Resin.io.

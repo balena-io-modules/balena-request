@@ -112,4 +112,3 @@ exports.estimate = (options) ->
 			passStream.pipe(progressStream).pipe(output)
 
 		return output
-

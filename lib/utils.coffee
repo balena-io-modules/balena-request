@@ -78,11 +78,13 @@ exports.getAuthorizationHeader = ->
 #		message = utils.getErrorMessageFromResponse(response)
 ###
 exports.getErrorMessageFromResponse = (response) ->
-	if not response.body?
-		return 'The request was unsuccessful'
-	if response.body.error?
-		return response.body.error.text
-	return response.body
+	response.text().then (body) ->
+		if not body?
+			return 'The request was unsuccessful'
+		if body.error?
+			return body.error.text
+		return body
+
 
 ###*
 # @summary Check if the status code represents an error
