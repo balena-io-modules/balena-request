@@ -101,8 +101,8 @@ prepareOptions = (options = {}) ->
       , ->
         return token.get().tap(token.remove).then (sessionToken) ->
           throw new errors.ResinExpiredToken(sessionToken)
-      .then (response) ->
-        token.set(response.get('body'))
+      .get('body')
+      .then(token.set)
 
   .then(utils.getAuthorizationHeader).then (authorizationHeader) ->
     # console.log 'authheader', authorizationHeader
