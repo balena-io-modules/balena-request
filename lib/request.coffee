@@ -17,9 +17,9 @@ limitations under the License.
 ###*
 # @module request
 ###
-
 Promise = require('bluebird')
 fetch = require('isomorphic-fetch')
+fetch.Promise = Promise
 
 url = require('url')
 _ = require('lodash')
@@ -33,94 +33,101 @@ progress = require('./progress')
 # move to utils
 isJson = (str) ->
   try
-  	JSON.parse(str)
+    JSON.parse(str)
   catch e
-  	return false
+    return false
   return true
 
 prepareResponse = (response, options) ->
 
-	# request has a get method so add one
-	(response.get = (key) ->
-		_.get(this, key)).bind(this)
-	response.request = {}
-	response.request.headers = options.headers
-	response.statusCode = response.status
+  response.request = {}
+  response.request.headers = options.headers
+  # fking ugly
+  path = options.url.split('/')[options.url.split('/').length - 1]
+  query = if options.url.includes('?') then options.url.split('?')[options.url.split('?').length - 1] else null
 
-	if response.headers._headers['content-type']
-		response.json().then (body) ->
-			# rea
-			response.body = body
-			response.from = response.body.from
-			response.method = response.body.method
-			return response
-	else
-		response.text().then (body) ->
-			response.body = body
-			response.from = response.body.from
-			response.method = response.body.method
-			if not body
-				response.body = options.body
-			else
-				response.body = body
-			return response
+  response.request.uri =
+    url: options.url,
+    query: query
+    path: "/#{path}"
+
+  response.statusCode = response.status
+
+  if response.headers._headers['content-type']
+    response.json().then (body) ->
+      # rea
+      response.body = body
+      response.from = response.body.from
+      response.method = response.body.method
+      return response
+  else
+    response.text().then (body) ->
+      response.body = body
+      response.from = response.body.from
+      response.method = response.body.method
+      if not body
+        response.body = options.body
+      else
+        response.body = body
+      return response
 
 prepareOptions = (options = {}) ->
 
-	_.defaults options,
-		method: 'GET'
-		headers: {
-	    "Content-Type": "application/json",
-			"Accept-Encoding": "compress, gzip"
-	  },
-		refreshToken: true
+  _.defaults options,
+    method: 'GET'
+    headers: {
+      "Content-Type": "application/json",
+      "Accept-Encoding": "compress, gzip"
+    },
+    refreshToken: true
 
 
-	Promise.try ->
-		return if not options.refreshToken
+  Promise.try ->
+    return if not options.refreshToken
 
-		utils.shouldUpdateToken().then (shouldUpdateToken) ->
-			return if not shouldUpdateToken
+    utils.shouldUpdateToken().then (shouldUpdateToken) ->
+      return if not shouldUpdateToken
 
-			exports.send
-				url: options.baseUrl + '/whoami'
-				refreshToken: false
+      exports.send
+        url: options.baseUrl + '/whoami'
+        refreshToken: false
 
-			# At this point we're sure there is a saved token,
-			# however the fact that /whoami returns 401 allows
-			# us to safely assume the token is expired
-			.catch
-				name: 'ResinRequestError'
-				statusCode: 401
-			, ->
-				return token.get().tap(token.remove).then (sessionToken) ->
-					throw new errors.ResinExpiredToken(sessionToken)
-			.then(token.set)
+      # At this point we're sure there is a saved token,
+      # however the fact that /whoami returns 401 allows
+      # us to safely assume the token is expired
+      .catch
+        name: 'ResinRequestError'
+        statusCode: 401
+      , ->
+        return token.get().tap(token.remove).then (sessionToken) ->
+          throw new errors.ResinExpiredToken(sessionToken)
+      .then (response) ->
+        token.set(response.get('body'))
 
-	.then(utils.getAuthorizationHeader).then (authorizationHeader) ->
-		# console.log 'authheader', authorizationHeader
-		if authorizationHeader?
-			options.headers.Authorization = authorizationHeader
+  .then(utils.getAuthorizationHeader).then (authorizationHeader) ->
+    # console.log 'authheader', authorizationHeader
+    if authorizationHeader?
+      options.headers.Authorization = authorizationHeader
 
-		if not _.isEmpty(options.apiKey)
+    if not _.isEmpty(options.apiKey)
+      # Using `request` qs object results in dollar signs, or other
+      # special characters used to query our OData API, being escaped
+      # and thus leading to all sort of weird error.
+      # The workaround is to append the `api_key` query string manually
+      # to prevent affecting the rest of the query strings.
+      # See https://github.com/request/request/issues/2129
+      options.url += if url.parse(options.url).query? then '&' else '?'
+      options.url += "api_key=#{options.apiKey}"
 
-			# Using `request` qs object results in dollar signs, or other
-			# special characters used to query our OData API, being escaped
-			# and thus leading to all sort of weird error.
-			# The workaround is to append the `api_key` query string manually
-			# to prevent affecting the rest of the query strings.
-			# See https://github.com/request/request/issues/2129
-			options.url += if url.parse(options.url).query? then '&' else '?'
-			options.url += "api_key=#{options.apiKey}"
+    # fetch doesn't support baseUrl
+    if options.baseUrl
+      options.url = options.baseUrl + options.url
 
-		# fetch doesn't support baseUrl
-		if options.baseUrl
-			options.url = options.baseUrl + options.url
+    # check if body is plain text
+    if !isJson(options.body)
+      delete options.headers['Content-Type']
 
-		# check if body is plain text
-		if !isJson(options.body)
-			delete options.headers['Content-Type']
-		return options
+    return options
 
 ###*
 # @summary Perform an HTTP request to Resin.io
@@ -142,35 +149,35 @@ prepareOptions = (options = {}) ->
 #
 # @example
 # request.send
-# 	method: 'GET'
-# 	baseUrl: 'https://api.resin.io'
-# 	url: '/foo'
+#   method: 'GET'
+#   baseUrl: 'https://api.resin.io'
+#   url: '/foo'
 # .get('body')
 #
 # @example
 # request.send
-# 	method: 'POST'
-# 	baseUrl: 'https://api.resin.io'
-# 	url: '/bar'
-# 	data:
-# 		hello: 'world'
+#   method: 'POST'
+#   baseUrl: 'https://api.resin.io'
+#   url: '/bar'
+#   data:
+#     hello: 'world'
 # .get('body')
 ###
 exports.send = (options = {}) ->
 
-	# Only set a default timeout when doing a normal HTTP
-	# request and not also when streaming since in the latter
-	# case we might cause unnecessary ESOCKETTIMEDOUT errors.
-	options.timeout ?= 30000
+  # Only set a default timeout when doing a normal HTTP
+  # request and not also when streaming since in the latter
+  # case we might cause unnecessary ESOCKETTIMEDOUT errors.
+  options.timeout ?= 30000
 
-	prepareOptions(options).then((options) ->
-		fetch(options.url, options)
-		).then (response) ->
-			if utils.isErrorCode(response.status)
-				utils.getErrorMessageFromResponse(response).then (responseError) ->
-					throw new errors.ResinRequestError(responseError, response.status)
-			else
-				return prepareResponse(response, options)
+  prepareOptions(options).then((options) ->
+    fetch(options.url, options)
+    ).then (response) ->
+      if utils.isErrorCode(response.status)
+        utils.getErrorMessageFromResponse(response).then (responseError) ->
+          throw new errors.ResinRequestError(responseError, response.status)
+      else
+        return prepareResponse(response, options)
 
 ###*
 # @summary Stream an HTTP response from Resin.io.
@@ -200,27 +207,27 @@ exports.send = (options = {}) ->
 #
 # @example
 # request.stream
-# 	method: 'GET'
-# 	baseUrl: 'https://img.resin.io'
-# 	url: '/download/foo'
+#   method: 'GET'
+#   baseUrl: 'https://img.resin.io'
+#   url: '/download/foo'
 # .then (stream) ->
-# 	stream.on 'progress', (state) ->
-# 		console.log(state)
+#   stream.on 'progress', (state) ->
+#     console.log(state)
 #
-# 	stream.pipe(fs.createWriteStream('/opt/download'))
+#   stream.pipe(fs.createWriteStream('/opt/download'))
 ###
 exports.stream = (options = {}) ->
-	prepareOptions(options).then(progress.estimate).then (download) ->
-		if not utils.isErrorCode(download.response.statusCode)
+  prepareOptions(options).then(progress.estimate).then (download) ->
+    if not utils.isErrorCode(download.response.statusCode)
 
-			# TODO: Move this to resin-image-manager
-			download.mime = download.response.headers['content-type']
+      # TODO: Move this to resin-image-manager
+      download.mime = download.response.headers['content-type']
 
-			return download
+      return download
 
-		# If status code is an error code, interpret
-		# the body of the request as an error.
-		return rindle.extract(download).then (data) ->
-			responseError = data or utils.getErrorMessageFromResponse(download.response)
-			utils.debugRequest(options, download.response)
-			throw new errors.ResinRequestError(responseError, download.response.statusCode)
+    # If status code is an error code, interpret
+    # the body of the request as an error.
+    return rindle.extract(download).then (data) ->
+      responseError = data or utils.getErrorMessageFromResponse(download.response)
+      utils.debugRequest(options, download.response)
+      throw new errors.ResinRequestError(responseError, download.response.statusCode)
