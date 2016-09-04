@@ -20,6 +20,7 @@ limitations under the License.
 Promise = require('bluebird')
 fetch = require('isomorphic-fetch')
 fetch.Promise = Promise
+# https://github.com/bitinn/node-fetch/blob/master/LIMITS.md
 
 url = require('url')
 _ = require('lodash')
@@ -127,6 +128,7 @@ prepareOptions = (options = {}) ->
     if !isJson(options.body)
       delete options.headers['Content-Type']
 
+    # console.log('prepareOptions', options)
     return options
 
 ###*
@@ -218,10 +220,10 @@ exports.send = (options = {}) ->
 ###
 exports.stream = (options = {}) ->
   prepareOptions(options).then(progress.estimate).then (download) ->
-    if not utils.isErrorCode(download.response.statusCode)
+    if not utils.isErrorCode(download.response.status)
 
       # TODO: Move this to resin-image-manager
-      download.mime = download.response.headers['content-type']
+      download.mime = download.response.headers._headers['content-type']
 
       return download
 
@@ -230,4 +232,4 @@ exports.stream = (options = {}) ->
     return rindle.extract(download).then (data) ->
       responseError = data or utils.getErrorMessageFromResponse(download.response)
       utils.debugRequest(options, download.response)
-      throw new errors.ResinRequestError(responseError, download.response.statusCode)
+      throw new errors.ResinRequestError(responseError, download.response.status)

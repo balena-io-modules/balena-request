@@ -131,11 +131,11 @@ exports.isResponseCompressed = (response) ->
 ###
 exports.getResponseLength = (response) ->
 	return {
-		uncompressed: _.parseInt(response.headers['content-length']) or undefined
+		uncompressed: _.parseInt(response.headers._headers['content-length']) or undefined
 
 		# X-Transfer-Length equals the compressed size of the body.
 		# This header is sent by Image Maker when downloading OS images.
-		compressed: _.parseInt(response.headers['x-transfer-length']) or undefined
+		compressed: _.parseInt(response.headers._headers['x-transfer-length']) or undefined
 	}
 
 ###*
