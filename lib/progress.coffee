@@ -25,6 +25,7 @@ utils = require('./utils')
 Promise = require('bluebird')
 fetch = require('isomorphic-fetch')
 fetch.Promise = Promise
+request = require('./request')
 
 ###*
 # @summary Get progress stream
@@ -93,7 +94,6 @@ exports.estimate = (options) ->
 			responseLength = utils.getResponseLength(response)
 			output = new stream.PassThrough()
 			output.response = response
-
 			total = responseLength.uncompressed or responseLength.compressed
 			progressStream = getProgressStream response, total, (state) ->
 				output.emit('progress', state)

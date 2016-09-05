@@ -21,6 +21,14 @@ token = require('resin-token')
 # Expose for testing purposes
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 
+
+exports.isJson = (str) ->
+	try
+		JSON.parse(str)
+	catch e
+		return false
+	return true
+
 ###*
 # @summary Determine if the token should be updated
 # @function
