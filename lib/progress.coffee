@@ -22,6 +22,11 @@ progress = require('progress-stream')
 rindle = require('rindle')
 utils = require('./utils')
 
+Promise = require('bluebird')
+fetch = require('isomorphic-fetch')
+fetch.Promise = Promise
+request = require('./request')
+
 ###*
 # @summary Get progress stream
 # @function
@@ -34,7 +39,7 @@ utils = require('./utils')
 #
 # @example
 # progressStream = getProgressStream response, (state) ->
-# 	console.log(state)
+#	 console.log(state)
 #
 # return requestStream.pipe(progressStream).pipe(output)
 ###
@@ -70,10 +75,9 @@ getProgressStream = (response, total, onState = _.noop) ->
 #			console.log(state)
 ###
 exports.estimate = (options) ->
-
 	# Disable gzip support. We manually handle compression
 	# given the need of finer control.
-	options.gzip = false
+	# options.gzip = false
 
 	# Disabling gzip makes request omit an Accept-Encoding: gzip
 	# completely. We disable automatic gzip decompression
@@ -81,35 +85,30 @@ exports.estimate = (options) ->
 	# it ourselves, therefore we pass the HTTP header manually.
 	options.headers['Accept-Encoding'] = 'gzip, deflate'
 
-	requestStream = request(options)
+	fetch(options.url, options)
+	.then (response) ->
+		passStream = new stream.PassThrough()
+		response.body.pipe(passStream)
 
-	# Instantly pipe the response to a PassThrough stream
-	# to allow data to be piped after `response` was emitted.
-	passStream = new stream.PassThrough()
-	requestStream.pipe(passStream)
+		return rindle.onEvent(passStream, 'data').then (data) ->
+			responseLength = utils.getResponseLength(response)
+			output = new stream.PassThrough()
+			output.response = response
+			total = responseLength.uncompressed or responseLength.compressed
+			progressStream = getProgressStream response, total, (state) ->
+				output.emit('progress', state)
 
-	return rindle.onEvent(requestStream, 'response').then (response) ->
-		responseLength = utils.getResponseLength(response)
+			if utils.isResponseCompressed(response)
+				gunzip = new zlib.createGunzip()
 
-		output = new stream.PassThrough()
-		output.response = response
+				# Uncompress after of before piping trough process
+				# depending on the response length available to us
+				if responseLength.compressed? and not responseLength.uncompressed?
+					passStream.pipe(progressStream).pipe(gunzip).pipe(output)
+				else
+					passStream.pipe(gunzip).pipe(progressStream).pipe(output)
 
-		total = responseLength.uncompressed or responseLength.compressed
-		progressStream = getProgressStream response, total, (state) ->
-			output.emit('progress', state)
-
-		if utils.isResponseCompressed(response)
-			gunzip = new zlib.createGunzip()
-
-			# Uncompress after of before piping trough process
-			# depending on the response length available to us
-			if responseLength.compressed? and not responseLength.uncompressed?
-				passStream.pipe(progressStream).pipe(gunzip).pipe(output)
 			else
-				passStream.pipe(gunzip).pipe(progressStream).pipe(output)
+				passStream.pipe(progressStream).pipe(output)
 
-		else
-			passStream.pipe(progressStream).pipe(output)
-
-		return output
-
+			return output

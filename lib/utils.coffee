@@ -21,6 +21,14 @@ token = require('resin-token')
 # Expose for testing purposes
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 
+
+exports.isJson = (str) ->
+	try
+		JSON.parse(str)
+	catch e
+		return false
+	return true
+
 ###*
 # @summary Determine if the token should be updated
 # @function
@@ -78,11 +86,13 @@ exports.getAuthorizationHeader = ->
 #		message = utils.getErrorMessageFromResponse(response)
 ###
 exports.getErrorMessageFromResponse = (response) ->
-	if not response.body?
-		return 'The request was unsuccessful'
-	if response.body.error?
-		return response.body.error.text
-	return response.body
+	response.text().then (body) ->
+		if not body?
+			return 'The request was unsuccessful'
+		if body.error?
+			return body.error.text
+		return body
+
 
 ###*
 # @summary Check if the status code represents an error
@@ -129,11 +139,11 @@ exports.isResponseCompressed = (response) ->
 ###
 exports.getResponseLength = (response) ->
 	return {
-		uncompressed: _.parseInt(response.headers['content-length']) or undefined
+		uncompressed: _.parseInt(response.headers._headers['content-length']) or undefined
 
 		# X-Transfer-Length equals the compressed size of the body.
 		# This header is sent by Image Maker when downloading OS images.
-		compressed: _.parseInt(response.headers['x-transfer-length']) or undefined
+		compressed: _.parseInt(response.headers._headers['x-transfer-length']) or undefined
 	}
 
 ###*
