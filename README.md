@@ -125,7 +125,7 @@ Tests
 Run the test suite by doing:
 
 ```sh
-$ gulp test
+$ npm test
 ```
 
 Contribute
