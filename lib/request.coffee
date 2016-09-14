@@ -40,6 +40,14 @@ prepareOptions = (options = {}) ->
 		headers: {}
 		refreshToken: true
 
+	{ baseUrl } = options
+
+	if options.uri
+		options.url = options.uri
+		delete options.uri
+	if url.parse(options.url).protocol?
+		delete options.baseUrl
+
 	Promise.try ->
 		return if not options.refreshToken
 
@@ -48,7 +56,7 @@ prepareOptions = (options = {}) ->
 
 			exports.send
 				url: '/whoami'
-				baseUrl: options.baseUrl
+				baseUrl: baseUrl
 				refreshToken: false
 
 			# At this point we're sure there is a saved token,

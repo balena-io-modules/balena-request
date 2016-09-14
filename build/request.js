@@ -41,6 +41,7 @@ utils = require('./utils');
 progress = require('./progress');
 
 prepareOptions = function(options) {
+  var baseUrl;
   if (options == null) {
     options = {};
   }
@@ -52,6 +53,14 @@ prepareOptions = function(options) {
     headers: {},
     refreshToken: true
   });
+  baseUrl = options.baseUrl;
+  if (options.uri) {
+    options.url = options.uri;
+    delete options.uri;
+  }
+  if (url.parse(options.url).protocol != null) {
+    delete options.baseUrl;
+  }
   return Promise["try"](function() {
     if (!options.refreshToken) {
       return;
@@ -62,7 +71,7 @@ prepareOptions = function(options) {
       }
       return exports.send({
         url: '/whoami',
-        baseUrl: options.baseUrl,
+        baseUrl: baseUrl,
         refreshToken: false
       })["catch"]({
         name: 'ResinRequestError',
