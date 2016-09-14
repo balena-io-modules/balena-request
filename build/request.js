@@ -79,7 +79,7 @@ prepareOptions = function(options) {
     }
     if (!_.isEmpty(options.apiKey)) {
       options.url += url.parse(options.url).query != null ? '&' : '?';
-      options.url += "api_key=" + options.apiKey;
+      options.url += "apikey=" + options.apiKey;
     }
     return options;
   });

@@ -74,11 +74,11 @@ prepareOptions = (options = {}) ->
 			# Using `request` qs object results in dollar signs, or other
 			# special characters used to query our OData API, being escaped
 			# and thus leading to all sort of weird error.
-			# The workaround is to append the `api_key` query string manually
+			# The workaround is to append the `apikey` query string manually
 			# to prevent affecting the rest of the query strings.
 			# See https://github.com/request/request/issues/2129
 			options.url += if url.parse(options.url).query? then '&' else '?'
-			options.url += "api_key=#{options.apiKey}"
+			options.url += "apikey=#{options.apiKey}"
 
 		return options
 
