@@ -3,11 +3,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### Changed
+
+- Fix the `apikey` query param name
+
 ## [5.0.0] - 2016-09-15
 
 ### Changed
 
-- Fix the `apikey` query param name
 - Updated `resin-token` to v2.4.3
 - Run tests in the browser
 - Updated node versions to be run on Travis and AppVeyor
