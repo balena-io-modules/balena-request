@@ -3,11 +3,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.0.0] - 2016-09-15
+
 ### Changed
 
 - Updated `resin-token` to v2.4.3
 - Run tests in the browser
 - Updated node versions to be run on Travis and AppVeyor
+- **Breaking!** Take API Key as a query option
+- **Breaking!** Decouple resin-request from resin-settings-client
 
 ## [4.1.2] - 2016-03-17
 
@@ -247,6 +251,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
+[5.0.0]: https://github.com/resin-io-modules/resin-request/compare/v4.1.2...v5.0.0
 [4.1.2]: https://github.com/resin-io-modules/resin-request/compare/v4.1.1...v4.1.2
 [4.1.1]: https://github.com/resin-io-modules/resin-request/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/resin-io-modules/resin-request/compare/v4.0.7...v4.1.0
