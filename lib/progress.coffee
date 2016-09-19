@@ -14,20 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ###
 
-_ = require('lodash')
+noop = require('lodash/noop')
 zlib = require('zlib')
-request = require('request')
 stream = require('stream')
 progress = require('progress-stream')
 rindle = require('rindle')
 utils = require('./utils')
 
 ###*
+# @module progress
+###
+
+###*
 # @summary Get progress stream
 # @function
 # @private
 #
-# @param {Object} response - request response object
 # @param {Number} total - response total
 # @param {Function} [onState] - on state callback (state)
 # @returns {Stream} progress stream
@@ -36,9 +38,9 @@ utils = require('./utils')
 # progressStream = getProgressStream response, (state) ->
 # 	console.log(state)
 #
-# return requestStream.pipe(progressStream).pipe(output)
+# return responseStream.pipe(progressStream).pipe(output)
 ###
-getProgressStream = (response, total, onState = _.noop) ->
+getProgressStream = (total, onState = noop) ->
 	progressStream = progress
 		time: 500
 		length: total
@@ -60,6 +62,8 @@ getProgressStream = (response, total, onState = _.noop) ->
 # @function
 # @protected
 #
+# @description **Not implemented for the browser.**
+#
 # @param {Object} options - request options
 # @returns {Promise<Stream>} request stream
 #
@@ -70,46 +74,33 @@ getProgressStream = (response, total, onState = _.noop) ->
 #			console.log(state)
 ###
 exports.estimate = (options) ->
-
-	# Disable gzip support. We manually handle compression
-	# given the need of finer control.
 	options.gzip = false
-
-	# Disabling gzip makes request omit an Accept-Encoding: gzip
-	# completely. We disable automatic gzip decompression
-	# but still want to receive the gzip encoded response to handle
-	# it ourselves, therefore we pass the HTTP header manually.
 	options.headers['Accept-Encoding'] = 'gzip, deflate'
 
-	requestStream = request(options)
-
-	# Instantly pipe the response to a PassThrough stream
-	# to allow data to be piped after `response` was emitted.
-	passStream = new stream.PassThrough()
-	requestStream.pipe(passStream)
-
-	return rindle.onEvent(requestStream, 'response').then (response) ->
-		responseLength = utils.getResponseLength(response)
-
+	return utils.requestAsync(options)
+	.then (response) ->
 		output = new stream.PassThrough()
 		output.response = response
 
+		responseLength = utils.getResponseLength(response)
 		total = responseLength.uncompressed or responseLength.compressed
-		progressStream = getProgressStream response, total, (state) ->
+
+		responseStream = response.body
+
+		progressStream = getProgressStream total, (state) ->
 			output.emit('progress', state)
 
 		if utils.isResponseCompressed(response)
 			gunzip = new zlib.createGunzip()
 
-			# Uncompress after of before piping trough process
+			# Uncompress after or before piping trough progress
 			# depending on the response length available to us
 			if responseLength.compressed? and not responseLength.uncompressed?
-				passStream.pipe(progressStream).pipe(gunzip).pipe(output)
+				responseStream.pipe(progressStream).pipe(gunzip).pipe(output)
 			else
-				passStream.pipe(gunzip).pipe(progressStream).pipe(output)
+				responseStream.pipe(gunzip).pipe(progressStream).pipe(output)
 
 		else
-			passStream.pipe(progressStream).pipe(output)
+			responseStream.pipe(progressStream).pipe(output)
 
 		return output
-

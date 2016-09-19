@@ -1,7 +1,6 @@
 m = require('mochainon')
-nock = require('nock')
-token = require('resin-token')
-request = require('../lib/request')
+
+{ token, request, fetchMock } = require('./setup')()
 
 describe 'Request:', ->
 
@@ -15,18 +14,24 @@ describe 'Request:', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				nock('https://api.resin.io').get('/foo').reply(200, from: 'resin')
+				fetchMock.get 'https://api.resin.io/foo',
+					body: from: 'resin'
+					headers:
+						'Content-Type': 'application/json'
 
 			afterEach ->
-				nock.cleanAll()
+				fetchMock.restore()
 
 			describe 'given an absolute url', ->
 
 				beforeEach ->
-					nock('https://foobar.baz').get('/foo').reply(200, from: 'foobar')
+					fetchMock.get 'https://foobar.baz/foo',
+						body: from: 'foobar'
+						headers:
+							'Content-Type': 'application/json'
 
 				afterEach ->
-					nock.cleanAll()
+					fetchMock.restore()
 
 				it 'should preserve the absolute url', ->
 					promise = request.send
@@ -46,15 +51,29 @@ describe 'Request:', ->
 		describe 'given multiple endpoints', ->
 
 			beforeEach ->
-				nock('https://api.resin.io')
-					.get('/foo').reply(200, method: 'GET')
-					.post('/foo').reply(200, method: 'POST')
-					.put('/foo').reply(200, method: 'PUT')
-					.patch('/foo').reply(200, method: 'PATCH')
-					.delete('/foo').reply(200, method: 'DELETE')
+				fetchMock.get 'https://api.resin.io/foo',
+					body: method: 'GET'
+					headers:
+						'Content-Type': 'application/json'
+				fetchMock.post 'https://api.resin.io/foo',
+					body: method: 'POST'
+					headers:
+						'Content-Type': 'application/json'
+				fetchMock.put 'https://api.resin.io/foo',
+					body: method: 'PUT'
+					headers:
+						'Content-Type': 'application/json'
+				fetchMock.patch 'https://api.resin.io/foo',
+					body: method: 'PATCH'
+					headers:
+						'Content-Type': 'application/json'
+				fetchMock.delete 'https://api.resin.io/foo',
+					body: method: 'DELETE'
+					headers:
+						'Content-Type': 'application/json'
 
 			afterEach ->
-				nock.cleanAll()
+				fetchMock.restore()
 
 			it 'should default to GET', ->
 				promise = request.send
@@ -66,10 +85,10 @@ describe 'Request:', ->
 		describe 'given an endpoint that returns a non json response', ->
 
 			beforeEach ->
-				nock('https://api.resin.io').get('/foo').reply(200, 'Hello World')
+				fetchMock.get('https://api.resin.io/foo', 'Hello World')
 
 			afterEach ->
-				nock.cleanAll()
+				fetchMock.restore()
 
 			it 'should resolve with the plain body', ->
 				promise = request.send
@@ -82,11 +101,11 @@ describe 'Request:', ->
 		describe 'given an endpoint that accepts a non json body', ->
 
 			beforeEach ->
-				nock('https://api.resin.io').post('/foo').reply 200, (uri, body) ->
-					return "The body is: #{body}"
+				fetchMock.post 'https://api.resin.io/foo', (url, opts) ->
+					return "The body is: #{opts.body}"
 
 			afterEach ->
-				nock.cleanAll()
+				fetchMock.restore()
 
 			it 'should take the plain body successfully', ->
 				promise = request.send
@@ -94,6 +113,7 @@ describe 'Request:', ->
 					baseUrl: 'https://api.resin.io'
 					url: '/foo'
 					body: 'Qux'
+					json: false
 				.get('body')
 				m.chai.expect(promise).to.eventually.equal('The body is: Qux')
 
@@ -104,10 +124,13 @@ describe 'Request:', ->
 				describe 'given no response error', ->
 
 					beforeEach ->
-						nock('https://api.resin.io').get('/foo').reply(200, hello: 'world')
+						fetchMock.get 'https://api.resin.io/foo',
+							body: hello: 'world'
+							headers:
+								'Content-Type': 'application/json'
 
 					afterEach ->
-						nock.cleanAll()
+						fetchMock.restore()
 
 					it 'should correctly make the request', ->
 						promise = request.send
@@ -120,10 +143,14 @@ describe 'Request:', ->
 				describe 'given a response error', ->
 
 					beforeEach ->
-						nock('https://api.resin.io').get('/foo').reply(500, error: text: 'Server Error')
+						fetchMock.get 'https://api.resin.io/foo',
+							status: 500
+							body: error: text: 'Server Error'
+							headers:
+								'Content-Type': 'application/json'
 
 					afterEach ->
-						nock.cleanAll()
+						fetchMock.restore()
 
 					it 'should be rejected with the error message', ->
 						promise = request.send
@@ -132,24 +159,23 @@ describe 'Request:', ->
 							url: '/foo'
 						m.chai.expect(promise).to.be.rejectedWith('Server Error')
 
-					it 'should have the status code in the error object', (done) ->
+					it 'should have the status code in the error object', ->
 						request.send
 							method: 'GET'
 							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.catch (error) ->
 							m.chai.expect(error.statusCode).to.equal(500)
-							done()
 
 			describe 'given a HEAD endpoint', ->
 
 				describe 'given no response error', ->
 
 					beforeEach ->
-						nock('https://api.resin.io').head('/foo').reply(200)
+						fetchMock.head('https://api.resin.io/foo', 200)
 
 					afterEach ->
-						nock.cleanAll()
+						fetchMock.restore()
 
 					it 'should correctly make the request', ->
 						promise = request.send
@@ -162,10 +188,10 @@ describe 'Request:', ->
 				describe 'given a response error', ->
 
 					beforeEach ->
-						nock('https://api.resin.io').head('/foo').reply(500)
+						fetchMock.head('https://api.resin.io/foo', 500)
 
 					afterEach ->
-						nock.cleanAll()
+						fetchMock.restore()
 
 					it 'should be rejected with a generic error message', ->
 						promise = request.send
@@ -180,11 +206,13 @@ describe 'Request:', ->
 			describe 'given a POST endpoint that mirrors the request body', ->
 
 				beforeEach ->
-					nock('https://api.resin.io').post('/foo').reply 200, (uri, body) ->
-						return body
+					fetchMock.post 'https://api.resin.io/foo', (url, opts) ->
+						body: opts.body
+						headers:
+							'Content-Type': 'application/json'
 
 				afterEach ->
-					nock.cleanAll()
+					fetchMock.restore()
 
 				it 'should eventually return the body', ->
 					promise = request.send
@@ -199,11 +227,13 @@ describe 'Request:', ->
 			describe 'given a PUT endpoint that mirrors the request body', ->
 
 				beforeEach ->
-					nock('https://api.resin.io').put('/foo').reply 200, (uri, body) ->
-						return body
+					fetchMock.put 'https://api.resin.io/foo', (url, opts) ->
+						body: opts.body
+						headers:
+							'Content-Type': 'application/json'
 
 				afterEach ->
-					nock.cleanAll()
+					fetchMock.restore()
 
 				it 'should eventually return the body', ->
 					promise = request.send
@@ -218,11 +248,13 @@ describe 'Request:', ->
 			describe 'given a PATCH endpoint that mirrors the request body', ->
 
 				beforeEach ->
-					nock('https://api.resin.io').patch('/foo').reply 200, (uri, body) ->
-						return body
+					fetchMock.patch 'https://api.resin.io/foo', (url, opts) ->
+						body: opts.body
+						headers:
+							'Content-Type': 'application/json'
 
 				afterEach ->
-					nock.cleanAll()
+					fetchMock.restore()
 
 				it 'should eventually return the body', ->
 					promise = request.send
@@ -237,11 +269,13 @@ describe 'Request:', ->
 			describe 'given a DELETE endpoint that mirrors the request body', ->
 
 				beforeEach ->
-					nock('https://api.resin.io').delete('/foo').reply 200, (uri, body) ->
-						return body
+					fetchMock.delete 'https://api.resin.io/foo', (url, opts) ->
+						body: opts.body
+						headers:
+							'Content-Type': 'application/json'
 
 				afterEach ->
-					nock.cleanAll()
+					fetchMock.restore()
 
 				it 'should eventually return the body', ->
 					promise = request.send

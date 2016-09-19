@@ -18,189 +18,201 @@ limitations under the License.
 /**
  * @module request
  */
-var Promise, _, errors, prepareOptions, progress, request, requestAsync, rindle, token, url, utils;
+var Promise, defaults, errors, getRequest, getToken, isEmpty, noop, onlyIf, progress, rindle, urlLib, utils;
 
 Promise = require('bluebird');
 
-request = require('request');
+urlLib = require('url');
 
-requestAsync = Promise.promisify(request);
+noop = require('lodash/noop');
 
-url = require('url');
+defaults = require('lodash/defaults');
 
-_ = require('lodash');
+isEmpty = require('lodash/isEmpty');
 
 rindle = require('rindle');
 
 errors = require('resin-errors');
 
-token = require('resin-token');
+getToken = require('resin-token');
 
 utils = require('./utils');
 
 progress = require('./progress');
 
-prepareOptions = function(options) {
-  var baseUrl;
-  if (options == null) {
-    options = {};
-  }
-  _.defaults(options, {
-    method: 'GET',
-    json: true,
-    strictSSL: true,
-    gzip: true,
-    headers: {},
-    refreshToken: true
+onlyIf = utils.onlyIf;
+
+module.exports = getRequest = function(arg) {
+  var dataDirectory, debug, debugRequest, exports, isBrowser, prepareOptions, ref, ref1, ref2, ref3, token;
+  ref = arg != null ? arg : {}, dataDirectory = (ref1 = ref.dataDirectory) != null ? ref1 : null, debug = (ref2 = ref.debug) != null ? ref2 : false, isBrowser = (ref3 = ref.isBrowser) != null ? ref3 : false;
+  token = getToken({
+    dataDirectory: dataDirectory
   });
-  baseUrl = options.baseUrl;
-  if (options.uri) {
-    options.url = options.uri;
-    delete options.uri;
-  }
-  if (url.parse(options.url).protocol != null) {
-    delete options.baseUrl;
-  }
-  return Promise["try"](function() {
-    if (!options.refreshToken) {
-      return;
+  debugRequest = !debug ? noop : utils.debugRequest;
+  exports = {};
+  prepareOptions = function(options) {
+    var baseUrl;
+    if (options == null) {
+      options = {};
     }
-    return utils.shouldUpdateToken().then(function(shouldUpdateToken) {
-      if (!shouldUpdateToken) {
+    defaults(options, {
+      method: 'GET',
+      json: true,
+      strictSSL: true,
+      headers: {},
+      refreshToken: true
+    });
+    baseUrl = options.baseUrl;
+    if (options.uri) {
+      options.url = options.uri;
+      delete options.uri;
+    }
+    if (urlLib.parse(options.url).protocol != null) {
+      delete options.baseUrl;
+    }
+    return Promise["try"](function() {
+      if (!options.refreshToken) {
         return;
       }
-      return exports.send({
-        url: '/whoami',
-        baseUrl: baseUrl,
-        refreshToken: false
-      })["catch"]({
-        name: 'ResinRequestError',
-        statusCode: 401
-      }, function() {
-        return token.get().tap(token.remove).then(function(sessionToken) {
-          throw new errors.ResinExpiredToken(sessionToken);
-        });
-      }).get('body').then(token.set);
+      return utils.shouldUpdateToken(token).then(function(shouldUpdateToken) {
+        if (!shouldUpdateToken) {
+          return;
+        }
+        return exports.send({
+          url: '/whoami',
+          baseUrl: baseUrl,
+          refreshToken: false
+        })["catch"]({
+          name: 'ResinRequestError',
+          statusCode: 401
+        }, function() {
+          return token.get().tap(token.remove).then(function(sessionToken) {
+            throw new errors.ResinExpiredToken(sessionToken);
+          });
+        }).get('body').then(token.set);
+      });
+    }).then(function() {
+      return utils.getAuthorizationHeader(token);
+    }).then(function(authorizationHeader) {
+      if (authorizationHeader != null) {
+        options.headers.Authorization = authorizationHeader;
+      }
+      if (!isEmpty(options.apiKey)) {
+        options.url += urlLib.parse(options.url).query != null ? '&' : '?';
+        options.url += "apikey=" + options.apiKey;
+      }
+      return options;
     });
-  }).then(utils.getAuthorizationHeader).then(function(authorizationHeader) {
-    if (authorizationHeader != null) {
-      options.headers.Authorization = authorizationHeader;
+  };
+
+  /**
+  	 * @summary Perform an HTTP request to Resin.io
+  	 * @function
+  	 * @public
+  	 *
+  	 * @description
+  	 * This function automatically handles authorization with Resin.io.
+  	 *
+  	 * The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
+  	 *
+  	 * @param {Object} options - options
+  	 * @param {String} [options.method='GET'] - method
+  	 * @param {String} options.url - relative url
+  	 * @param {String} [options.apiKey] - api key
+  	 * @param {*} [options.body] - body
+  	 *
+  	 * @returns {Promise<Object>} response
+  	 *
+  	 * @example
+  	 * request.send
+  	 * 	method: 'GET'
+  	 * 	baseUrl: 'https://api.resin.io'
+  	 * 	url: '/foo'
+  	 * .get('body')
+  	 *
+  	 * @example
+  	 * request.send
+  	 * 	method: 'POST'
+  	 * 	baseUrl: 'https://api.resin.io'
+  	 * 	url: '/bar'
+  	 * 	data:
+  	 * 		hello: 'world'
+  	 * .get('body')
+   */
+  exports.send = function(options) {
+    if (options == null) {
+      options = {};
     }
-    if (!_.isEmpty(options.apiKey)) {
-      options.url += url.parse(options.url).query != null ? '&' : '?';
-      options.url += "apikey=" + options.apiKey;
+    if (options.timeout == null) {
+      options.timeout = 30000;
     }
-    return options;
-  });
-};
+    return prepareOptions(options).then(utils.requestAsync).then(function(response) {
+      return utils.getBody(response).then(function(body) {
+        var responseError;
+        response.body = body;
+        if (utils.isErrorCode(response.statusCode)) {
+          responseError = utils.getErrorMessageFromResponse(response);
+          debugRequest(options, response);
+          throw new errors.ResinRequestError(responseError, response.statusCode);
+        }
+      })["return"](response);
+    });
+  };
 
-
-/**
- * @summary Perform an HTTP request to Resin.io
- * @function
- * @public
- *
- * @description
- * This function automatically handles authorization with Resin.io.
- *
- * The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
- *
- * @param {Object} options - options
- * @param {String} [options.method='GET'] - method
- * @param {String} options.url - relative url
- * @param {String} [options.apiKey] - api key
- * @param {*} [options.body] - body
- *
- * @returns {Promise<Object>} response
- *
- * @example
- * request.send
- * 	method: 'GET'
- * 	baseUrl: 'https://api.resin.io'
- * 	url: '/foo'
- * .get('body')
- *
- * @example
- * request.send
- * 	method: 'POST'
- * 	baseUrl: 'https://api.resin.io'
- * 	url: '/bar'
- * 	data:
- * 		hello: 'world'
- * .get('body')
- */
-
-exports.send = function(options) {
-  if (options == null) {
-    options = {};
-  }
-  if (options.timeout == null) {
-    options.timeout = 30000;
-  }
-  return prepareOptions(options).then(requestAsync).then(function(response) {
-    var responseError;
-    if (utils.isErrorCode(response.statusCode)) {
-      responseError = utils.getErrorMessageFromResponse(response);
-      utils.debugRequest(options, response);
-      throw new errors.ResinRequestError(responseError, response.statusCode);
+  /**
+  	 * @summary Stream an HTTP response from Resin.io.
+  	 * @function
+  	 * @public
+  	 *
+  	 * @description
+  	 * **Not implemented for the browser.**
+  	 * This function emits a `progress` event, passing an object with the following properties:
+  	 *
+  	 * - `Number percent`: from 0 to 100.
+  	 * - `Number total`: total bytes to be transmitted.
+  	 * - `Number received`: number of bytes transmitted.
+  	 * - `Number eta`: estimated remaining time, in seconds.
+  	 *
+  	 * The stream may also contain the following custom properties:
+  	 *
+  	 * - `String .mime`: Equals the value of the `Content-Type` HTTP header.
+  	 *
+  	 * See `request.send()` for an explanation on how this function handles authentication.
+  	 *
+  	 * @param {Object} options - options
+  	 * @param {String} [options.method='GET'] - method
+  	 * @param {String} options.url - relative url
+  	 * @param {*} [options.body] - body
+  	 *
+  	 * @returns {Promise<Stream>} response
+  	 *
+  	 * @example
+  	 * request.stream
+  	 * 	method: 'GET'
+  	 * 	baseUrl: 'https://img.resin.io'
+  	 * 	url: '/download/foo'
+  	 * .then (stream) ->
+  	 * 	stream.on 'progress', (state) ->
+  	 * 		console.log(state)
+  	 *
+  	 * 	stream.pipe(fs.createWriteStream('/opt/download'))
+   */
+  exports.stream = onlyIf(!isBrowser)(function(options) {
+    if (options == null) {
+      options = {};
     }
-    return response;
-  });
-};
-
-
-/**
- * @summary Stream an HTTP response from Resin.io.
- * @function
- * @public
- *
- * @description
- * This function emits a `progress` event, passing an object with the following properties:
- *
- * - `Number percent`: from 0 to 100.
- * - `Number total`: total bytes to be transmitted.
- * - `Number received`: number of bytes transmitted.
- * - `Number eta`: estimated remaining time, in seconds.
- *
- * The stream may also contain the following custom properties:
- *
- * - `String .mime`: Equals the value of the `Content-Type` HTTP header.
- *
- * See `request.send()` for an explanation on how this function handles authentication.
- *
- * @param {Object} options - options
- * @param {String} [options.method='GET'] - method
- * @param {String} options.url - relative url
- * @param {*} [options.body] - body
- *
- * @returns {Promise<Stream>} response
- *
- * @example
- * request.stream
- * 	method: 'GET'
- * 	baseUrl: 'https://img.resin.io'
- * 	url: '/download/foo'
- * .then (stream) ->
- * 	stream.on 'progress', (state) ->
- * 		console.log(state)
- *
- * 	stream.pipe(fs.createWriteStream('/opt/download'))
- */
-
-exports.stream = function(options) {
-  if (options == null) {
-    options = {};
-  }
-  return prepareOptions(options).then(progress.estimate).then(function(download) {
-    if (!utils.isErrorCode(download.response.statusCode)) {
-      download.mime = download.response.headers['content-type'];
-      return download;
-    }
-    return rindle.extract(download).then(function(data) {
-      var responseError;
-      responseError = data || utils.getErrorMessageFromResponse(download.response);
-      utils.debugRequest(options, download.response);
-      throw new errors.ResinRequestError(responseError, download.response.statusCode);
+    return prepareOptions(options).then(progress.estimate).then(function(download) {
+      if (!utils.isErrorCode(download.response.statusCode)) {
+        download.mime = download.response.headers.get('Content-Type');
+        return download;
+      }
+      return rindle.extract(download).then(function(data) {
+        var responseError;
+        responseError = data || 'The request was unsuccessful';
+        debugRequest(options, download.response);
+        throw new errors.ResinRequestError(responseError, download.response.statusCode);
+      });
     });
   });
+  return exports;
 };

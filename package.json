@@ -17,37 +17,39 @@
     "test": "tests"
   },
   "scripts": {
+    "lint": "gulp lint",
     "test": "npm run test-node && npm run test-browser",
     "test-node": "gulp test",
     "test-browser": "karma start",
     "build": "gulp build",
     "prepublish": "npm test && npm run build",
-    "readme": "jsdoc2md --template doc/README.hbs build/request.js > README.md"
+    "readme": "jsdoc2md --template doc/README.hbs build/request.js build/progress.js build/utils.js > README.md"
   },
   "author": "Juan Cruz Viotti <juanchiviotti@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "coffee-script": "~1.10.0",
+    "coffee-script": "~1.11.0",
+    "fetch-mock": "^5.1.5",
     "gulp": "^3.9.1",
     "gulp-coffee": "^2.3.1",
     "gulp-coffeelint": "^0.6.0",
-    "gulp-mocha": "^2.2.0",
+    "gulp-mocha": "^3.0.0",
     "gulp-util": "^3.0.1",
+    "isomorphic-fetch": "^2.2.1",
     "jsdoc-to-markdown": "^1.1.1",
     "karma": "^1.3.0",
-    "mocha": "^2.4.5",
+    "mocha": "^3.0.0",
     "mochainon": "^1.0.0",
-    "nock": "^7.4.0",
     "resin-config-karma": "^1.0.4",
-    "timekeeper": "0.0.5"
+    "resin-settings-client": "^3.5.2",
+    "timekeeper": "^0.1.1"
   },
   "dependencies": {
     "bluebird": "^3.3.4",
     "lodash": "^4.6.1",
     "progress-stream": "^1.1.1",
-    "request": "^2.53.0",
     "resin-errors": "^2.3.0",
-    "resin-token": "^2.4.3",
+    "resin-token": "^3.0.0",
     "rindle": "^1.2.0"
   }
 }

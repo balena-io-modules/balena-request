@@ -14,9 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ###
 
+urlLib = require('url')
+qs = require('qs')
+parseInt = require('lodash/parseInt')
+assign = require('lodash/assign')
+includes = require('lodash/includes')
 Promise = require('bluebird')
-_ = require('lodash')
-token = require('resin-token')
+
+###*
+# @module utils
+###
 
 # Expose for testing purposes
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
@@ -30,14 +37,15 @@ exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 # This function makes use of a soft user-configurable setting called `tokenRefreshInterval`.
 # That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
 #
+# @param {Object} tokenInstance - an instance of `resin-token`
 # @returns {Promise<Boolean>} the token should be updated
 #
 # @example
-# tokenUtils.shouldUpdateToken().then (shouldUpdateToken) ->
+# tokenUtils.shouldUpdateToken(tokenInstance).then (shouldUpdateToken) ->
 #		if shouldUpdateToken
 #			console.log('Updating token!')
 ###
-exports.shouldUpdateToken = ->
+exports.shouldUpdateToken = (token) ->
 	token.getAge().then (age) ->
 		return age >= exports.TOKEN_REFRESH_INTERVAL
 
@@ -49,14 +57,15 @@ exports.shouldUpdateToken = ->
 # @description
 # This promise becomes undefined if no saved token.
 #
+# @param {Object} tokenInstance - an instance of `resin-token`
 # @returns {Promise<String>} authorization header
 #
 # @example
-# utils.getAuthorizationHeader().then (authorizationHeader) ->
+# utils.getAuthorizationHeader(tokenInstance).then (authorizationHeader) ->
 #		headers =
 #			Authorization: authorizationHeader
 ###
-exports.getAuthorizationHeader = ->
+exports.getAuthorizationHeader = (token) ->
 	token.get().then (sessionToken) ->
 		return if not sessionToken?
 		return "Bearer #{sessionToken}"
@@ -78,10 +87,11 @@ exports.getAuthorizationHeader = ->
 #		message = utils.getErrorMessageFromResponse(response)
 ###
 exports.getErrorMessageFromResponse = (response) ->
-	if not response.body?
+	if not response.body
 		return 'The request was unsuccessful'
 	if response.body.error?
 		return response.body.error.text
+
 	return response.body
 
 ###*
@@ -112,7 +122,7 @@ exports.isErrorCode = (statusCode) ->
 # 	console.log('The response body is compressed')
 ###
 exports.isResponseCompressed = (response) ->
-	return response.headers['content-encoding'] is 'gzip'
+	return response.headers.get('Content-Encoding') is 'gzip'
 
 ###*
 # @summary Get response compressed/uncompressed length
@@ -129,15 +139,14 @@ exports.isResponseCompressed = (response) ->
 ###
 exports.getResponseLength = (response) ->
 	return {
-		uncompressed: _.parseInt(response.headers['content-length']) or undefined
-
+		uncompressed: parseInt(response.headers.get('Content-Length'), 10) or undefined
 		# X-Transfer-Length equals the compressed size of the body.
 		# This header is sent by Image Maker when downloading OS images.
-		compressed: _.parseInt(response.headers['x-transfer-length']) or undefined
+		compressed: parseInt(response.headers.get('X-Transfer-Length'), 10) or undefined
 	}
 
 ###*
-# @summary Print debug information about a request/response
+# @summary Print debug information about a request/response.
 # @function
 # @protected
 #
@@ -147,13 +156,158 @@ exports.getResponseLength = (response) ->
 # @example
 # options = {
 # 	method: 'GET'
-#   url: '/foo'
+#	 url: '/foo'
 # }
 #
 # request(options).spread (response) ->
 # 	utils.debugRequest(options, response)
 ###
 exports.debugRequest = (options, response) ->
-	return if not process.env.DEBUG
-	options.statusCode = response.statusCode
-	console.error(options)
+	console.error(assign({ statusCode: response.statusCode }, options))
+
+# fetch adapter
+
+UNSUPPORTED_REQUEST_PARAMS = [
+	'qsParseOptions'
+	'qsStringifyOptions'
+	'useQuerystring'
+	'form'
+	'formData'
+	'multipart'
+	'preambleCRLF'
+	'postambleCRLF'
+	'jsonReviver'
+	'jsonReplacer'
+	'auth'
+	'oauth'
+	'aws'
+	'httpSignature'
+	'followAllRedirects'
+	'maxRedirects'
+	'removeRefererHeader'
+	'encoding'
+	'jar'
+	'agent'
+	'agentClass'
+	'agentOptions'
+	'forever'
+	'pool'
+	'localAddress'
+	'proxy'
+	'proxyHeaderWhiteList'
+	'proxyHeaderExclusiveList'
+	'time'
+	'har'
+	'callback'
+]
+
+processRequestOptions = (options = {}) ->
+	url = options.url or options.uri
+	if options.baseUrl
+		url = urlLib.resolve(options.baseUrl, url)
+	if options.qs
+		params = qs.stringify(options.qs)
+		url += (if url.indexOf('?') >= 0 then '&' else '?') + params
+
+	opts = {}
+
+	opts.method = options.method
+	opts.compress = options.gzip
+
+	{ body, headers } = options
+	headers ?= {}
+	if options.json and body
+		body = JSON.stringify(body)
+		headers['Content-Type'] = 'application/json'
+
+	opts.body = body
+
+	headers['Accept-Encoding'] or= 'compress, gzip'
+
+	if options.followRedirect
+		opts.redirect = 'follow'
+
+	opts.headers = new Headers(headers)
+
+	if options.strictSSL is false
+		throw new Error('`strictSSL` must be true or absent')
+
+	for key in UNSUPPORTED_REQUEST_PARAMS
+		if options[key]?
+			throw new Error("The #{key} param is not supported. Value: #{options[key]}")
+
+	opts.mode = 'cors'
+
+	return [ url, opts ]
+
+###*
+# @summary Extract the body from the server response
+# @function
+# @protected
+#
+# @param {Response} response
+#
+# @example
+# utils.getBody(response).then (body) ->
+# 	console.log(body)
+###
+exports.getBody = processBody = (response) ->
+	# wrap in Bluebird promise for extra methods
+	return Promise.try ->
+		contentType = response.headers.get('Content-Type')
+
+		if includes(contentType, 'binary/octet-stream')
+			# this is according to the standard
+			if typeof response.blob is 'function'
+				return response.blob()
+			# https://github.com/bitinn/node-fetch/blob/master/lib/body.js#L66
+			if typeof response.buffer is 'function'
+				return response.buffer()
+			throw new Error('This `fetch` implementation does not support decoding binary streams.')
+
+		if includes(contentType, 'application/json')
+			return response.json()
+
+		return response.text()
+
+timeoutPromise = (ms, promise) ->
+	return new Promise (resolve, reject) ->
+		timeoutId = setTimeout ->
+			reject(new Error('timeout'))
+		, ms
+
+		promise
+		.tap -> clearTimeout(timeoutId)
+		.then(resolve)
+		.catch(reject)
+
+###*
+# @summary The method that keeps partial compatibility with promisified `request` but uses `fetch` behind the scenes.
+# @function
+# @protected
+#
+# @param {Object} options
+#
+# @example
+# utils.requestAsync({ url: 'http://example.com' }).then (response) ->
+# 	console.log(response)
+###
+exports.requestAsync = (options) ->
+	[ url, opts ] = processRequestOptions(options)
+	{ timeout } = opts
+	delete opts.timeout
+	p = fetch(url, opts)
+	if timeout
+		p = timeoutPromise(timeout, p)
+
+	return p.then (response) ->
+		response.statusCode = response.status
+		response.request =
+			headers: options.headers
+			uri: urlLib.parse(url)
+		return response
+
+exports.notImplemented = notImplemented = ->
+	throw new Error('The method is not implemented.')
+
+exports.onlyIf = (cond) -> (fn) -> if cond then fn else notImplemented

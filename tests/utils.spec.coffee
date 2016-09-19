@@ -1,9 +1,10 @@
 ReadableStream = require('stream').Readable
 Promise = require('bluebird')
 m = require('mochainon')
-token = require('resin-token')
 johnDoeFixture = require('./tokens.json').johndoe
 utils = require('../lib/utils')
+
+{ token } = require('./setup')()
 
 describe 'Utils:', ->
 
@@ -19,7 +20,7 @@ describe 'Utils:', ->
 				@tokenGetAgeStub.restore()
 
 			it 'should return true', ->
-				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.true
+				m.chai.expect(utils.shouldUpdateToken(token)).to.eventually.be.true
 
 		describe 'given the token is newer than the specified validity time', ->
 
@@ -31,7 +32,7 @@ describe 'Utils:', ->
 				@tokenGetAgeStub.restore()
 
 			it 'should return false', ->
-				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.false
+				m.chai.expect(utils.shouldUpdateToken(token)).to.eventually.be.false
 
 		describe 'given the token is equal to the specified validity time', ->
 
@@ -43,7 +44,7 @@ describe 'Utils:', ->
 				@tokenGetAgeStub.restore()
 
 			it 'should return true', ->
-				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.true
+				m.chai.expect(utils.shouldUpdateToken(token)).to.eventually.be.true
 
 		describe 'given no token', ->
 
@@ -55,7 +56,7 @@ describe 'Utils:', ->
 				@tokenGetAgeStub.restore()
 
 			it 'should return false', ->
-				m.chai.expect(utils.shouldUpdateToken()).to.eventually.be.false
+				m.chai.expect(utils.shouldUpdateToken(token)).to.eventually.be.false
 
 	describe '.getAuthorizationHeader()', ->
 
@@ -65,7 +66,7 @@ describe 'Utils:', ->
 				token.set(johnDoeFixture.token)
 
 			it 'should eventually become the authorization header', ->
-				m.chai.expect(utils.getAuthorizationHeader()).to.eventually.equal("Bearer #{johnDoeFixture.token}")
+				m.chai.expect(utils.getAuthorizationHeader(token)).to.eventually.equal("Bearer #{johnDoeFixture.token}")
 
 		describe 'given there is no token', ->
 
@@ -73,7 +74,7 @@ describe 'Utils:', ->
 				token.remove()
 
 			it 'should eventually be undefined', ->
-				m.chai.expect(utils.getAuthorizationHeader()).to.eventually.be.undefined
+				m.chai.expect(utils.getAuthorizationHeader(token)).to.eventually.be.undefined
 
 	describe '.getErrorMessageFromResponse()', ->
 
@@ -126,14 +127,14 @@ describe 'Utils:', ->
 
 		it 'should return false if Content-Encoding is gzip', ->
 			response =
-				headers:
+				headers: new Headers
 					'content-encoding': 'gzip'
 
 			m.chai.expect(utils.isResponseCompressed(response)).to.be.true
 
 		it 'should return false if Content-Encoding is not set', ->
 			response =
-				headers: {}
+				headers: new Headers({})
 
 			m.chai.expect(utils.isResponseCompressed(response)).to.be.false
 
@@ -143,7 +144,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@response =
-					headers:
+					headers: new Headers
 						'x-transfer-length': '1234'
 
 			it 'should return the value of X-Transfer-Length as compressed length', ->
@@ -156,7 +157,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@response =
-					headers:
+					headers: new Headers
 						'content-length': '1234'
 
 			it 'should return the value of Content-Length as uncompressed length', ->
@@ -169,7 +170,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@response =
-					headers:
+					headers: new Headers
 						'x-transfer-length': ''
 
 			it 'should set the compressed to undefined', ->
@@ -179,7 +180,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@response =
-					headers:
+					headers: new Headers
 						'content-length': ''
 
 			it 'should set the uncompressed to undefined', ->
@@ -189,7 +190,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@response =
-					headers:
+					headers: new Headers
 						'x-transfer-length': 'asdf'
 
 			it 'should set the compressed to undefined', ->
@@ -199,7 +200,7 @@ describe 'Utils:', ->
 
 			beforeEach ->
 				@response =
-					headers:
+					headers: new Headers
 						'content-length': 'asdf'
 
 			it 'should set the uncompressed to undefined', ->

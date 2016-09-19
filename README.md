@@ -30,6 +30,31 @@ $ npm install --save resin-request
 Documentation
 -------------
 
+**Note.** This module expects [`fetch`](https://developer.mozilla.org/en/docs/Web/API/Fetch_API)
+and [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+to be available in the global scope.
+The easiest way to get `fetch` is to use `isomorphic-fetch` npm module.
+
+The module returns a _factory function_ that you use to get an instance of the token module.
+
+It accepts the following params:
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>Object</code> | options |
+| options.dataDirectory | <code>string</code> | the directory to use for token storage in Node.js. Ignored in the browser. |
+| options.debug | <code>boolean</code> | when set to `true` will log the request details in case of error. |
+| options.isBrowser | <code>boolean</code> | set to `true` if the runtime is the browser. |
+
+**Example**
+```js
+var request = require('resin-request')({
+	dataDirectory: '/opt/cache/resin',
+	debug: false,
+	isBrowser: false
+})
+```
+
 
 * [request](#module_request)
     * [.send(options)](#module_request.send) ⇒ <code>Promise.&lt;Object&gt;</code>
@@ -76,6 +101,7 @@ request.send
 <a name="module_request.stream"></a>
 
 ### request.stream(options) ⇒ <code>Promise.&lt;Stream&gt;</code>
+**Not implemented for the browser.**
 This function emits a `progress` event, passing an object with the following properties:
 
 - `Number percent`: from 0 to 100.

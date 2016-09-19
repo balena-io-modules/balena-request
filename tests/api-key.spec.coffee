@@ -1,11 +1,10 @@
 Promise = require('bluebird')
 m = require('mochainon')
-nock = require('nock')
 rindle = require('rindle')
-token = require('resin-token')
 johnDoeFixture = require('./tokens.json').johndoe
-request = require('../lib/request')
 utils = require('../lib/utils')
+
+{ token, request, fetchMock, IS_BROWSER } = require('./setup')()
 
 describe 'Request (api key):', ->
 
@@ -23,13 +22,10 @@ describe 'Request (api key):', ->
 		describe 'given a simple GET endpoint containing special characters in query strings', ->
 
 			beforeEach ->
-				nock('https://api.resin.io')
-					.get('/foo')
-					.query(true)
-					.reply(200)
+				fetchMock.get('^https://api.resin.io/foo', 200)
 
 			afterEach ->
-				nock.cleanAll()
+				fetchMock.restore()
 
 			describe 'given no api key', ->
 
@@ -60,10 +56,10 @@ describe 'Request (api key):', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				nock('https://api.resin.io').get('/foo').query(true).reply(200, 'Foo Bar')
+				fetchMock.get('^https://api.resin.io/foo', 'Foo Bar')
 
 			afterEach ->
-				nock.cleanAll()
+				fetchMock.restore()
 
 			describe 'given an api key', ->
 
@@ -87,7 +83,9 @@ describe 'Request (api key):', ->
 
 					describe '.stream()', ->
 
-						it 'should pass an apikey query string', (done) ->
+						return if IS_BROWSER
+
+						it 'should pass an apikey query string', ->
 							request.stream
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
@@ -95,7 +93,7 @@ describe 'Request (api key):', ->
 								apiKey: '123456789'
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.equal('apikey=123456789')
-								rindle.extract(stream).nodeify(done)
+								rindle.extract(stream)
 
 				describe 'given a token', ->
 
@@ -128,7 +126,9 @@ describe 'Request (api key):', ->
 
 					describe '.stream()', ->
 
-						it 'should pass an apikey query string', (done) ->
+						return if IS_BROWSER
+
+						it 'should pass an apikey query string', ->
 							request.stream
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
@@ -136,9 +136,9 @@ describe 'Request (api key):', ->
 								apiKey: '123456789'
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.equal('apikey=123456789')
-								rindle.extract(stream).nodeify(done)
+								rindle.extract(stream)
 
-						it 'should still send an Authorization header', (done) ->
+						it 'should still send an Authorization header', ->
 							request.stream
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
@@ -147,7 +147,7 @@ describe 'Request (api key):', ->
 							.then (stream) ->
 								headers = stream.response.request.headers
 								m.chai.expect(headers.Authorization).to.equal("Bearer #{johnDoeFixture.token}")
-								rindle.extract(stream).nodeify(done)
+								rindle.extract(stream)
 
 			describe 'given an empty api key', ->
 
@@ -182,7 +182,9 @@ describe 'Request (api key):', ->
 
 					describe '.stream()', ->
 
-						it 'should not pass an apikey query string', (done) ->
+						return if IS_BROWSER
+
+						it 'should not pass an apikey query string', ->
 							request.stream
 								method: 'GET'
 								baseUrl: 'https://api.resin.io'
@@ -190,4 +192,4 @@ describe 'Request (api key):', ->
 								apiKey: ''
 							.then (stream) ->
 								m.chai.expect(stream.response.request.uri.query).to.not.exist
-								rindle.extract(stream).nodeify(done)
+								rindle.extract(stream)

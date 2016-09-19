@@ -1,13 +1,13 @@
 Promise = require('bluebird')
 m = require('mochainon')
-nock = require('nock')
 zlib = require('zlib')
 PassThrough = require('stream').PassThrough
-token = require('resin-token')
 rindle = require('rindle')
-request = require('../lib/request')
+
+{ token, request, fetchMock, IS_BROWSER } = require('./setup')()
 
 describe 'Request (stream):', ->
+	return if IS_BROWSER
 
 	beforeEach ->
 		token.remove()
@@ -15,10 +15,12 @@ describe 'Request (stream):', ->
 	describe 'given a simple endpoint that responds with an error', ->
 
 		beforeEach ->
-			nock('https://api.resin.io').get('/foo').reply(400, 'Something happened')
+			fetchMock.get 'https://api.resin.io/foo',
+				status: 400
+				body: 'Something happened'
 
 		afterEach ->
-			nock.cleanAll()
+			fetchMock.restore()
 
 		it 'should reject with the error message', ->
 			promise = request.stream
@@ -28,33 +30,31 @@ describe 'Request (stream):', ->
 
 			m.chai.expect(promise).to.be.rejectedWith('Something happened')
 
-		it 'should have the status code in the error object', (done) ->
+		it 'should have the status code in the error object', ->
 			request.stream
 				method: 'GET'
 				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.catch (error) ->
 				m.chai.expect(error.statusCode).to.equal(400)
-				done()
 
 	describe 'given a simple endpoint that responds with a string', ->
 
 		beforeEach ->
-			nock('https://api.resin.io').get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
+			fetchMock.get('https://api.resin.io/foo', 'Lorem ipsum dolor sit amet')
 
 		afterEach ->
-			nock.cleanAll()
+			fetchMock.restore()
 
-		it 'should be able to pipe the response', (done) ->
+		it 'should be able to pipe the response', ->
 			request.stream
 				method: 'GET'
 				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then(rindle.extract).then (data) ->
 				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
-			.nodeify(done)
 
-		it 'should be able to pipe the response after a delay', (done) ->
+		it 'should be able to pipe the response after a delay', ->
 			request.stream
 				method: 'GET'
 				baseUrl: 'https://api.resin.io'
@@ -67,30 +67,27 @@ describe 'Request (stream):', ->
 
 				rindle.extract(pass).then (data) ->
 					m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
-				.nodeify(done)
 
 	describe 'given multiple endpoints', ->
 
 		beforeEach ->
-			nock('https://api.resin.io')
-				.get('/foo').reply(200, 'GET')
-				.post('/foo').reply(200, 'POST')
-				.put('/foo').reply(200, 'PUT')
-				.patch('/foo').reply(200, 'PATCH')
-				.delete('/foo').reply(200, 'DELETE')
+			fetchMock.get('https://api.resin.io/foo', body: 'GET')
+			fetchMock.post('https://api.resin.io/foo', body: 'POST')
+			fetchMock.put('https://api.resin.io/foo', body: 'PUT')
+			fetchMock.patch('https://api.resin.io/foo', body: 'PATCH')
+			fetchMock.delete('https://api.resin.io/foo', body: 'DELETE')
 
 		afterEach ->
-			nock.cleanAll()
+			fetchMock.restore()
 
 		describe 'given no method option', ->
 
-			it 'should default to GET', (done) ->
+			it 'should default to GET', ->
 				request.stream
 					baseUrl: 'https://api.resin.io'
 					url: '/foo'
 				.then(rindle.extract).then (data) ->
 					m.chai.expect(data).to.equal('GET')
-				.nodeify(done)
 
 	describe 'given an gzip endpoint with a x-transfer-length header', ->
 
@@ -98,18 +95,21 @@ describe 'Request (stream):', ->
 			message = 'Lorem ipsum dolor sit amet'
 			zlib.gzip message, (error, compressedMessage) ->
 				return done(error) if error?
-				nock('https://api.resin.io')
-					.get('/foo')
-					.reply 200, compressedMessage,
-						'X-Transfer-Length': String(compressedMessage.length)
+				fetchMock.get 'https://api.resin.io/foo',
+					status: 200
+					body: compressedMessage
+					sendAsJson: false
+					headers:
+						'Content-Type': 'text/plain'
+						'X-Transfer-Length': '' + compressedMessage.length
 						'Content-Length': undefined
 						'Content-Encoding': 'gzip'
 				done()
 
 		afterEach ->
-			nock.cleanAll()
+			fetchMock.restore()
 
-		it 'should correctly uncompress the body', (done) ->
+		it 'should correctly uncompress the body', ->
 			request.stream
 				baseUrl: 'https://api.resin.io'
 				url: '/foo'
@@ -118,15 +118,13 @@ describe 'Request (stream):', ->
 			.then (data) ->
 				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
 				m.chai.expect(data.length).to.equal(26)
-			.nodeify(done)
 
-		it 'should set no .length property', (done) ->
+		it 'should set no .length property', ->
 			request.stream
 				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				m.chai.expect(stream.length).to.be.undefined
-			.nodeify(done)
 
 	describe 'given an gzip endpoint with a content-length header', ->
 
@@ -134,17 +132,20 @@ describe 'Request (stream):', ->
 			message = 'Lorem ipsum dolor sit amet'
 			zlib.gzip message, (error, compressedMessage) ->
 				return done(error) if error?
-				nock('https://api.resin.io')
-					.get('/foo')
-					.reply 200, compressedMessage,
-						'Content-Length': String(message.length)
+				fetchMock.get 'https://api.resin.io/foo',
+					status: 200
+					body: compressedMessage
+					sendAsJson: false
+					headers:
+						'Content-Type': 'text/plain'
+						'Content-Length': '' + message.length
 						'Content-Encoding': 'gzip'
 				done()
 
 		afterEach ->
-			nock.cleanAll()
+			fetchMock.restore()
 
-		it 'should correctly uncompress the body', (done) ->
+		it 'should correctly uncompress the body', ->
 			request.stream
 				baseUrl: 'https://api.resin.io'
 				url: '/foo'
@@ -153,7 +154,6 @@ describe 'Request (stream):', ->
 			.then (data) ->
 				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
 				m.chai.expect(data.length).to.equal(26)
-			.nodeify(done)
 
 	describe 'given an gzip endpoint with a content-length and x-transfer-length headers', ->
 
@@ -161,18 +161,21 @@ describe 'Request (stream):', ->
 			message = 'Lorem ipsum dolor sit amet'
 			zlib.gzip message, (error, compressedMessage) ->
 				return done(error) if error?
-				nock('https://api.resin.io')
-					.get('/foo')
-					.reply 200, compressedMessage,
-						'X-Transfer-Length': String(compressedMessage.length)
-						'Content-Length': String(message.length)
+				fetchMock.get 'https://api.resin.io/foo',
+					status: 200
+					sendAsJson: false
+					body: compressedMessage
+					headers:
+						'Content-Type': 'text/plain'
+						'X-Transfer-Length': '' + compressedMessage.length
+						'Content-Length': '' + message.length
 						'Content-Encoding': 'gzip'
 				done()
 
 		afterEach ->
-			nock.cleanAll()
+			fetchMock.restore()
 
-		it 'should correctly uncompress the body', (done) ->
+		it 'should correctly uncompress the body', ->
 			request.stream
 				baseUrl: 'https://api.resin.io'
 				url: '/foo'
@@ -181,40 +184,43 @@ describe 'Request (stream):', ->
 			.then (data) ->
 				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
 				m.chai.expect(data.length).to.equal(26)
-			.nodeify(done)
 
 	describe 'given an endpoint with an invalid content-length header', ->
 
 		beforeEach ->
 			message = 'Lorem ipsum dolor sit amet'
-			nock('https://api.resin.io')
-				.get('/foo').reply(200, message, 'Content-Length': 'Hello')
+			fetchMock.get 'https://api.resin.io/foo',
+				status: 200
+				body: message
+				headers:
+					'Content-Length': 'Hello'
 
 		afterEach ->
-			nock.cleanAll()
+			fetchMock.restore()
 
-		it 'should become a stream with an undefined length property', (done) ->
+		it 'should become a stream with an undefined length property', ->
 			request.stream
 				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				m.chai.expect(stream.length).to.be.undefined
-			.nodeify(done)
 
 	describe 'given an endpoint with a content-type header', ->
 
 		beforeEach ->
 			message = 'Lorem ipsum dolor sit amet'
-			nock('https://api.resin.io')
-				.get('/foo').reply(200, message, 'Content-Type': 'application/octet-stream')
+			fetchMock.get 'https://api.resin.io/foo',
+				status: 200
+				body: message
+				headers:
+					'Content-Type': 'application/octet-stream'
 
 		afterEach ->
-			nock.cleanAll()
+			fetchMock.restore()
 
-		it 'should become a stream with a mime property', (done) ->
+		it 'should become a stream with a mime property', ->
 			request.stream
 				baseUrl: 'https://api.resin.io'
 				url: '/foo'
 			.then (stream) ->
 				m.chai.expect(stream.mime).to.equal('application/octet-stream')
-			.nodeify(done)
