@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### Changed
+
+- **Breaking!** Switch to factory pattern in order to make it work with the new resin-token
+- Fix the `apikey` query param name
+
 ## [5.0.0] - 2016-09-15
 
 ### Changed

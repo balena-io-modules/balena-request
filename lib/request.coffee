@@ -19,168 +19,190 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
-request = require('request')
-requestAsync = Promise.promisify(request)
-url = require('url')
-_ = require('lodash')
+urlLib = require('url')
+noop = require('lodash/noop')
+defaults = require('lodash/defaults')
+isEmpty = require('lodash/isEmpty')
 rindle = require('rindle')
 
 errors = require('resin-errors')
-token = require('resin-token')
+getToken = require('resin-token')
 utils = require('./utils')
 progress = require('./progress')
 
-prepareOptions = (options = {}) ->
+{ onlyIf } = utils
 
-	_.defaults options,
-		method: 'GET'
-		json: true
-		strictSSL: true
-		gzip: true
-		headers: {}
-		refreshToken: true
+module.exports = getRequest = ({ dataDirectory = null, debug = false, isBrowser = false } = {}) ->
 
-	Promise.try ->
-		return if not options.refreshToken
+	token = getToken({ dataDirectory })
+	debugRequest = if not debug then noop else utils.debugRequest
 
-		utils.shouldUpdateToken().then (shouldUpdateToken) ->
-			return if not shouldUpdateToken
+	exports = {}
 
-			exports.send
-				url: '/whoami'
-				baseUrl: options.baseUrl
-				refreshToken: false
+	prepareOptions = (options = {}) ->
 
-			# At this point we're sure there is a saved token,
-			# however the fact that /whoami returns 401 allows
-			# us to safely assume the token is expired
-			.catch
-				name: 'ResinRequestError'
-				statusCode: 401
-			, ->
+		defaults options,
+			method: 'GET'
+			json: true
+			strictSSL: true
+			headers: {}
+			refreshToken: true
 
-				return token.get().tap(token.remove).then (sessionToken) ->
-					throw new errors.ResinExpiredToken(sessionToken)
+		{ baseUrl } = options
 
-			.get('body')
-			.then(token.set)
+		if options.uri
+			options.url = options.uri
+			delete options.uri
+		if urlLib.parse(options.url).protocol?
+			delete options.baseUrl
 
-	.then(utils.getAuthorizationHeader).then (authorizationHeader) ->
-		if authorizationHeader?
-			options.headers.Authorization = authorizationHeader
+		Promise.try ->
+			return if not options.refreshToken
 
-		if not _.isEmpty(options.apiKey)
+			utils.shouldUpdateToken(token).then (shouldUpdateToken) ->
+				return if not shouldUpdateToken
 
-			# Using `request` qs object results in dollar signs, or other
-			# special characters used to query our OData API, being escaped
-			# and thus leading to all sort of weird error.
-			# The workaround is to append the `api_key` query string manually
-			# to prevent affecting the rest of the query strings.
-			# See https://github.com/request/request/issues/2129
-			options.url += if url.parse(options.url).query? then '&' else '?'
-			options.url += "api_key=#{options.apiKey}"
+				exports.send
+					url: '/whoami'
+					baseUrl: baseUrl
+					refreshToken: false
 
-		return options
+				# At this point we're sure there is a saved token,
+				# however the fact that /whoami returns 401 allows
+				# us to safely assume the token is expired
+				.catch
+					name: 'ResinRequestError'
+					statusCode: 401
+				, ->
 
-###*
-# @summary Perform an HTTP request to Resin.io
-# @function
-# @public
-#
-# @description
-# This function automatically handles authorization with Resin.io.
-#
-# The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
-#
-# @param {Object} options - options
-# @param {String} [options.method='GET'] - method
-# @param {String} options.url - relative url
-# @param {String} [options.apiKey] - api key
-# @param {*} [options.body] - body
-#
-# @returns {Promise<Object>} response
-#
-# @example
-# request.send
-# 	method: 'GET'
-# 	baseUrl: 'https://api.resin.io'
-# 	url: '/foo'
-# .get('body')
-#
-# @example
-# request.send
-# 	method: 'POST'
-# 	baseUrl: 'https://api.resin.io'
-# 	url: '/bar'
-# 	data:
-# 		hello: 'world'
-# .get('body')
-###
-exports.send = (options = {}) ->
+					return token.get().tap(token.remove).then (sessionToken) ->
+						throw new errors.ResinExpiredToken(sessionToken)
 
-	# Only set a default timeout when doing a normal HTTP
-	# request and not also when streaming since in the latter
-	# case we might cause unnecessary ESOCKETTIMEDOUT errors.
-	options.timeout ?= 30000
+				.get('body')
+				.then(token.set)
 
-	prepareOptions(options).then(requestAsync).then (response) ->
+		.then ->
+			utils.getAuthorizationHeader(token)
+		.then (authorizationHeader) ->
+			if authorizationHeader?
+				options.headers.Authorization = authorizationHeader
 
-		if utils.isErrorCode(response.statusCode)
-			responseError = utils.getErrorMessageFromResponse(response)
-			utils.debugRequest(options, response)
-			throw new errors.ResinRequestError(responseError, response.statusCode)
+			if not isEmpty(options.apiKey)
+				# Using `request` qs object results in dollar signs, or other
+				# special characters used to query our OData API, being escaped
+				# and thus leading to all sort of weird error.
+				# The workaround is to append the `apikey` query string manually
+				# to prevent affecting the rest of the query strings.
+				# See https://github.com/request/request/issues/2129
+				options.url += if urlLib.parse(options.url).query? then '&' else '?'
+				options.url += "apikey=#{options.apiKey}"
 
-		return response
+			return options
 
-###*
-# @summary Stream an HTTP response from Resin.io.
-# @function
-# @public
-#
-# @description
-# This function emits a `progress` event, passing an object with the following properties:
-#
-# - `Number percent`: from 0 to 100.
-# - `Number total`: total bytes to be transmitted.
-# - `Number received`: number of bytes transmitted.
-# - `Number eta`: estimated remaining time, in seconds.
-#
-# The stream may also contain the following custom properties:
-#
-# - `String .mime`: Equals the value of the `Content-Type` HTTP header.
-#
-# See `request.send()` for an explanation on how this function handles authentication.
-#
-# @param {Object} options - options
-# @param {String} [options.method='GET'] - method
-# @param {String} options.url - relative url
-# @param {*} [options.body] - body
-#
-# @returns {Promise<Stream>} response
-#
-# @example
-# request.stream
-# 	method: 'GET'
-# 	baseUrl: 'https://img.resin.io'
-# 	url: '/download/foo'
-# .then (stream) ->
-# 	stream.on 'progress', (state) ->
-# 		console.log(state)
-#
-# 	stream.pipe(fs.createWriteStream('/opt/download'))
-###
-exports.stream = (options = {}) ->
-	prepareOptions(options).then(progress.estimate).then (download) ->
-		if not utils.isErrorCode(download.response.statusCode)
+	###*
+	# @summary Perform an HTTP request to Resin.io
+	# @function
+	# @public
+	#
+	# @description
+	# This function automatically handles authorization with Resin.io.
+	#
+	# The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
+	#
+	# @param {Object} options - options
+	# @param {String} [options.method='GET'] - method
+	# @param {String} options.url - relative url
+	# @param {String} [options.apiKey] - api key
+	# @param {*} [options.body] - body
+	#
+	# @returns {Promise<Object>} response
+	#
+	# @example
+	# request.send
+	# 	method: 'GET'
+	# 	baseUrl: 'https://api.resin.io'
+	# 	url: '/foo'
+	# .get('body')
+	#
+	# @example
+	# request.send
+	# 	method: 'POST'
+	# 	baseUrl: 'https://api.resin.io'
+	# 	url: '/bar'
+	# 	data:
+	# 		hello: 'world'
+	# .get('body')
+	###
+	exports.send = (options = {}) ->
 
-			# TODO: Move this to resin-image-manager
-			download.mime = download.response.headers['content-type']
+		# Only set a default timeout when doing a normal HTTP
+		# request and not also when streaming since in the latter
+		# case we might cause unnecessary ESOCKETTIMEDOUT errors.
+		options.timeout ?= 30000
 
-			return download
+		prepareOptions(options).then(utils.requestAsync).then (response) ->
+			utils.getBody(response)
+			.then (body) ->
+				response.body = body
 
-		# If status code is an error code, interpret
-		# the body of the request as an error.
-		return rindle.extract(download).then (data) ->
-			responseError = data or utils.getErrorMessageFromResponse(download.response)
-			utils.debugRequest(options, download.response)
-			throw new errors.ResinRequestError(responseError, download.response.statusCode)
+				if utils.isErrorCode(response.statusCode)
+					responseError = utils.getErrorMessageFromResponse(response)
+					debugRequest(options, response)
+					throw new errors.ResinRequestError(responseError, response.statusCode)
+			.return(response)
+
+	###*
+	# @summary Stream an HTTP response from Resin.io.
+	# @function
+	# @public
+	#
+	# @description
+	# **Not implemented for the browser.**
+	# This function emits a `progress` event, passing an object with the following properties:
+	#
+	# - `Number percent`: from 0 to 100.
+	# - `Number total`: total bytes to be transmitted.
+	# - `Number received`: number of bytes transmitted.
+	# - `Number eta`: estimated remaining time, in seconds.
+	#
+	# The stream may also contain the following custom properties:
+	#
+	# - `String .mime`: Equals the value of the `Content-Type` HTTP header.
+	#
+	# See `request.send()` for an explanation on how this function handles authentication.
+	#
+	# @param {Object} options - options
+	# @param {String} [options.method='GET'] - method
+	# @param {String} options.url - relative url
+	# @param {*} [options.body] - body
+	#
+	# @returns {Promise<Stream>} response
+	#
+	# @example
+	# request.stream
+	# 	method: 'GET'
+	# 	baseUrl: 'https://img.resin.io'
+	# 	url: '/download/foo'
+	# .then (stream) ->
+	# 	stream.on 'progress', (state) ->
+	# 		console.log(state)
+	#
+	# 	stream.pipe(fs.createWriteStream('/opt/download'))
+	###
+	exports.stream = onlyIf(not isBrowser) (options = {}) ->
+		prepareOptions(options).then(progress.estimate).then (download) ->
+			if not utils.isErrorCode(download.response.statusCode)
+				# TODO: Move this to resin-image-manager
+				download.mime = download.response.headers.get('Content-Type')
+
+				return download
+
+			# If status code is an error code, interpret
+			# the body of the request as an error.
+			rindle.extract(download)
+			.then (data) ->
+				responseError = data or 'The request was unsuccessful'
+				debugRequest(options, download.response)
+				throw new errors.ResinRequestError(responseError, download.response.statusCode)
+
+	return exports

@@ -1,14 +1,14 @@
 Promise = require('bluebird')
 m = require('mochainon')
-nock = require('nock')
 errors = require('resin-errors')
 rindle = require('rindle')
-token = require('resin-token')
 tokens = require('./tokens.json')
+
 johnDoeFixture = tokens.johndoe
 janeDoeFixture = tokens.janedoe
-request = require('../lib/request')
 utils = require('../lib/utils')
+
+{ token, request, fetchMock, IS_BROWSER } = require('./setup')()
 
 describe 'Request (token):', ->
 
@@ -19,10 +19,10 @@ describe 'Request (token):', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				nock('https://api.resin.io').get('/foo').reply(200, 'bar')
+				fetchMock.get('^https://api.resin.io/foo', 'bar')
 
 			afterEach ->
-				nock.cleanAll()
+				fetchMock.restore()
 
 			describe 'given the token is always fresh', ->
 
@@ -65,11 +65,11 @@ describe 'Request (token):', ->
 
 			describe 'given the token needs to be updated', ->
 
-				beforeEach (done) ->
+				beforeEach ->
 					@utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldUpdateToken')
 					@utilsShouldUpdateToken.returns(Promise.resolve(true))
 
-					token.set(johnDoeFixture.token).nodeify(done)
+					token.set(johnDoeFixture.token)
 
 
 				afterEach ->
@@ -78,14 +78,12 @@ describe 'Request (token):', ->
 				describe 'given a working /whoami endpoint', ->
 
 					beforeEach ->
-						nock('https://api.resin.io')
-							.get('/whoami')
-							.reply(200, janeDoeFixture.token)
+						fetchMock.get('https://api.resin.io/whoami', janeDoeFixture.token)
 
 					afterEach ->
-						nock.cleanAll()
+						fetchMock.restore()
 
-					it 'should refresh the token', (done) ->
+					it 'should refresh the token', ->
 						token.get().then (savedToken) ->
 							m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
 							return request.send
@@ -96,13 +94,12 @@ describe 'Request (token):', ->
 							return token.get()
 						.then (savedToken) ->
 							m.chai.expect(savedToken).to.equal(janeDoeFixture.token)
-						.nodeify(done)
 
 					# We could make the token request in parallel to avoid
 					# having to wait for it to make the actual request.
 					# Given the impact is minimal, the implementation aims
 					# to simplicity.
-					it 'should use the new token in the same request', (done) ->
+					it 'should use the new token in the same request', ->
 						m.chai.expect(token.get()).to.eventually.equal(johnDoeFixture.token)
 						request.send
 							baseUrl: 'https://api.resin.io'
@@ -110,17 +107,16 @@ describe 'Request (token):', ->
 						.then (response) ->
 							authorizationHeader = response.request.headers.Authorization
 							m.chai.expect(authorizationHeader).to.equal("Bearer #{janeDoeFixture.token}")
-						.nodeify(done)
 
 				describe 'given /whoami returns 401', ->
 
 					beforeEach ->
-						nock('https://api.resin.io')
-							.get('/whoami')
-							.reply(401, 'Unauthorized')
+						fetchMock.get 'https://api.resin.io/whoami',
+							status: 401
+							body: 'Unauthorized'
 
 					afterEach ->
-						nock.cleanAll()
+						fetchMock.restore()
 
 					it 'should be rejected with an expiration error', ->
 						promise = request.send
@@ -128,32 +124,28 @@ describe 'Request (token):', ->
 							url: '/foo'
 						m.chai.expect(promise).to.be.rejectedWith(errors.ResinExpiredToken)
 
-					it 'should have the session token as an error attribute', (done) ->
+					it 'should have the session token as an error attribute', ->
 						request.send
 							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.catch (error) ->
 							m.chai.expect(error.token).to.equal(johnDoeFixture.token)
-						.nodeify(done)
 
-					it 'should clear the token', (done) ->
+					it 'should clear the token', ->
 						request.send
 							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.catch ->
 							token.has().then (hasToken) ->
 								m.chai.expect(hasToken).to.be.false
-						.nodeify(done)
 
 				describe 'given /whoami returns a non 401 status code', ->
 
 					beforeEach ->
-						nock('https://api.resin.io')
-							.get('/whoami')
-							.reply(500)
+						fetchMock.get('https://api.resin.io/whoami', 500)
 
 					afterEach ->
-						nock.cleanAll()
+						fetchMock.restore()
 
 					it 'should be rejected with a request error', ->
 						promise = request.send
@@ -163,13 +155,15 @@ describe 'Request (token):', ->
 
 	describe '.stream()', ->
 
+		return if IS_BROWSER
+
 		describe 'given a simple endpoint that responds with a string', ->
 
 			beforeEach ->
-				nock('https://api.resin.io').get('/foo').reply(200, 'Lorem ipsum dolor sit amet')
+				fetchMock.get('https://api.resin.io/foo', 'Lorem ipsum dolor sit amet')
 
 			afterEach ->
-				nock.cleanAll()
+				fetchMock.restore()
 
 			describe 'given the token is always fresh', ->
 
@@ -185,7 +179,7 @@ describe 'Request (token):', ->
 					beforeEach ->
 						token.set(johnDoeFixture.token)
 
-					it 'should send an Authorization header', (done) ->
+					it 'should send an Authorization header', ->
 						request.stream
 							method: 'GET'
 							baseUrl: 'https://api.resin.io'
@@ -193,14 +187,14 @@ describe 'Request (token):', ->
 						.then (stream) ->
 							headers = stream.response.request.headers
 							m.chai.expect(headers.Authorization).to.equal("Bearer #{johnDoeFixture.token}")
-							rindle.extract(stream).nodeify(done)
+							rindle.extract(stream)
 
 				describe 'given there is no token', ->
 
 					beforeEach ->
 						token.remove()
 
-					it 'should not send an Authorization header', (done) ->
+					it 'should not send an Authorization header', ->
 						request.stream
 							method: 'GET'
 							baseUrl: 'https://api.resin.io'
@@ -208,4 +202,4 @@ describe 'Request (token):', ->
 						.then (stream) ->
 							headers = stream.response.request.headers
 							m.chai.expect(headers.Authorization).to.not.exist
-							rindle.extract(stream).nodeify(done)
+							rindle.extract(stream)

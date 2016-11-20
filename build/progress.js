@@ -14,13 +14,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var _, getProgressStream, progress, request, rindle, stream, utils, zlib;
+var getProgressStream, noop, progress, rindle, stream, utils, zlib;
 
-_ = require('lodash');
+noop = require('lodash/noop');
 
 zlib = require('zlib');
-
-request = require('request');
 
 stream = require('stream');
 
@@ -32,11 +30,15 @@ utils = require('./utils');
 
 
 /**
+ * @module progress
+ */
+
+
+/**
  * @summary Get progress stream
  * @function
  * @private
  *
- * @param {Object} response - request response object
  * @param {Number} total - response total
  * @param {Function} [onState] - on state callback (state)
  * @returns {Stream} progress stream
@@ -45,13 +47,13 @@ utils = require('./utils');
  * progressStream = getProgressStream response, (state) ->
  * 	console.log(state)
  *
- * return requestStream.pipe(progressStream).pipe(output)
+ * return responseStream.pipe(progressStream).pipe(output)
  */
 
-getProgressStream = function(response, total, onState) {
+getProgressStream = function(total, onState) {
   var progressStream;
   if (onState == null) {
-    onState = _.noop;
+    onState = noop;
   }
   progressStream = progress({
     time: 500,
@@ -77,6 +79,8 @@ getProgressStream = function(response, total, onState) {
  * @function
  * @protected
  *
+ * @description **Not implemented for the browser.**
+ *
  * @param {Object} options - request options
  * @returns {Promise<Stream>} request stream
  *
@@ -88,30 +92,27 @@ getProgressStream = function(response, total, onState) {
  */
 
 exports.estimate = function(options) {
-  var passStream, requestStream;
   options.gzip = false;
   options.headers['Accept-Encoding'] = 'gzip, deflate';
-  requestStream = request(options);
-  passStream = new stream.PassThrough();
-  requestStream.pipe(passStream);
-  return rindle.onEvent(requestStream, 'response').then(function(response) {
-    var gunzip, output, progressStream, responseLength, total;
-    responseLength = utils.getResponseLength(response);
+  return utils.requestAsync(options).then(function(response) {
+    var gunzip, output, progressStream, responseLength, responseStream, total;
     output = new stream.PassThrough();
     output.response = response;
+    responseLength = utils.getResponseLength(response);
     total = responseLength.uncompressed || responseLength.compressed;
-    progressStream = getProgressStream(response, total, function(state) {
+    responseStream = response.body;
+    progressStream = getProgressStream(total, function(state) {
       return output.emit('progress', state);
     });
     if (utils.isResponseCompressed(response)) {
       gunzip = new zlib.createGunzip();
       if ((responseLength.compressed != null) && (responseLength.uncompressed == null)) {
-        passStream.pipe(progressStream).pipe(gunzip).pipe(output);
+        responseStream.pipe(progressStream).pipe(gunzip).pipe(output);
       } else {
-        passStream.pipe(gunzip).pipe(progressStream).pipe(output);
+        responseStream.pipe(gunzip).pipe(progressStream).pipe(output);
       }
     } else {
-      passStream.pipe(progressStream).pipe(output);
+      responseStream.pipe(progressStream).pipe(output);
     }
     return output;
   });
