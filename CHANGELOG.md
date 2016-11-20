@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [6.0.0] - 2016-11-20
+
 ### Changed
 
 - **Breaking!** Switch to factory pattern in order to make it work with the new resin-token
@@ -256,6 +258,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
+[6.0.0]: https://github.com/resin-io-modules/resin-request/compare/v5.0.0...v6.0.0
 [5.0.0]: https://github.com/resin-io-modules/resin-request/compare/v4.1.2...v5.0.0
 [4.1.2]: https://github.com/resin-io-modules/resin-request/compare/v4.1.1...v4.1.2
 [4.1.1]: https://github.com/resin-io-modules/resin-request/compare/v4.1.0...v4.1.1
