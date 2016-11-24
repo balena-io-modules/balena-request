@@ -48,6 +48,7 @@
     "bluebird": "^3.3.4",
     "lodash": "^4.6.1",
     "progress-stream": "^1.1.1",
+    "qs": "^6.3.0",
     "resin-errors": "^2.3.0",
     "resin-token": "^3.0.0",
     "rindle": "^1.2.0"
