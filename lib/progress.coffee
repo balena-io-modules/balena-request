@@ -15,10 +15,6 @@ limitations under the License.
 ###
 
 noop = require('lodash/noop')
-zlib = require('zlib')
-stream = require('stream')
-progress = require('progress-stream')
-rindle = require('rindle')
 utils = require('./utils')
 
 ###*
@@ -41,6 +37,8 @@ utils = require('./utils')
 # return responseStream.pipe(progressStream).pipe(output)
 ###
 getProgressStream = (total, onState = noop) ->
+	progress = require('progress-stream')
+
 	progressStream = progress
 		time: 500
 		length: total
@@ -74,6 +72,9 @@ getProgressStream = (total, onState = noop) ->
 #			console.log(state)
 ###
 exports.estimate = (options) ->
+	zlib = require('zlib')
+	stream = require('stream')
+
 	options.gzip = false
 	options.headers['Accept-Encoding'] = 'gzip, deflate'
 
