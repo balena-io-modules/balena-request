@@ -195,7 +195,8 @@ exports.getResponseLength = function(response) {
 
 exports.debugRequest = function(options, response) {
   return console.error(assign({
-    statusCode: response.statusCode
+    statusCode: response.statusCode,
+    duration: response.duration
   }, options));
 };
 
@@ -304,7 +305,7 @@ timeoutPromise = function(ms, promise) {
  */
 
 exports.requestAsync = function(options, retriesRemaining) {
-  var opts, p, ref, timeout, url;
+  var opts, p, ref, requestTime, timeout, url;
   if (retriesRemaining == null) {
     retriesRemaining = void 0;
   }
@@ -314,11 +315,15 @@ exports.requestAsync = function(options, retriesRemaining) {
   }
   timeout = opts.timeout;
   delete opts.timeout;
+  requestTime = new Date();
   p = fetch(url, opts);
   if (timeout) {
     p = timeoutPromise(timeout, p);
   }
   return p.then(function(response) {
+    var responseTime;
+    responseTime = new Date();
+    response.duration = responseTime - requestTime;
     response.statusCode = response.status;
     response.request = {
       headers: options.headers,

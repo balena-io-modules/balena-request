@@ -163,7 +163,10 @@ exports.getResponseLength = (response) ->
 # 	utils.debugRequest(options, response)
 ###
 exports.debugRequest = (options, response) ->
-	console.error(assign({ statusCode: response.statusCode }, options))
+	console.error(assign(
+		statusCode: response.statusCode
+		duration: response.duration
+	, options))
 
 # fetch adapter
 
@@ -299,11 +302,14 @@ exports.requestAsync = (options, retriesRemaining = undefined) ->
 	{ timeout } = opts
 	delete opts.timeout
 
+	requestTime = new Date()
 	p = fetch(url, opts)
 	if timeout
 		p = timeoutPromise(timeout, p)
 
 	return p.then (response) ->
+		responseTime = new Date()
+		response.duration = responseTime - requestTime
 		response.statusCode = response.status
 		response.request =
 			headers: options.headers
