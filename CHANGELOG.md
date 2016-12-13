@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Include 'duration' in debug output, if enabled
 - Added a 'retries' option you can pass to `send()`, to set the number of times to retry
 failing requests, or to `getRequest` directly to set the default number of retries.
 
