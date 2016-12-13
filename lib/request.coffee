@@ -20,6 +20,7 @@ limitations under the License.
 
 Promise = require('bluebird')
 urlLib = require('url')
+assign = require('lodash/assign')
 noop = require('lodash/noop')
 defaults = require('lodash/defaults')
 isEmpty = require('lodash/isEmpty')
@@ -73,7 +74,6 @@ module.exports = getRequest = ({ dataDirectory = null, debug = false, isBrowser 
 					name: 'ResinRequestError'
 					statusCode: 401
 				, ->
-
 					return token.get().tap(token.remove).then (sessionToken) ->
 						throw new errors.ResinExpiredToken(sessionToken)
 
@@ -142,13 +142,14 @@ module.exports = getRequest = ({ dataDirectory = null, debug = false, isBrowser 
 		prepareOptions(options).then(utils.requestAsync).then (response) ->
 			utils.getBody(response)
 			.then (body) ->
-				response.body = body
+				response = assign({}, response, { body })
 
 				if utils.isErrorCode(response.statusCode)
 					responseError = utils.getErrorMessageFromResponse(response)
 					debugRequest(options, response)
 					throw new errors.ResinRequestError(responseError, response.statusCode)
-			.return(response)
+
+				return response
 
 	###*
 	# @summary Stream an HTTP response from Resin.io.

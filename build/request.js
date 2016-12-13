@@ -19,11 +19,13 @@ limitations under the License.
 /**
  * @module request
  */
-var Promise, defaults, errors, getRequest, getToken, isEmpty, noop, onlyIf, progress, urlLib, utils;
+var Promise, assign, defaults, errors, getRequest, getToken, isEmpty, noop, onlyIf, progress, urlLib, utils;
 
 Promise = require('bluebird');
 
 urlLib = require('url');
+
+assign = require('lodash/assign');
 
 noop = require('lodash/noop');
 
@@ -148,13 +150,16 @@ module.exports = getRequest = function(arg) {
     return prepareOptions(options).then(utils.requestAsync).then(function(response) {
       return utils.getBody(response).then(function(body) {
         var responseError;
-        response.body = body;
+        response = assign({}, response, {
+          body: body
+        });
         if (utils.isErrorCode(response.statusCode)) {
           responseError = utils.getErrorMessageFromResponse(response);
           debugRequest(options, response);
           throw new errors.ResinRequestError(responseError, response.statusCode);
         }
-      })["return"](response);
+        return response;
+      });
     });
   };
 
