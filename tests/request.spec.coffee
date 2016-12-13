@@ -1,6 +1,6 @@
 m = require('mochainon')
 
-{ token, request, fetchMock } = require('./setup')()
+{ token, request, getCustomRequest, fetchMock } = require('./setup')()
 
 describe 'Request:', ->
 
@@ -8,6 +8,9 @@ describe 'Request:', ->
 
 	beforeEach ->
 		token.remove()
+
+	afterEach ->
+		fetchMock.restore()
 
 	describe '.send()', ->
 
@@ -18,9 +21,6 @@ describe 'Request:', ->
 					body: from: 'resin'
 					headers:
 						'Content-Type': 'application/json'
-
-			afterEach ->
-				fetchMock.restore()
 
 			describe 'given an absolute url', ->
 
@@ -72,9 +72,6 @@ describe 'Request:', ->
 					headers:
 						'Content-Type': 'application/json'
 
-			afterEach ->
-				fetchMock.restore()
-
 			it 'should default to GET', ->
 				promise = request.send
 					baseUrl: 'https://api.resin.io'
@@ -86,9 +83,6 @@ describe 'Request:', ->
 
 			beforeEach ->
 				fetchMock.get('https://api.resin.io/foo', 'Hello World')
-
-			afterEach ->
-				fetchMock.restore()
 
 			it 'should resolve with the plain body', ->
 				promise = request.send
@@ -103,9 +97,6 @@ describe 'Request:', ->
 			beforeEach ->
 				fetchMock.post 'https://api.resin.io/foo', (url, opts) ->
 					return "The body is: #{opts.body}"
-
-			afterEach ->
-				fetchMock.restore()
 
 			it 'should take the plain body successfully', ->
 				promise = request.send
@@ -129,9 +120,6 @@ describe 'Request:', ->
 							headers:
 								'Content-Type': 'application/json'
 
-					afterEach ->
-						fetchMock.restore()
-
 					it 'should correctly make the request', ->
 						promise = request.send
 							method: 'GET'
@@ -148,9 +136,6 @@ describe 'Request:', ->
 							body: error: text: 'Server Error'
 							headers:
 								'Content-Type': 'application/json'
-
-					afterEach ->
-						fetchMock.restore()
 
 					it 'should be rejected with the error message', ->
 						promise = request.send
@@ -174,9 +159,6 @@ describe 'Request:', ->
 					beforeEach ->
 						fetchMock.head('https://api.resin.io/foo', 200)
 
-					afterEach ->
-						fetchMock.restore()
-
 					it 'should correctly make the request', ->
 						promise = request.send
 							method: 'HEAD'
@@ -189,9 +171,6 @@ describe 'Request:', ->
 
 					beforeEach ->
 						fetchMock.head('https://api.resin.io/foo', 500)
-
-					afterEach ->
-						fetchMock.restore()
 
 					it 'should be rejected with a generic error message', ->
 						promise = request.send
@@ -211,9 +190,6 @@ describe 'Request:', ->
 						headers:
 							'Content-Type': 'application/json'
 
-				afterEach ->
-					fetchMock.restore()
-
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'POST'
@@ -231,9 +207,6 @@ describe 'Request:', ->
 						body: opts.body
 						headers:
 							'Content-Type': 'application/json'
-
-				afterEach ->
-					fetchMock.restore()
 
 				it 'should eventually return the body', ->
 					promise = request.send
@@ -253,9 +226,6 @@ describe 'Request:', ->
 						headers:
 							'Content-Type': 'application/json'
 
-				afterEach ->
-					fetchMock.restore()
-
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'PATCH'
@@ -274,9 +244,6 @@ describe 'Request:', ->
 						headers:
 							'Content-Type': 'application/json'
 
-				afterEach ->
-					fetchMock.restore()
-
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'DELETE'
@@ -286,3 +253,49 @@ describe 'Request:', ->
 							foo: 'bar'
 					.get('body')
 					m.chai.expect(promise).to.eventually.become(foo: 'bar')
+
+		describe 'given an endpoint that fails the first two times', ->
+
+			beforeEach ->
+				requestsSeen = 0
+				fetchMock.get 'https://example.com/initially-failing', ->
+					requestsSeen += 1
+					if requestsSeen <= 2
+						Promise.reject(new Error('low-level network error'))
+					else
+						Promise.resolve
+							body: result: 'success'
+							headers:
+								'Content-Type': 'application/json'
+
+			it 'should fail by default', ->
+				promise = request.send
+					method: 'GET'
+					url: 'https://example.com/initially-failing'
+				.get('body')
+				m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
+
+			it 'should retry and fail if set to retry just once', ->
+				promise = request.send
+					method: 'GET'
+					url: 'https://example.com/initially-failing'
+					retries: 1
+				.get('body')
+				m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
+
+			it 'should retry and eventually succeed if set to retry more than once', ->
+				promise = request.send
+					method: 'GET'
+					url: 'https://example.com/initially-failing'
+					retries: 2
+				.get('body')
+				m.chai.expect(promise).to.eventually.become(result: 'success')
+
+			it 'should retry and eventually succeed if set to retry more than once by default', ->
+				retryingRequest = getCustomRequest({ retries: 2 })
+				promise = retryingRequest.send
+					method: 'GET'
+					url: 'https://example.com/initially-failing'
+				.get('body')
+				m.chai.expect(promise).to.eventually.become(result: 'success')
+

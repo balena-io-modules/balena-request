@@ -32,7 +32,7 @@ progress = require('./progress')
 
 { onlyIf } = utils
 
-module.exports = getRequest = ({ dataDirectory = null, debug = false, isBrowser = false } = {}) ->
+module.exports = getRequest = ({ dataDirectory = null, debug = false, retries = 0, isBrowser = false } = {}) ->
 
 	token = getToken({ dataDirectory })
 	debugRequest = if not debug then noop else utils.debugRequest
@@ -47,6 +47,7 @@ module.exports = getRequest = ({ dataDirectory = null, debug = false, isBrowser 
 			strictSSL: true
 			headers: {}
 			refreshToken: true
+			retries: retries
 
 		{ baseUrl } = options
 
