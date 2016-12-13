@@ -23,7 +23,6 @@ urlLib = require('url')
 noop = require('lodash/noop')
 defaults = require('lodash/defaults')
 isEmpty = require('lodash/isEmpty')
-rindle = require('rindle')
 
 errors = require('resin-errors')
 getToken = require('resin-token')
@@ -190,6 +189,8 @@ module.exports = getRequest = ({ dataDirectory = null, debug = false, isBrowser 
 	# 	stream.pipe(fs.createWriteStream('/opt/download'))
 	###
 	exports.stream = onlyIf(not isBrowser) (options = {}) ->
+		rindle = require('rindle')
+
 		prepareOptions(options).then(progress.estimate).then (download) ->
 			if not utils.isErrorCode(download.response.statusCode)
 				# TODO: Move this to resin-image-manager

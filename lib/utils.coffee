@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ###
 
+Promise = require('bluebird')
 urlLib = require('url')
 qs = require('qs')
 parseInt = require('lodash/parseInt')
 assign = require('lodash/assign')
 includes = require('lodash/includes')
-Promise = require('bluebird')
 
 ###*
 # @module utils
