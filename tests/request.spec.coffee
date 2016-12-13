@@ -9,6 +9,9 @@ describe 'Request:', ->
 	beforeEach ->
 		token.remove()
 
+	afterEach ->
+		fetchMock.restore()
+
 	describe '.send()', ->
 
 		describe 'given a simple GET endpoint', ->
@@ -18,9 +21,6 @@ describe 'Request:', ->
 					body: from: 'resin'
 					headers:
 						'Content-Type': 'application/json'
-
-			afterEach ->
-				fetchMock.restore()
 
 			describe 'given an absolute url', ->
 
@@ -72,9 +72,6 @@ describe 'Request:', ->
 					headers:
 						'Content-Type': 'application/json'
 
-			afterEach ->
-				fetchMock.restore()
-
 			it 'should default to GET', ->
 				promise = request.send
 					baseUrl: 'https://api.resin.io'
@@ -86,9 +83,6 @@ describe 'Request:', ->
 
 			beforeEach ->
 				fetchMock.get('https://api.resin.io/foo', 'Hello World')
-
-			afterEach ->
-				fetchMock.restore()
 
 			it 'should resolve with the plain body', ->
 				promise = request.send
@@ -103,9 +97,6 @@ describe 'Request:', ->
 			beforeEach ->
 				fetchMock.post 'https://api.resin.io/foo', (url, opts) ->
 					return "The body is: #{opts.body}"
-
-			afterEach ->
-				fetchMock.restore()
 
 			it 'should take the plain body successfully', ->
 				promise = request.send
@@ -129,9 +120,6 @@ describe 'Request:', ->
 							headers:
 								'Content-Type': 'application/json'
 
-					afterEach ->
-						fetchMock.restore()
-
 					it 'should correctly make the request', ->
 						promise = request.send
 							method: 'GET'
@@ -148,9 +136,6 @@ describe 'Request:', ->
 							body: error: text: 'Server Error'
 							headers:
 								'Content-Type': 'application/json'
-
-					afterEach ->
-						fetchMock.restore()
 
 					it 'should be rejected with the error message', ->
 						promise = request.send
@@ -174,9 +159,6 @@ describe 'Request:', ->
 					beforeEach ->
 						fetchMock.head('https://api.resin.io/foo', 200)
 
-					afterEach ->
-						fetchMock.restore()
-
 					it 'should correctly make the request', ->
 						promise = request.send
 							method: 'HEAD'
@@ -189,9 +171,6 @@ describe 'Request:', ->
 
 					beforeEach ->
 						fetchMock.head('https://api.resin.io/foo', 500)
-
-					afterEach ->
-						fetchMock.restore()
 
 					it 'should be rejected with a generic error message', ->
 						promise = request.send
@@ -211,9 +190,6 @@ describe 'Request:', ->
 						headers:
 							'Content-Type': 'application/json'
 
-				afterEach ->
-					fetchMock.restore()
-
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'POST'
@@ -231,9 +207,6 @@ describe 'Request:', ->
 						body: opts.body
 						headers:
 							'Content-Type': 'application/json'
-
-				afterEach ->
-					fetchMock.restore()
 
 				it 'should eventually return the body', ->
 					promise = request.send
@@ -253,9 +226,6 @@ describe 'Request:', ->
 						headers:
 							'Content-Type': 'application/json'
 
-				afterEach ->
-					fetchMock.restore()
-
 				it 'should eventually return the body', ->
 					promise = request.send
 						method: 'PATCH'
@@ -273,9 +243,6 @@ describe 'Request:', ->
 						body: opts.body
 						headers:
 							'Content-Type': 'application/json'
-
-				afterEach ->
-					fetchMock.restore()
 
 				it 'should eventually return the body', ->
 					promise = request.send
