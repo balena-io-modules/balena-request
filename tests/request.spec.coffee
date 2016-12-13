@@ -263,11 +263,10 @@ describe 'Request:', ->
 					if requestsSeen <= 2
 						Promise.reject(new Error('low-level network error'))
 					else
-						Promise.resolve(
+						Promise.resolve
 							body: result: 'success'
 							headers:
 								'Content-Type': 'application/json'
-						)
 
 			it 'should fail by default', ->
 				promise = request.send
