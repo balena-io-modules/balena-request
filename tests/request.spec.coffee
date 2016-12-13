@@ -253,3 +253,41 @@ describe 'Request:', ->
 							foo: 'bar'
 					.get('body')
 					m.chai.expect(promise).to.eventually.become(foo: 'bar')
+
+		describe 'given an endpoint that fails the first two times', ->
+
+			beforeEach ->
+				requestsSeen = 0
+				fetchMock.get 'https://example.com/initially-failing', ->
+					requestsSeen += 1
+					if requestsSeen <= 2
+						Promise.reject(new Error('low-level network error'))
+					else
+						Promise.resolve(
+							body: result: 'success'
+							headers:
+								'Content-Type': 'application/json'
+						)
+
+			it 'should fail by default', ->
+				promise = request.send
+					method: 'GET'
+					url: 'https://example.com/initially-failing'
+				.get('body')
+				m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
+
+			it 'should retry and fail if set to retry just once', ->
+				promise = request.send
+					method: 'GET'
+					url: 'https://example.com/initially-failing'
+					retries: 1
+				.get('body')
+				m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
+
+			it 'should retry and eventually succeed if set to retry more than once', ->
+				promise = request.send
+					method: 'GET'
+					url: 'https://example.com/initially-failing'
+					retries: 2
+				.get('body')
+				m.chai.expect(promise).to.eventually.become(result: 'success')

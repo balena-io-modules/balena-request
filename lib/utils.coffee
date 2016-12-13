@@ -211,6 +211,7 @@ processRequestOptions = (options = {}) ->
 
 	opts = {}
 
+	opts.retries = options.retries
 	opts.method = options.method
 	opts.compress = options.gzip
 
@@ -292,10 +293,12 @@ timeoutPromise = (ms, promise) ->
 # utils.requestAsync({ url: 'http://example.com' }).then (response) ->
 # 	console.log(response)
 ###
-exports.requestAsync = (options) ->
+exports.requestAsync = (options, retriesRemaining = undefined) ->
 	[ url, opts ] = processRequestOptions(options)
+	retriesRemaining ?= opts.retries
 	{ timeout } = opts
 	delete opts.timeout
+
 	p = fetch(url, opts)
 	if timeout
 		p = timeoutPromise(timeout, p)
@@ -306,6 +309,12 @@ exports.requestAsync = (options) ->
 			headers: options.headers
 			uri: urlLib.parse(url)
 		return response
+	.catch (error) ->
+		if retriesRemaining > 0
+			exports.requestAsync(options, retriesRemaining - 1)
+		else
+			throw error
+
 
 exports.notImplemented = notImplemented = ->
 	throw new Error('The method is not implemented.')

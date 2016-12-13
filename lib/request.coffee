@@ -47,6 +47,7 @@ module.exports = getRequest = ({ dataDirectory = null, debug = false, isBrowser 
 			strictSSL: true
 			headers: {}
 			refreshToken: true
+			retries: 0
 
 		{ baseUrl } = options
 

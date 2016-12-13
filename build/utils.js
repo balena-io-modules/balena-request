@@ -215,6 +215,7 @@ processRequestOptions = function(options) {
     url += (url.indexOf('?') >= 0 ? '&' : '?') + params;
   }
   opts = {};
+  opts.retries = options.retries;
   opts.method = options.method;
   opts.compress = options.gzip;
   body = options.body, headers = options.headers;
@@ -302,9 +303,15 @@ timeoutPromise = function(ms, promise) {
  * 	console.log(response)
  */
 
-exports.requestAsync = function(options) {
+exports.requestAsync = function(options, retriesRemaining) {
   var opts, p, ref, timeout, url;
+  if (retriesRemaining == null) {
+    retriesRemaining = void 0;
+  }
   ref = processRequestOptions(options), url = ref[0], opts = ref[1];
+  if (retriesRemaining == null) {
+    retriesRemaining = opts.retries;
+  }
   timeout = opts.timeout;
   delete opts.timeout;
   p = fetch(url, opts);
@@ -318,6 +325,12 @@ exports.requestAsync = function(options) {
       uri: urlLib.parse(url)
     };
     return response;
+  })["catch"](function(error) {
+    if (retriesRemaining > 0) {
+      return exports.requestAsync(options, retriesRemaining - 1);
+    } else {
+      throw error;
+    }
   });
 };
 

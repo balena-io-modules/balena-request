@@ -61,7 +61,8 @@ module.exports = getRequest = function(arg) {
       json: true,
       strictSSL: true,
       headers: {},
-      refreshToken: true
+      refreshToken: true,
+      retries: 0
     });
     baseUrl = options.baseUrl;
     if (options.uri) {
