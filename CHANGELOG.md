@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### Changed
+
+- **Fixed:** in specific environments (like Chrome 54) `Response.body` is a getter that is
+impossible to overwrite. As a result it's always the original instance of the ReadableStream.
+We now clone the response object before assigning the parsed body.
+
 ## [6.1.0] - 2016-12-13
 
 ### Changed
