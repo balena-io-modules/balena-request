@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [6.2.0] - 2016-12-13
+
 ### Changed
 
 - Include 'duration' in debug output, if enabled
@@ -284,6 +286,7 @@ We now clone the response object before assigning the parsed body.
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
+[6.2.0]: https://github.com/resin-io-modules/resin-request/compare/v6.1.1...v6.2.0
 [6.1.1]: https://github.com/resin-io-modules/resin-request/compare/v6.1.0...v6.1.1
 [6.1.0]: https://github.com/resin-io-modules/resin-request/compare/v6.0.1...v6.1.0
 [6.0.1]: https://github.com/resin-io-modules/resin-request/compare/v6.0.0...v6.0.1
