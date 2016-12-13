@@ -44,8 +44,8 @@ progress = require('./progress');
 onlyIf = utils.onlyIf;
 
 module.exports = getRequest = function(arg) {
-  var dataDirectory, debug, debugRequest, exports, isBrowser, prepareOptions, ref, ref1, ref2, ref3, token;
-  ref = arg != null ? arg : {}, dataDirectory = (ref1 = ref.dataDirectory) != null ? ref1 : null, debug = (ref2 = ref.debug) != null ? ref2 : false, isBrowser = (ref3 = ref.isBrowser) != null ? ref3 : false;
+  var dataDirectory, debug, debugRequest, exports, isBrowser, prepareOptions, ref, ref1, ref2, ref3, ref4, retries, token;
+  ref = arg != null ? arg : {}, dataDirectory = (ref1 = ref.dataDirectory) != null ? ref1 : null, debug = (ref2 = ref.debug) != null ? ref2 : false, retries = (ref3 = ref.retries) != null ? ref3 : 0, isBrowser = (ref4 = ref.isBrowser) != null ? ref4 : false;
   token = getToken({
     dataDirectory: dataDirectory
   });
@@ -62,7 +62,7 @@ module.exports = getRequest = function(arg) {
       strictSSL: true,
       headers: {},
       refreshToken: true,
-      retries: 0
+      retries: retries
     });
     baseUrl = options.baseUrl;
     if (options.uri) {

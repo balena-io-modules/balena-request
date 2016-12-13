@@ -5,7 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
-- Added a 'retries' option you can pass to `send()` which sets the number of times to retry failing requests.
+- Added a 'retries' option you can pass to `send()`, to set the number of times to retry
+failing requests, or to `getRequest` directly to set the default number of retries.
 
 ## [6.1.1] - 2016-12-13
 

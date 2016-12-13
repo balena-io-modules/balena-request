@@ -1,6 +1,6 @@
 m = require('mochainon')
 
-{ token, request, fetchMock } = require('./setup')()
+{ token, request, getCustomRequest, fetchMock } = require('./setup')()
 
 describe 'Request:', ->
 
@@ -290,3 +290,12 @@ describe 'Request:', ->
 					retries: 2
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(result: 'success')
+
+			it 'should retry and eventually succeed if set to retry more than once by default', ->
+				retryingRequest = getCustomRequest({ retries: 2 })
+				promise = retryingRequest.send
+					method: 'GET'
+					url: 'https://example.com/initially-failing'
+				.get('body')
+				m.chai.expect(promise).to.eventually.become(result: 'success')
+
