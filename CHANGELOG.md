@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### Changed
+
+- Added a 'retries' option you can pass to `send()` which sets the number of times to retry failing requests.
+
 ## [6.1.1] - 2016-12-13
 
 ### Changed
