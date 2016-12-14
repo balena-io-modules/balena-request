@@ -258,15 +258,16 @@ describe 'Request:', ->
 
 			beforeEach ->
 				requestsSeen = 0
-				fetchMock.get 'https://example.com/initially-failing', ->
+				fetchMock.get 'https://example.com/initially-failing', Promise.method ->
 					requestsSeen += 1
 					if requestsSeen <= 2
-						Promise.reject(new Error('low-level network error'))
+						throw new Error('low-level network error')
 					else
-						Promise.resolve
+						return {
 							body: result: 'success'
 							headers:
 								'Content-Type': 'application/json'
+						}
 
 			it 'should fail by default', ->
 				promise = request.send
