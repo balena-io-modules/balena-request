@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise, UNSUPPORTED_REQUEST_PARAMS, assign, includes, notImplemented, parseInt, processBody, processRequestOptions, qs, timeoutPromise, urlLib;
+var Promise, UNSUPPORTED_REQUEST_PARAMS, assign, includes, notImplemented, parseInt, processBody, processRequestOptions, qs, urlLib;
 
 Promise = require('bluebird');
 
@@ -279,18 +279,6 @@ exports.getBody = processBody = function(response) {
   });
 };
 
-timeoutPromise = function(ms, promise) {
-  return new Promise(function(resolve, reject) {
-    var timeoutId;
-    timeoutId = setTimeout(function() {
-      return reject(new Error('timeout'));
-    }, ms);
-    return promise.tap(function() {
-      return clearTimeout(timeoutId);
-    }).then(resolve)["catch"](reject);
-  });
-};
-
 
 /**
  * @summary The method that keeps partial compatibility with promisified `request` but uses `fetch` behind the scenes.
@@ -318,7 +306,7 @@ exports.requestAsync = function(options, retriesRemaining) {
   requestTime = new Date();
   p = fetch(url, opts);
   if (timeout) {
-    p = timeoutPromise(timeout, p);
+    p = p.timeout(timeout);
   }
   return p.then(function(response) {
     var responseTime;
