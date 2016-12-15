@@ -274,17 +274,6 @@ exports.getBody = processBody = (response) ->
 
 		return response.text()
 
-timeoutPromise = (ms, promise) ->
-	return new Promise (resolve, reject) ->
-		timeoutId = setTimeout ->
-			reject(new Error('timeout'))
-		, ms
-
-		promise
-		.tap -> clearTimeout(timeoutId)
-		.then(resolve)
-		.catch(reject)
-
 ###*
 # @summary The method that keeps partial compatibility with promisified `request` but uses `fetch` behind the scenes.
 # @function
@@ -305,7 +294,7 @@ exports.requestAsync = (options, retriesRemaining = undefined) ->
 	requestTime = new Date()
 	p = fetch(url, opts)
 	if timeout
-		p = timeoutPromise(timeout, p)
+		p = p.timeout(timeout)
 
 	return p.then (response) ->
 		responseTime = new Date()
