@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### Changed
+
+- Timeouts in requests now use the Bluebird implementation. This changes how errors are thrown slightly: a `Promise.TimeoutError` is now thrown instead of a raw `Error`, with the message "operation timed out" instead of "timeout".
+
 ## [6.2.0] - 2016-12-13
 
 ### Changed
