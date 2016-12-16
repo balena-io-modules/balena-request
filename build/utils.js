@@ -286,6 +286,7 @@ exports.getBody = processBody = function(response) {
  * @protected
  *
  * @param {Object} options
+ * @param {number} [retriesRemaining=undefined] Number of retries remaining for this request
  *
  * @example
  * utils.requestAsync({ url: 'http://example.com' }).then (response) ->
@@ -294,9 +295,6 @@ exports.getBody = processBody = function(response) {
 
 exports.requestAsync = function(options, retriesRemaining) {
   var opts, p, ref, requestTime, timeout, url;
-  if (retriesRemaining == null) {
-    retriesRemaining = void 0;
-  }
   ref = processRequestOptions(options), url = ref[0], opts = ref[1];
   if (retriesRemaining == null) {
     retriesRemaining = opts.retries;

@@ -280,12 +280,13 @@ exports.getBody = processBody = (response) ->
 # @protected
 #
 # @param {Object} options
+# @param {number} [retriesRemaining=undefined] Number of retries remaining for this request
 #
 # @example
 # utils.requestAsync({ url: 'http://example.com' }).then (response) ->
 # 	console.log(response)
 ###
-exports.requestAsync = (options, retriesRemaining = undefined) ->
+exports.requestAsync = (options, retriesRemaining) ->
 	[ url, opts ] = processRequestOptions(options)
 	retriesRemaining ?= opts.retries
 	{ timeout } = opts
