@@ -280,12 +280,13 @@ exports.getBody = processBody = (response) ->
 # @protected
 #
 # @param {Object} options
+# @param {number} [retriesRemaining=undefined] Number of retries remaining for this request
 #
 # @example
 # utils.requestAsync({ url: 'http://example.com' }).then (response) ->
 # 	console.log(response)
 ###
-exports.requestAsync = (options, retriesRemaining = undefined) ->
+exports.requestAsync = (options, retriesRemaining) ->
 	[ url, opts ] = processRequestOptions(options)
 	retriesRemaining ?= opts.retries
 	{ timeout } = opts
@@ -296,7 +297,7 @@ exports.requestAsync = (options, retriesRemaining = undefined) ->
 	if timeout
 		p = p.timeout(timeout)
 
-	return p.then (response) ->
+	p = p.then (response) ->
 		responseTime = new Date()
 		response.duration = responseTime - requestTime
 		response.statusCode = response.status
@@ -304,12 +305,10 @@ exports.requestAsync = (options, retriesRemaining = undefined) ->
 			headers: options.headers
 			uri: urlLib.parse(url)
 		return response
-	.catch (error) ->
-		if retriesRemaining > 0
-			exports.requestAsync(options, retriesRemaining - 1)
-		else
-			throw error
 
+	if retriesRemaining > 0 then p.catch ->
+		exports.requestAsync(options, retriesRemaining - 1)
+	else p
 
 exports.notImplemented = notImplemented = ->
 	throw new Error('The method is not implemented.')
