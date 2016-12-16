@@ -306,7 +306,7 @@ exports.requestAsync = function(options, retriesRemaining) {
   if (timeout) {
     p = p.timeout(timeout);
   }
-  return p.then(function(response) {
+  p = p.then(function(response) {
     var responseTime;
     responseTime = new Date();
     response.duration = responseTime - requestTime;
@@ -316,13 +316,14 @@ exports.requestAsync = function(options, retriesRemaining) {
       uri: urlLib.parse(url)
     };
     return response;
-  })["catch"](function(error) {
-    if (retriesRemaining > 0) {
-      return exports.requestAsync(options, retriesRemaining - 1);
-    } else {
-      throw error;
-    }
   });
+  if (retriesRemaining > 0) {
+    return p["catch"](function() {
+      return exports.requestAsync(options, retriesRemaining - 1);
+    });
+  } else {
+    return p;
+  }
 };
 
 exports.notImplemented = notImplemented = function() {

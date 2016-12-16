@@ -297,7 +297,7 @@ exports.requestAsync = (options, retriesRemaining) ->
 	if timeout
 		p = p.timeout(timeout)
 
-	return p.then (response) ->
+	p = p.then (response) ->
 		responseTime = new Date()
 		response.duration = responseTime - requestTime
 		response.statusCode = response.status
@@ -305,12 +305,10 @@ exports.requestAsync = (options, retriesRemaining) ->
 			headers: options.headers
 			uri: urlLib.parse(url)
 		return response
-	.catch (error) ->
-		if retriesRemaining > 0
-			exports.requestAsync(options, retriesRemaining - 1)
-		else
-			throw error
 
+	if retriesRemaining > 0 then p.catch ->
+		exports.requestAsync(options, retriesRemaining - 1)
+	else p
 
 exports.notImplemented = notImplemented = ->
 	throw new Error('The method is not implemented.')
