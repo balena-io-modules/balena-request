@@ -1,3 +1,4 @@
+Promise = require('bluebird')
 m = require('mochainon')
 
 { token, request, getCustomRequest, fetchMock } = require('./setup')()
@@ -14,39 +15,28 @@ describe 'Request:', ->
 
 	describe '.send()', ->
 
-		describe 'given a simple GET endpoint', ->
+		describe 'given a simple absolute GET endpoint', ->
 
 			beforeEach ->
-				fetchMock.get 'https://api.resin.io/foo',
-					body: from: 'resin'
+				fetchMock.get 'https://foobar.baz/foo',
+					body: from: 'foobar'
 					headers:
 						'Content-Type': 'application/json'
 
-			describe 'given an absolute url', ->
+			it 'should preserve the absolute url', ->
+				promise = request.send
+					method: 'GET'
+					url: 'https://foobar.baz/foo'
+				.get('body')
+				m.chai.expect(promise).to.eventually.become(from: 'foobar')
 
-				beforeEach ->
-					fetchMock.get 'https://foobar.baz/foo',
-						body: from: 'foobar'
-						headers:
-							'Content-Type': 'application/json'
-
-				afterEach ->
-					fetchMock.restore()
-
-				it 'should preserve the absolute url', ->
-					promise = request.send
-						method: 'GET'
-						url: 'https://foobar.baz/foo'
-					.get('body')
-					m.chai.expect(promise).to.eventually.become(from: 'foobar')
-
-				it 'should allow passing a baseUrl', ->
-					promise = request.send
-						method: 'GET'
-						baseUrl: 'https://foobar.baz'
-						url: '/foo'
-					.get('body')
-					m.chai.expect(promise).to.eventually.become(from: 'foobar')
+			it 'should allow passing a baseUrl', ->
+				promise = request.send
+					method: 'GET'
+					baseUrl: 'https://foobar.baz'
+					url: '/foo'
+				.get('body')
+				m.chai.expect(promise).to.eventually.become(from: 'foobar')
 
 		describe 'given multiple endpoints', ->
 
