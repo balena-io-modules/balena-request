@@ -169,17 +169,6 @@ describe 'Request (api key):', ->
 							.get('query')
 							m.chai.expect(promise).to.eventually.be.null
 
-						it 'should not pass an apikey query string', ->
-							promise = request.send
-								method: 'GET'
-								baseUrl: 'https://api.resin.io'
-								url: '/foo'
-								apiKey: ''
-							.get('request')
-							.get('uri')
-							.get('query')
-							m.chai.expect(promise).to.eventually.be.null
-
 					describe '.stream()', ->
 
 						return if IS_BROWSER
