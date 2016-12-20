@@ -12,6 +12,7 @@ if (IS_BROWSER)
 	global.Response = realFetchModule.Response
 
 fetchMock = require('fetch-mock').sandbox(Promise)
+fetchMock.fetchMock.Promise = Promise
 fetchMock.patch = (matcher, response, options) ->
 	options = _.assign({}, options, { method: 'PATCH' })
 	@mock(matcher, response, options)
