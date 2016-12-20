@@ -3,13 +3,11 @@ Promise = require('bluebird')
 
 IS_BROWSER = window?
 
-if (IS_BROWSER)
+if IS_BROWSER
 	# The browser mock assumes global fetch prototypes exist
 	# Can improve after https://github.com/wheresrhys/fetch-mock/issues/158
 	realFetchModule = require('fetch-ponyfill')({ Promise })
-	global.Headers = realFetchModule.Headers
-	global.Request = realFetchModule.Request
-	global.Response = realFetchModule.Response
+	_.assign(global, _.pick(realFetchModule, 'Headers', 'Request', 'Response'))
 
 fetchMock = require('fetch-mock').sandbox(Promise)
 
