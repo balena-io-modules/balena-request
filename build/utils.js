@@ -15,9 +15,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise, UNSUPPORTED_REQUEST_PARAMS, assign, includes, notImplemented, parseInt, processBody, processRequestOptions, qs, urlLib;
+var Headers, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, fetch, includes, notImplemented, parseInt, processBody, processRequestOptions, qs, ref, urlLib;
 
 Promise = require('bluebird');
+
+ref = require('fetch-ponyfill')({
+  Promise: Promise
+}), fetch = ref.fetch, Headers = ref.Headers;
 
 urlLib = require('url');
 
@@ -33,6 +37,8 @@ includes = require('lodash/includes');
 /**
  * @module utils
  */
+
+exports.fetch = fetch;
 
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60;
 
@@ -294,15 +300,15 @@ exports.getBody = processBody = function(response) {
  */
 
 exports.requestAsync = function(options, retriesRemaining) {
-  var opts, p, ref, requestTime, timeout, url;
-  ref = processRequestOptions(options), url = ref[0], opts = ref[1];
+  var opts, p, ref1, requestTime, timeout, url;
+  ref1 = processRequestOptions(options), url = ref1[0], opts = ref1[1];
   if (retriesRemaining == null) {
     retriesRemaining = opts.retries;
   }
   timeout = opts.timeout;
   delete opts.timeout;
   requestTime = new Date();
-  p = fetch(url, opts);
+  p = exports.fetch(url, opts);
   if (timeout) {
     p = p.timeout(timeout);
   }

@@ -6,6 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - Timeouts in requests now use the Bluebird implementation. This changes how errors are thrown slightly: a `Promise.TimeoutError` is now thrown instead of a raw `Error`, with the message "operation timed out" instead of "timeout".
+- Fetch is now provided internally (by `Fetch-ponyfill`), so isomorphic-fetch is no longer required in downstream applications.
 
 ## [6.2.0] - 2016-12-13
 

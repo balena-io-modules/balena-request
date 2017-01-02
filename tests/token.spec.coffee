@@ -19,7 +19,7 @@ describe 'Request (token):', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				fetchMock.get('^https://api.resin.io/foo', 'bar')
+				fetchMock.get('begin:https://api.resin.io/foo', 'bar')
 
 			afterEach ->
 				fetchMock.restore()

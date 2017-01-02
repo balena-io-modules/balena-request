@@ -22,7 +22,7 @@ describe 'Request (api key):', ->
 		describe 'given a simple GET endpoint containing special characters in query strings', ->
 
 			beforeEach ->
-				fetchMock.get('^https://api.resin.io/foo', 200)
+				fetchMock.get('begin:https://api.resin.io/foo', 200)
 
 			afterEach ->
 				fetchMock.restore()
@@ -56,7 +56,7 @@ describe 'Request (api key):', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				fetchMock.get('^https://api.resin.io/foo', 'Foo Bar')
+				fetchMock.get('begin:https://api.resin.io/foo', 'Foo Bar')
 
 			afterEach ->
 				fetchMock.restore()
@@ -157,17 +157,6 @@ describe 'Request (api key):', ->
 						token.remove()
 
 					describe '.send()', ->
-
-						it 'should not pass an apikey query string', ->
-							promise = request.send
-								method: 'GET'
-								baseUrl: 'https://api.resin.io'
-								url: '/foo'
-								apiKey: ''
-							.get('request')
-							.get('uri')
-							.get('query')
-							m.chai.expect(promise).to.eventually.be.null
 
 						it 'should not pass an apikey query string', ->
 							promise = request.send

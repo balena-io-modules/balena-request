@@ -15,6 +15,7 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
+{ fetch, Headers } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
 parseInt = require('lodash/parseInt')
@@ -26,6 +27,7 @@ includes = require('lodash/includes')
 ###
 
 # Expose for testing purposes
+exports.fetch = fetch
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 
 ###*
@@ -293,7 +295,7 @@ exports.requestAsync = (options, retriesRemaining) ->
 	delete opts.timeout
 
 	requestTime = new Date()
-	p = fetch(url, opts)
+	p = exports.fetch(url, opts)
 	if timeout
 		p = p.timeout(timeout)
 
