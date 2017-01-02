@@ -22,6 +22,8 @@ parseInt = require('lodash/parseInt')
 assign = require('lodash/assign')
 includes = require('lodash/includes')
 
+IS_BROWSER = window?
+
 ###*
 # @module utils
 ###
@@ -216,6 +218,7 @@ processRequestOptions = (options = {}) ->
 
 	opts = {}
 
+	opts.timeout = options.timeout
 	opts.retries = options.retries
 	opts.method = options.method
 	opts.compress = options.gzip
@@ -291,13 +294,11 @@ exports.getBody = processBody = (response) ->
 exports.requestAsync = (options, retriesRemaining) ->
 	[ url, opts ] = processRequestOptions(options)
 	retriesRemaining ?= opts.retries
-	{ timeout } = opts
-	delete opts.timeout
 
 	requestTime = new Date()
 	p = exports.fetch(url, opts)
-	if timeout
-		p = p.timeout(timeout)
+	if opts.timeout and IS_BROWSER
+		p = p.timeout(opts.timeout)
 
 	p = p.then (response) ->
 		responseTime = new Date()
