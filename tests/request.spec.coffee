@@ -1,3 +1,4 @@
+_ = require('lodash')
 Promise = require('bluebird')
 m = require('mochainon')
 
@@ -306,10 +307,9 @@ describe 'Request:', ->
 
 					# Emulate node-fetch timeout behaviour if we use it
 					if not IS_BROWSER and opts.timeout
-						new Promise (resolve, reject) ->
-							setTimeout((-> reject(NODE_TIMEOUT_ERROR)), opts.timeout)
+						Promise.delay(opts.timeout).throw(NODE_TIMEOUT_ERROR)
 					# Browser/no timeout fetch() simply never resolves.
-					else new Promise(->)
+					else new Promise(_.noop)
 
 			it 'should reject the promise after 30s by default', ->
 				promise = request.send
