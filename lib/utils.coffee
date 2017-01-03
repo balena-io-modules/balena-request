@@ -15,7 +15,8 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
-{ fetch, Headers } = require('fetch-ponyfill')({ Promise })
+# _ prefixed because exports.fetch should always be used instead.
+{ _fetch, Headers } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
 parseInt = require('lodash/parseInt')
@@ -28,8 +29,8 @@ IS_BROWSER = window?
 # @module utils
 ###
 
-# Expose for testing purposes
-exports.fetch = fetch
+# Expose for testing purposes.
+exports.fetch = _fetch
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 
 ###*

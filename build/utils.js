@@ -15,13 +15,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, fetch, includes, notImplemented, parseInt, processBody, processRequestOptions, qs, ref, urlLib;
+var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, _fetch, assign, includes, notImplemented, parseInt, processBody, processRequestOptions, qs, ref, urlLib;
 
 Promise = require('bluebird');
 
 ref = require('fetch-ponyfill')({
   Promise: Promise
-}), fetch = ref.fetch, Headers = ref.Headers;
+}), _fetch = ref._fetch, Headers = ref.Headers;
 
 urlLib = require('url');
 
@@ -40,7 +40,7 @@ IS_BROWSER = typeof window !== "undefined" && window !== null;
  * @module utils
  */
 
-exports.fetch = fetch;
+exports.fetch = _fetch;
 
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60;
 
