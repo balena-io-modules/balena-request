@@ -309,7 +309,8 @@ describe 'Request:', ->
 					if not IS_BROWSER and opts.timeout
 						Promise.delay(opts.timeout).throw(NODE_TIMEOUT_ERROR)
 					# Browser/no timeout fetch() simply never resolves.
-					else new Promise(_.noop)
+					else
+						new Promise(_.noop)
 
 			it 'should reject the promise after 30s by default', ->
 				promise = request.send
