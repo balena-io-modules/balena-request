@@ -1,7 +1,8 @@
+_ = require('lodash')
 Promise = require('bluebird')
 m = require('mochainon')
 
-{ token, request, getCustomRequest, fetchMock } = require('./setup')()
+{ token, request, getCustomRequest, fetchMock, IS_BROWSER } = require('./setup')()
 
 describe 'Request:', ->
 
@@ -290,3 +291,64 @@ describe 'Request:', ->
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(result: 'success')
 
+		describe 'given an endpoint that will time out', ->
+
+			NODE_TIMEOUT_ERROR = new Error('node timeout error')
+
+			beforeEach ->
+				@clock = m.sinon.useFakeTimers()
+
+			afterEach ->
+				@clock.restore()
+
+			stubTimeout = -> new Promise (resolve, reject) ->
+				fetchMock.get 'http://infinite-wait.com', (url, opts) ->
+					resolve()
+
+					# Emulate node-fetch timeout behaviour if we use it
+					if not IS_BROWSER and opts.timeout
+						Promise.delay(opts.timeout).throw(NODE_TIMEOUT_ERROR)
+					# Browser/no timeout fetch() simply never resolves.
+					else
+						new Promise(_.noop)
+
+			it 'should reject the promise after 30s by default', ->
+				promise = request.send
+					method: 'GET'
+					url: 'http://infinite-wait.com'
+				.get('body')
+
+				stubTimeout().then =>
+					@clock.tick(29000)
+					m.chai.expect(promise.isPending()).to.equal(true)
+
+					@clock.tick(1000)
+					m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
+
+			it 'should use a provided timeout option', ->
+				promise = request.send
+					method: 'GET'
+					url: 'http://infinite-wait.com'
+					timeout: 5000
+				.get('body')
+
+				stubTimeout().then =>
+					@clock.tick(4000)
+					m.chai.expect(promise.isPending()).to.equal(true)
+
+					@clock.tick(1000)
+					m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
+
+			it 'should be rejected by the correct error', ->
+				promise = request.send
+					method: 'GET'
+					url: 'http://infinite-wait.com'
+				.get('body')
+
+				stubTimeout().then =>
+					@clock.tick(30000)
+
+					if IS_BROWSER
+						m.chai.expect(promise).to.be.rejectedWith(Promise.TimeoutError)
+					else
+						m.chai.expect(promise).to.be.rejectedWith(NODE_TIMEOUT_ERROR)

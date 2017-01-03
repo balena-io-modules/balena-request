@@ -15,19 +15,22 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
-{ fetch, Headers } = require('fetch-ponyfill')({ Promise })
+# _ prefixed because exports.fetch should always be used instead.
+{ _fetch, Headers } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
 parseInt = require('lodash/parseInt')
 assign = require('lodash/assign')
 includes = require('lodash/includes')
 
+IS_BROWSER = window?
+
 ###*
 # @module utils
 ###
 
-# Expose for testing purposes
-exports.fetch = fetch
+# Expose for testing purposes.
+exports.fetch = _fetch
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 
 ###*
@@ -216,6 +219,7 @@ processRequestOptions = (options = {}) ->
 
 	opts = {}
 
+	opts.timeout = options.timeout
 	opts.retries = options.retries
 	opts.method = options.method
 	opts.compress = options.gzip
@@ -291,13 +295,11 @@ exports.getBody = processBody = (response) ->
 exports.requestAsync = (options, retriesRemaining) ->
 	[ url, opts ] = processRequestOptions(options)
 	retriesRemaining ?= opts.retries
-	{ timeout } = opts
-	delete opts.timeout
 
 	requestTime = new Date()
 	p = exports.fetch(url, opts)
-	if timeout
-		p = p.timeout(timeout)
+	if opts.timeout and IS_BROWSER
+		p = p.timeout(opts.timeout)
 
 	p = p.then (response) ->
 		responseTime = new Date()

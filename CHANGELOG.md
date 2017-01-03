@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+### Changed
+
+- Fixed bug where no timeouts were set
+- Timeouts now abort underlying requests (in Node only)
+
 ## [7.0.0] - 2017-01-02
 
 ### Changed
