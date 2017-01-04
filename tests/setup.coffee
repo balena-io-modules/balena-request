@@ -23,21 +23,21 @@ utils = require('../lib/utils')
 # Can probably just be 'fetchMock' after https://github.com/wheresrhys/fetch-mock/issues/159
 utils.fetch = fetchMock.fetchMock
 
-getToken = require('resin-token')
-getRequest = require('../lib/request')
-
 dataDirectory = null
 if not IS_BROWSER
-	settings = require('resin-settings-client')
-	dataDirectory = settings.get('dataDirectory')
+	temp = require('temp').track()
+	dataDirectory = temp.mkdirSync()
+
+token = require('resin-token')({ dataDirectory })
+getRequest = require('../lib/request')
 
 getCustomRequest = (opts) ->
-	opts = _.assign({}, opts, { dataDirectory, debug: false, isBrowser: IS_BROWSER })
+	opts = _.assign({}, opts, { token, debug: false, isBrowser: IS_BROWSER })
 	getRequest(opts)
 
 module.exports = ->
 	IS_BROWSER: IS_BROWSER
 	fetchMock: fetchMock
-	token: getToken({ dataDirectory })
+	token: token
 	request: getCustomRequest()
 	getCustomRequest: getCustomRequest

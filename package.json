@@ -40,7 +40,8 @@
     "mocha": "^3.0.0",
     "mochainon": "^1.0.0",
     "resin-config-karma": "^1.0.4",
-    "resin-settings-client": "^3.5.2",
+    "resin-token": "^3.0.0",
+    "temp": "^0.8.3",
     "timekeeper": "^1.0.0"
   },
   "dependencies": {
@@ -50,7 +51,9 @@
     "progress-stream": "^1.1.1",
     "qs": "^6.3.0",
     "resin-errors": "^2.3.0",
-    "resin-token": "^3.0.0",
     "rindle": "^1.2.0"
+  },
+  "peerDependencies": {
+    "resin-token": "^3.0.0"
   }
 }

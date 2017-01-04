@@ -32,9 +32,7 @@ progress = require('./progress')
 
 { onlyIf } = utils
 
-module.exports = getRequest = ({ dataDirectory = null, debug = false, retries = 0, isBrowser = false } = {}) ->
-
-	token = getToken({ dataDirectory })
+module.exports = getRequest = ({ token, debug = false, retries = 0, isBrowser = false } = {}) ->
 	debugRequest = if not debug then noop else utils.debugRequest
 
 	exports = {}
