@@ -21,7 +21,7 @@ Promise = require('bluebird');
 
 ref = require('fetch-ponyfill')({
   Promise: Promise
-}), _fetch = ref._fetch, Headers = ref.Headers;
+}), _fetch = ref.fetch, Headers = ref.Headers;
 
 urlLib = require('url');
 
