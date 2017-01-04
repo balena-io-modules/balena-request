@@ -37,14 +37,14 @@ It accepts the following params:
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>Object</code> | options |
-| options.dataDirectory | <code>string</code> | the directory to use for token storage in Node.js. Ignored in the browser. |
+| options.token | <code>Object</code> | An instantiated [resin-token](https://github.com/resin-io/resin-token) instance |
 | options.debug | <code>boolean</code> | when set to `true` will log the request details in case of error. |
 | options.isBrowser | <code>boolean</code> | set to `true` if the runtime is the browser. |
 
 **Example**
 ```js
 var request = require('resin-request')({
-	dataDirectory: '/opt/cache/resin',
+	token: token,
 	debug: false,
 	isBrowser: false
 })

@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- **Breaking:** Resin-Token must now be injected, rather than being built internally
 - Fixed bug where no timeouts were set
 - Timeouts now abort underlying requests (in Node only)
 
