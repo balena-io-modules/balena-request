@@ -3,13 +3,15 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [8.0.0] - 2017-01-04
+## [8.0.1] - 2017-01-04
 
 ### Changed
 
 - **Breaking:** Resin-Token must now be injected, rather than being built internally
 - Fixed bug where no timeouts were set
 - Timeouts now abort underlying requests (in Node only)
+
+## 8.0.0 (yanked due to major issues)
 
 ## [7.0.0] - 2017-01-02
 
