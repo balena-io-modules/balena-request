@@ -16,7 +16,7 @@ limitations under the License.
 
 Promise = require('bluebird')
 # _ prefixed because exports.fetch should always be used instead.
-{ _fetch, Headers } = require('fetch-ponyfill')({ Promise })
+{ fetch: _fetch, Headers } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
 parseInt = require('lodash/parseInt')
