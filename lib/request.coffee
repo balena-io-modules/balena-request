@@ -207,3 +207,5 @@ module.exports = getRequest = ({ token, debug = false, retries = 0, isBrowser = 
 				throw new errors.ResinRequestError(responseError, download.response.statusCode)
 
 	return exports
+
+getRequest._setFetch = utils._setFetch

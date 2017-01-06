@@ -15,7 +15,6 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
-# _ prefixed because exports.fetch should always be used instead.
 { fetch: _fetch, Headers } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
@@ -29,9 +28,16 @@ IS_BROWSER = window?
 # @module utils
 ###
 
-# Expose for testing purposes.
-exports.fetch = _fetch
+fetch = _fetch
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
+
+###*
+# @summary Override the fetch implementation
+# @function
+# @protected
+###
+exports._setFetch = (_fetch) ->
+	fetch = _fetch
 
 ###*
 # @summary Determine if the token should be updated
@@ -280,24 +286,14 @@ exports.getBody = processBody = (response) ->
 
 		return response.text()
 
-###*
-# @summary The method that keeps partial compatibility with promisified `request` but uses `fetch` behind the scenes.
-# @function
-# @protected
-#
-# @param {Object} options
-# @param {number} [retriesRemaining=undefined] Number of retries remaining for this request
-#
-# @example
-# utils.requestAsync({ url: 'http://example.com' }).then (response) ->
-# 	console.log(response)
-###
-exports.requestAsync = (options, retriesRemaining) ->
+# This is the actual implementation that hides the internal `retriesRemaining` parameter
+
+requestAsync = (options, retriesRemaining) ->
 	[ url, opts ] = processRequestOptions(options)
 	retriesRemaining ?= opts.retries
 
 	requestTime = new Date()
-	p = exports.fetch(url, opts)
+	p = fetch(url, opts)
 	if opts.timeout and IS_BROWSER
 		p = p.timeout(opts.timeout)
 
@@ -311,8 +307,22 @@ exports.requestAsync = (options, retriesRemaining) ->
 		return response
 
 	if retriesRemaining > 0 then p.catch ->
-		exports.requestAsync(options, retriesRemaining - 1)
+		requestAsync(options, retriesRemaining - 1)
 	else p
+
+###*
+# @summary The method that keeps partial compatibility with promisified `request` but uses `fetch` behind the scenes.
+# @function
+# @protected
+#
+# @param {Object} options
+#
+# @example
+# utils.requestAsync({ url: 'http://example.com' }).then (response) ->
+# 	console.log(response)
+###
+exports.requestAsync = (options) ->
+	requestAsync(options)
 
 exports.notImplemented = notImplemented = ->
 	throw new Error('The method is not implemented.')
