@@ -52,9 +52,30 @@ var request = require('resin-request')({
 
 
 * [request](#module_request)
-    * [.send(options)](#module_request.send) ⇒ <code>Promise.&lt;Object&gt;</code>
-    * [.stream(options)](#module_request.stream) ⇒ <code>Promise.&lt;Stream&gt;</code>
+    * _static_
+        * [.interceptors](#module_request.interceptors) : <code>Array.&lt;Interceptor&gt;</code>
+        * [.send(options)](#module_request.send) ⇒ <code>Promise.&lt;Object&gt;</code>
+        * [.stream(options)](#module_request.stream) ⇒ <code>Promise.&lt;Stream&gt;</code>
+    * _inner_
+        * [~Interceptor](#module_request..Interceptor) : <code>object</code>
 
+<a name="module_request.interceptors"></a>
+
+### request.interceptors : <code>Array.&lt;Interceptor&gt;</code>
+The current array of interceptors to use. Interceptors intercept requests made
+by calls to `.stream()` and `.send()` (some of which are made internally) and
+are executed in the order they appear in this array for requests, and in the
+reverse order for responses.
+
+**Kind**: static property of <code>[request](#module_request)</code>  
+**Summary**: Array of interceptors  
+**Access:** public  
+**Example**  
+```js
+resin.interceptors.push(
+	requestError: (error) -> console.log(error)
+)
+```
 <a name="module_request.send"></a>
 
 ### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
@@ -134,6 +155,26 @@ request.stream
 
 	stream.pipe(fs.createWriteStream('/opt/download'))
 ```
+<a name="module_request..Interceptor"></a>
+
+### request~Interceptor : <code>object</code>
+An interceptor implements some set of the four interception hook callbacks.
+To continue processing, each function should return a value or a promise that
+successfully resolves to a value.
+
+To halt processing, each function should throw an error or return a promise that
+rejects with an error.
+
+**Kind**: inner typedef of <code>[request](#module_request)</code>  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| request | <code>function</code> | Callback invoked before requests are made. Called with the request options, should return (or resolve to) new request options, or throw/reject. |
+| response | <code>function</code> | Callback invoked before responses are returned. Called with the response, should return (or resolve to) a new response, or throw/reject. |
+| requestError | <code>function</code> | Callback invoked if an error happens before a request. Called with the error itself, caused by a preceeding request interceptor rejecting/throwing an error for the request. Should return (or resolve to) new request options, or throw/reject. |
+| responseError | <code>function</code> | Callback invoked if an error happens in the response. Called with the error itself, caused by a preceeding response interceptor rejecting/throwing an error for the request, a network error, or an error response from the server. Should return (or resolve to) a new response, or throw/reject. |
+
 
 Support
 -------
