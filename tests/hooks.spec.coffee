@@ -20,12 +20,7 @@ describe 'An interceptor', ->
 			headers:
 				'Content-Type': 'application/json'
 
-		request.interceptors = [
-			request: undefined
-			requestError: undefined
-			response: undefined
-			responseError: undefined
-		]
+		request.interceptors = []
 
 	afterEach ->
 		fetchMock.restore()
@@ -33,7 +28,7 @@ describe 'An interceptor', ->
 	describe 'with a request hook', ->
 
 		it 'should be able to change a request before it is sent', ->
-			request.interceptors[0].request = (request) ->
+			request.interceptors[0] = request: (request) ->
 				_.assign({}, request, url: 'https://changed.com')
 
 			promise = request.send
@@ -43,7 +38,7 @@ describe 'An interceptor', ->
 			m.chai.expect(promise).to.eventually.become(requested: 'https://changed.com')
 
 		it 'should be able to asynchronously change a request before it is sent', ->
-			request.interceptors[0].request = (request) ->
+			request.interceptors[0] = request: (request) ->
 				Promise.fromCallback (callback) ->
 					setTimeout ->
 						callback(null, _.assign({}, request, url: 'https://changed.com'))
@@ -56,7 +51,7 @@ describe 'An interceptor', ->
 			m.chai.expect(promise).to.eventually.become(requested: 'https://changed.com')
 
 		it 'should be able to stop a request', ->
-			request.interceptors[0].request = ->
+			request.interceptors[0] = request: ->
 				throw new Error('blocked')
 
 			promise = request.send
@@ -188,7 +183,7 @@ describe 'An interceptor', ->
 
 	describe 'with a responseError hook', ->
 
-		it 'should not call requestError if there are no errors', ->
+		it 'should not call responseError if there are no errors', ->
 			request.interceptors[0] = responseError: m.sinon.mock()
 
 			promise = request.send
@@ -199,31 +194,33 @@ describe 'An interceptor', ->
 				m.chai.expect(request.interceptors[0].responseError.called).to.equal false,
 					'responseError should not have been called'
 
-		it 'should call requestError if the server returns a server error', ->
+		it 'should call responseError if the server returns a server error', ->
 			fetchMock.restore()
 			fetchMock.get 'https://500.com', (url, opts) ->
 				status: 500
 
-			request.interceptors[0] = responseError: m.sinon.mock().throws(new Error('caught error'))
+			request.interceptors[0] = responseError:
+				m.sinon.mock().throws(new Error('caught error'))
 
 			promise = request.send
 				url: 'https://500.com'
 
 			m.chai.expect(promise).to.be.rejectedWith('caught error')
 
-		it 'should call requestError if the server returns an authentication error', ->
+		it 'should call responseError if the server returns an authentication error', ->
 			fetchMock.restore()
 			fetchMock.get 'https://401.com', (url, opts) ->
 				status: 401
 
-			request.interceptors[0] = responseError: m.sinon.mock().throws(new Error('caught auth error'))
+			request.interceptors[0] = responseError:
+				m.sinon.mock().throws(new Error('caught auth error'))
 
 			promise = request.send
 				url: 'https://401.com'
 
 			m.chai.expect(promise).to.be.rejectedWith('caught auth error')
 
-		it 'should let requestError retry a different request', ->
+		it 'should let responseError retry a different request', ->
 			fetchMock.restore()
 			fetchMock.get '*', (url, opts) ->
 				if url is 'https://ok.com'
