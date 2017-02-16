@@ -227,7 +227,10 @@ module.exports = getRequest = ({
 	exports.stream = onlyIf(not isBrowser) (options = {}) ->
 		rindle = require('rindle')
 
-		prepareOptions(options).then(progress.estimate).then (download) ->
+		prepareOptions(options)
+		.then(interceptRequestOptions, interceptRequestError)
+		.then(progress.estimate)
+		.then (download) ->
 			if not utils.isErrorCode(download.response.statusCode)
 				# TODO: Move this to resin-image-manager
 				download.mime = download.response.headers.get('Content-Type')
@@ -241,6 +244,7 @@ module.exports = getRequest = ({
 				responseError = data or 'The request was unsuccessful'
 				debugRequest(options, download.response)
 				throw new errors.ResinRequestError(responseError, download.response.statusCode)
+		.then(interceptResponse, interceptResponseError)
 
 	###*
 	# @summary Array of interceptors

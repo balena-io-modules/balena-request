@@ -1,10 +1,13 @@
 _ = require('lodash')
+rindle = require('rindle')
 Promise = require('bluebird')
 m = require('mochainon')
 
 utils = require('../lib/utils')
 
-{ token, request, fetchMock } = require('./setup')()
+{ token, request, fetchMock, IS_BROWSER } = require('./setup')()
+
+inNodeIt = if IS_BROWSER then (->) else it
 
 describe 'An interceptor', ->
 
@@ -62,6 +65,16 @@ describe 'An interceptor', ->
 
 			m.chai.expect(promise).to.be.rejectedWith('blocked')
 
+		inNodeIt 'should be able to change a stream request before it is sent', ->
+			request.interceptors[0] = request: (request) ->
+				_.assign({}, request, url: 'https://changed.com')
+
+			promise = request.stream
+				url: 'https://original.com'
+			.then(rindle.extract).then (data) ->
+				body = JSON.parse(data)
+				m.chai.expect(body).to.deep.equal(requested: 'https://changed.com')
+
 	describe 'with a requestError hook', ->
 
 		it 'should not call requestError if there are no errors', ->
@@ -113,6 +126,15 @@ describe 'An interceptor', ->
 
 				m.chai.expect(promise).to.be.rejectedWith('intercepted token failure')
 
+			inNodeIt 'should call requestError if the token is expired for stream()', ->
+				request.interceptors[0] =
+					requestError: m.sinon.mock().throws(new Error('intercepted token failure'))
+
+				promise = request.stream
+					url: 'https://example.com'
+
+				m.chai.expect(promise).to.be.rejectedWith('intercepted token failure')
+
 	describe 'with a response hook', ->
 
 		it 'should be able to change a response before it is returned', ->
@@ -154,6 +176,15 @@ describe 'An interceptor', ->
 			.then (response) ->
 				m.chai.expect(response.body).to.deep.equal(replaced: true)
 				m.chai.expect(response.statusCode).to.equal(201)
+
+		inNodeIt 'should be able to change a stream response before it is sent', ->
+			request.interceptors[0] = response: (response) ->
+				rindle.getStreamFromString('replacement stream')
+
+			promise = request.stream
+				url: 'https://original.com'
+			.then(rindle.extract).then (data) ->
+				m.chai.expect(data).to.equal('replacement stream')
 
 	describe 'with a responseError hook', ->
 
@@ -210,3 +241,15 @@ describe 'An interceptor', ->
 
 			m.chai.expect(promise).to.eventually.become(200)
 
+		inNodeIt 'should call responseError if the server returns an error for a stream', ->
+			fetchMock.restore()
+			fetchMock.get 'https://500.com', (url, opts) ->
+				status: 500
+
+			request.interceptors[0] = responseError:
+				m.sinon.mock().throws(new Error('caught error'))
+
+			promise = request.stream
+				url: 'https://500.com'
+
+			m.chai.expect(promise).to.be.rejectedWith('caught error')

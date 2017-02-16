@@ -227,7 +227,7 @@ module.exports = getRequest = function(arg) {
       options = {};
     }
     rindle = require('rindle');
-    return prepareOptions(options).then(progress.estimate).then(function(download) {
+    return prepareOptions(options).then(interceptRequestOptions, interceptRequestError).then(progress.estimate).then(function(download) {
       if (!utils.isErrorCode(download.response.statusCode)) {
         download.mime = download.response.headers.get('Content-Type');
         return download;
@@ -238,7 +238,7 @@ module.exports = getRequest = function(arg) {
         debugRequest(options, download.response);
         throw new errors.ResinRequestError(responseError, download.response.statusCode);
       });
-    });
+    }).then(interceptResponse, interceptResponseError);
   });
 
   /**
