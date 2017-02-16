@@ -44,7 +44,7 @@ progress = require('./progress');
 onlyIf = utils.onlyIf;
 
 module.exports = getRequest = function(arg) {
-  var debug, debugRequest, exports, interceptRequest, interceptResponse, interceptors, isBrowser, prepareOptions, ref, ref1, ref2, ref3, ref4, retries, token;
+  var debug, debugRequest, exports, interceptRequestError, interceptRequestOptions, interceptRequestOrError, interceptResponse, interceptResponseError, interceptResponseOrError, interceptors, isBrowser, prepareOptions, ref, ref1, ref2, ref3, ref4, retries, token;
   ref = arg != null ? arg : {}, token = ref.token, debug = (ref1 = ref.debug) != null ? ref1 : false, retries = (ref2 = ref.retries) != null ? ref2 : 0, isBrowser = (ref3 = ref.isBrowser) != null ? ref3 : false, interceptors = (ref4 = ref.interceptors) != null ? ref4 : [];
   debugRequest = !debug ? noop : utils.debugRequest;
   exports = {};
@@ -103,15 +103,27 @@ module.exports = getRequest = function(arg) {
       return options;
     });
   };
-  interceptRequest = function(initialRequestOptions) {
-    return Promise.resolve(exports.interceptors.reduce(function(requestOptionsPromise, interceptor) {
-      return requestOptionsPromise.then(interceptor.request, interceptor.requestError);
-    }, Promise.resolve(initialRequestOptions)));
+  interceptRequestOptions = function(requestOptions) {
+    return interceptRequestOrError(Promise.resolve(requestOptions));
   };
-  interceptResponse = function(initialResponse) {
-    return Promise.resolve(exports.interceptors.slice().reverse().reduce(function(responsePromise, interceptor) {
-      return responsePromise.then(interceptor.response, interceptor.responseError);
-    }, Promise.resolve(initialResponse)));
+  interceptRequestError = function(requestError) {
+    return interceptRequestOrError(Promise.reject(requestError));
+  };
+  interceptResponse = function(response) {
+    return interceptResponseOrError(Promise.resolve(response));
+  };
+  interceptResponseError = function(responseError) {
+    return interceptResponseOrError(Promise.reject(responseError));
+  };
+  interceptRequestOrError = function(initialPromise) {
+    return Promise.resolve(exports.interceptors.reduce(function(promise, interceptor) {
+      return promise.then(interceptor.request, interceptor.requestError);
+    }, initialPromise));
+  };
+  interceptResponseOrError = function(initialPromise) {
+    return Promise.resolve(exports.interceptors.slice().reverse().reduce(function(promise, interceptor) {
+      return promise.then(interceptor.response, interceptor.responseError);
+    }, initialPromise));
   };
 
   /**
@@ -155,7 +167,7 @@ module.exports = getRequest = function(arg) {
     if (options.timeout == null) {
       options.timeout = 30000;
     }
-    return prepareOptions(options).then(interceptRequest).then(utils.requestAsync).then(function(response) {
+    return prepareOptions(options).then(interceptRequestOptions, interceptRequestError).then(utils.requestAsync).then(function(response) {
       return utils.getBody(response).then(function(body) {
         var responseError;
         response = assign({}, response, {
@@ -168,7 +180,7 @@ module.exports = getRequest = function(arg) {
         }
         return response;
       });
-    });
+    }).then(interceptResponse, interceptResponseError);
   };
 
   /**

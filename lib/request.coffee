@@ -103,18 +103,30 @@ module.exports = getRequest = ({
 
 			return options
 
-	interceptRequest = (initialRequestOptions) ->
+	interceptRequestOptions = (requestOptions) ->
+		interceptRequestOrError(Promise.resolve(requestOptions))
+
+	interceptRequestError = (requestError) ->
+		interceptRequestOrError(Promise.reject(requestError))
+
+	interceptResponse = (response) ->
+		interceptResponseOrError(Promise.resolve(response))
+
+	interceptResponseError = (responseError) ->
+		interceptResponseOrError(Promise.reject(responseError))
+
+	interceptRequestOrError = (initialPromise) ->
 		Promise.resolve(
-			exports.interceptors.reduce (requestOptionsPromise, interceptor) ->
-				requestOptionsPromise.then(interceptor.request, interceptor.requestError)
-			, Promise.resolve(initialRequestOptions)
+			exports.interceptors.reduce (promise, interceptor) ->
+				promise.then(interceptor.request, interceptor.requestError)
+			, initialPromise
 		)
 
-	interceptResponse = (initialResponse) ->
+	interceptResponseOrError = (initialPromise) ->
 		Promise.resolve(
-			exports.interceptors.slice().reverse().reduce (responsePromise, interceptor) ->
-				responsePromise.then(interceptor.response, interceptor.responseError)
-			, Promise.resolve(initialResponse)
+			exports.interceptors.slice().reverse().reduce (promise, interceptor) ->
+				promise.then(interceptor.response, interceptor.responseError)
+			, initialPromise
 		)
 
 	###*
@@ -159,7 +171,7 @@ module.exports = getRequest = ({
 		options.timeout ?= 30000
 
 		prepareOptions(options)
-		.then(interceptRequest)
+		.then(interceptRequestOptions, interceptRequestError)
 		.then(utils.requestAsync)
 		.then (response) ->
 			utils.getBody(response)
@@ -172,6 +184,7 @@ module.exports = getRequest = ({
 					throw new errors.ResinRequestError(responseError, response.statusCode)
 
 				return response
+		.then(interceptResponse, interceptResponseError)
 
 	###*
 	# @summary Stream an HTTP response from Resin.io.
