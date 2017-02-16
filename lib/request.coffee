@@ -282,7 +282,8 @@ module.exports = getRequest = ({
 #
 # @property {function} [requestError] - Callback invoked if an error happens before a request.
 # Called with the error itself, caused by a preceeding request interceptor rejecting/throwing
-# an error for the request. Should return (or resolve to) new request options, or throw/reject.
+# an error for the request, or a failing in preflight token validation. Should return (or resolve
+# to) new request options, or throw/reject.
 #
 # @property {function} [responseError] - Callback invoked if an error happens in the response.
 # Called with the error itself, caused by a preceeding response interceptor rejecting/throwing

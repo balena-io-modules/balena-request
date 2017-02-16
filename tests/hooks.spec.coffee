@@ -97,6 +97,22 @@ describe 'An interceptor', ->
 				m.chai.expect(request.interceptors[1].requestError.called).to.equal true,
 					'Subsequent requestError hook should be called'
 
+		describe 'with an expired token', ->
+			beforeEach ->
+				@utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldUpdateToken').returns(true)
+
+			afterEach ->
+				@utilsShouldUpdateToken.restore()
+
+			it 'should call requestError if the token is expired', ->
+				request.interceptors[0] =
+					requestError: m.sinon.mock().throws(new Error('intercepted token failure'))
+
+				promise = request.send
+					url: 'https://example.com'
+
+				m.chai.expect(promise).to.be.rejectedWith('intercepted token failure')
+
 	describe 'with a response hook', ->
 
 		it 'should be able to change a response before it is returned', ->
