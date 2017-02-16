@@ -259,7 +259,9 @@ module.exports = getRequest = ({
 	#
 	# @example
 	# resin.interceptors.push(
-	# 	requestError: (error) -> console.log(error)
+	# 	requestError: (error) ->
+	#		console.log(error)
+	#		throw error
 	# )
 	###
 	exports.interceptors = interceptors

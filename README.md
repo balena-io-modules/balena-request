@@ -40,6 +40,7 @@ It accepts the following params:
 | options.token | <code>Object</code> | An instantiated [resin-token](https://github.com/resin-io/resin-token) instance |
 | options.debug | <code>boolean</code> | when set to `true` will log the request details in case of error. |
 | options.isBrowser | <code>boolean</code> | set to `true` if the runtime is the browser. |
+| options.interceptors | <code>Array&lt;Interceptor&gt;</code> | An initial array of interceptors |
 
 **Example**
 ```js
@@ -73,7 +74,9 @@ reverse order for responses.
 **Example**  
 ```js
 resin.interceptors.push(
-	requestError: (error) -> console.log(error)
+	requestError: (error) ->
+		console.log(error)
+		throw error
 )
 ```
 <a name="module_request.send"></a>
