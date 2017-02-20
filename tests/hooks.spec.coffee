@@ -39,10 +39,8 @@ describe 'An interceptor', ->
 
 		it 'should be able to asynchronously change a request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
-				Promise.fromCallback (callback) ->
-					setTimeout ->
-						callback(null, _.assign({}, request, url: 'https://changed.com'))
-					, 100
+				Promise.delay(100).then ->
+					_.assign({}, request, url: 'https://changed.com')
 
 			promise = request.send
 				url: 'https://original.com'
@@ -133,8 +131,8 @@ describe 'An interceptor', ->
 	describe 'with a response hook', ->
 
 		it 'should be able to change a response before it is returned', ->
-			request.interceptors[0] =
-				response: (response) -> _.assign({}, response, body: replaced: true)
+			request.interceptors[0] = response: (response) ->
+				_.assign({}, response, body: replaced: true)
 
 			promise = request.send
 				url: 'https://example.com'
@@ -143,11 +141,9 @@ describe 'An interceptor', ->
 			m.chai.expect(promise).to.eventually.become(replaced: true)
 
 		it 'should be able to asynchronously change a response before it is returned', ->
-			request.interceptors[0] =
-				response: (response) -> Promise.fromCallback (callback) ->
-					setTimeout ->
-						callback(null, _.assign({}, response, body: replaced: true))
-					, 100
+			request.interceptors[0] = response: (response) ->
+				Promise.delay(100).then ->
+					_.assign({}, response, body: replaced: true)
 
 			promise = request.send
 				url: 'https://example.com'

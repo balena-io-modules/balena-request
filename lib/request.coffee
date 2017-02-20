@@ -117,15 +117,22 @@ module.exports = getRequest = ({
 
 	interceptRequestOrError = (initialPromise) ->
 		Promise.resolve(
-			exports.interceptors.reduce (promise, interceptor) ->
-				promise.then(interceptor.request, interceptor.requestError)
+			exports.interceptors.reduce (promise, { request, requestError }) ->
+				if request? or requestError?
+					promise.then(request, requestError)
+				else
+					promise
 			, initialPromise
 		)
 
 	interceptResponseOrError = (initialPromise) ->
+		interceptors = exports.interceptors.slice().reverse()
 		Promise.resolve(
-			exports.interceptors.slice().reverse().reduce (promise, interceptor) ->
-				promise.then(interceptor.response, interceptor.responseError)
+			interceptors.reduce (promise, { response, responseError }) ->
+				if response? or responseError?
+					promise.then(response, responseError)
+				else
+					promise
 			, initialPromise
 		)
 
@@ -258,7 +265,7 @@ module.exports = getRequest = ({
 	# reverse order for responses.
 	#
 	# @example
-	# resin.interceptors.push(
+	# request.interceptors.push(
 	# 	requestError: (error) ->
 	#		console.log(error)
 	#		throw error

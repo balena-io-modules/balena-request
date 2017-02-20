@@ -73,7 +73,7 @@ reverse order for responses.
 **Access:** public  
 **Example**  
 ```js
-resin.interceptors.push(
+request.interceptors.push(
 	requestError: (error) ->
 		console.log(error)
 		throw error

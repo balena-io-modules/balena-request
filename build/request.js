@@ -116,13 +116,26 @@ module.exports = getRequest = function(arg) {
     return interceptResponseOrError(Promise.reject(responseError));
   };
   interceptRequestOrError = function(initialPromise) {
-    return Promise.resolve(exports.interceptors.reduce(function(promise, interceptor) {
-      return promise.then(interceptor.request, interceptor.requestError);
+    return Promise.resolve(exports.interceptors.reduce(function(promise, arg1) {
+      var request, requestError;
+      request = arg1.request, requestError = arg1.requestError;
+      if ((request != null) || (requestError != null)) {
+        return promise.then(request, requestError);
+      } else {
+        return promise;
+      }
     }, initialPromise));
   };
   interceptResponseOrError = function(initialPromise) {
-    return Promise.resolve(exports.interceptors.slice().reverse().reduce(function(promise, interceptor) {
-      return promise.then(interceptor.response, interceptor.responseError);
+    interceptors = exports.interceptors.slice().reverse();
+    return Promise.resolve(interceptors.reduce(function(promise, arg1) {
+      var response, responseError;
+      response = arg1.response, responseError = arg1.responseError;
+      if ((response != null) || (responseError != null)) {
+        return promise.then(response, responseError);
+      } else {
+        return promise;
+      }
     }, initialPromise));
   };
 
@@ -253,7 +266,7 @@ module.exports = getRequest = function(arg) {
   	 * reverse order for responses.
   	 *
   	 * @example
-  	 * resin.interceptors.push(
+  	 * request.interceptors.push(
   	 * 	requestError: (error) ->
   	 *		console.log(error)
   	 *		throw error
