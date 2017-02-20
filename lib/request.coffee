@@ -32,7 +32,13 @@ progress = require('./progress')
 
 { onlyIf } = utils
 
-module.exports = getRequest = ({ token, debug = false, retries = 0, isBrowser = false } = {}) ->
+module.exports = getRequest = ({
+	token,
+	debug = false,
+	retries = 0,
+	isBrowser = false,
+	interceptors = []
+} = {}) ->
 	debugRequest = if not debug then noop else utils.debugRequest
 
 	exports = {}
@@ -97,6 +103,39 @@ module.exports = getRequest = ({ token, debug = false, retries = 0, isBrowser = 
 
 			return options
 
+	interceptRequestOptions = (requestOptions) ->
+		interceptRequestOrError(Promise.resolve(requestOptions))
+
+	interceptRequestError = (requestError) ->
+		interceptRequestOrError(Promise.reject(requestError))
+
+	interceptResponse = (response) ->
+		interceptResponseOrError(Promise.resolve(response))
+
+	interceptResponseError = (responseError) ->
+		interceptResponseOrError(Promise.reject(responseError))
+
+	interceptRequestOrError = (initialPromise) ->
+		Promise.resolve(
+			exports.interceptors.reduce (promise, { request, requestError }) ->
+				if request? or requestError?
+					promise.then(request, requestError)
+				else
+					promise
+			, initialPromise
+		)
+
+	interceptResponseOrError = (initialPromise) ->
+		interceptors = exports.interceptors.slice().reverse()
+		Promise.resolve(
+			interceptors.reduce (promise, { response, responseError }) ->
+				if response? or responseError?
+					promise.then(response, responseError)
+				else
+					promise
+			, initialPromise
+		)
+
 	###*
 	# @summary Perform an HTTP request to Resin.io
 	# @function
@@ -138,7 +177,10 @@ module.exports = getRequest = ({ token, debug = false, retries = 0, isBrowser = 
 		# case we might cause unnecessary ESOCKETTIMEDOUT errors.
 		options.timeout ?= 30000
 
-		prepareOptions(options).then(utils.requestAsync).then (response) ->
+		prepareOptions(options)
+		.then(interceptRequestOptions, interceptRequestError)
+		.then(utils.requestAsync)
+		.then (response) ->
 			utils.getBody(response)
 			.then (body) ->
 				response = assign({}, response, { body })
@@ -149,6 +191,7 @@ module.exports = getRequest = ({ token, debug = false, retries = 0, isBrowser = 
 					throw new errors.ResinRequestError(responseError, response.statusCode)
 
 				return response
+		.then(interceptResponse, interceptResponseError)
 
 	###*
 	# @summary Stream an HTTP response from Resin.io.
@@ -191,7 +234,10 @@ module.exports = getRequest = ({ token, debug = false, retries = 0, isBrowser = 
 	exports.stream = onlyIf(not isBrowser) (options = {}) ->
 		rindle = require('rindle')
 
-		prepareOptions(options).then(progress.estimate).then (download) ->
+		prepareOptions(options)
+		.then(interceptRequestOptions, interceptRequestError)
+		.then(progress.estimate)
+		.then (download) ->
 			if not utils.isErrorCode(download.response.statusCode)
 				# TODO: Move this to resin-image-manager
 				download.mime = download.response.headers.get('Content-Type')
@@ -205,7 +251,57 @@ module.exports = getRequest = ({ token, debug = false, retries = 0, isBrowser = 
 				responseError = data or 'The request was unsuccessful'
 				debugRequest(options, download.response)
 				throw new errors.ResinRequestError(responseError, download.response.statusCode)
+		.then(interceptResponse, interceptResponseError)
+
+	###*
+	# @summary Array of interceptors
+	# @type {Interceptor[]}
+	# @public
+	#
+	# @description
+	# The current array of interceptors to use. Interceptors intercept requests made
+	# by calls to `.stream()` and `.send()` (some of which are made internally) and
+	# are executed in the order they appear in this array for requests, and in the
+	# reverse order for responses.
+	#
+	# @example
+	# request.interceptors.push(
+	# 	requestError: (error) ->
+	#		console.log(error)
+	#		throw error
+	# )
+	###
+	exports.interceptors = interceptors
 
 	return exports
+
+###*
+# @typedef Interceptor
+# @type {object}
+#
+# @description
+# An interceptor implements some set of the four interception hook callbacks.
+# To continue processing, each function should return a value or a promise that
+# successfully resolves to a value.
+#
+# To halt processing, each function should throw an error or return a promise that
+# rejects with an error.
+#
+# @property {function} [request] - Callback invoked before requests are made. Called with
+# the request options, should return (or resolve to) new request options, or throw/reject.
+#
+# @property {function} [response] - Callback invoked before responses are returned. Called with
+# the response, should return (or resolve to) a new response, or throw/reject.
+#
+# @property {function} [requestError] - Callback invoked if an error happens before a request.
+# Called with the error itself, caused by a preceeding request interceptor rejecting/throwing
+# an error for the request, or a failing in preflight token validation. Should return (or resolve
+# to) new request options, or throw/reject.
+#
+# @property {function} [responseError] - Callback invoked if an error happens in the response.
+# Called with the error itself, caused by a preceeding response interceptor rejecting/throwing
+# an error for the request, a network error, or an error response from the server. Should return
+# (or resolve to) a new response, or throw/reject.
+###
 
 getRequest._setFetch = utils._setFetch
