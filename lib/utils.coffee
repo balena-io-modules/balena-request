@@ -238,7 +238,8 @@ processRequestOptions = (options = {}) ->
 
 	opts.body = body
 
-	headers['Accept-Encoding'] or= 'compress, gzip'
+	if not IS_BROWSER
+		headers['Accept-Encoding'] or= 'compress, gzip'
 
 	if options.followRedirect
 		opts.redirect = 'follow'
