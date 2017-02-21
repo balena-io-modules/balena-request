@@ -248,7 +248,9 @@ processRequestOptions = function(options) {
     headers['Content-Type'] = 'application/json';
   }
   opts.body = body;
-  headers['Accept-Encoding'] || (headers['Accept-Encoding'] = 'compress, gzip');
+  if (!IS_BROWSER) {
+    headers['Accept-Encoding'] || (headers['Accept-Encoding'] = 'compress, gzip');
+  }
   if (options.followRedirect) {
     opts.redirect = 'follow';
   }
