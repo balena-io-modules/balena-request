@@ -179,7 +179,11 @@ module.exports = getRequest = ({
 
 		prepareOptions(options)
 		.then(interceptRequestOptions, interceptRequestError)
-		.then(utils.requestAsync)
+		.then (options) ->
+			utils.requestAsync(options)
+			.catch (error) ->
+				error.requestOptions = options
+				throw error
 		.then (response) ->
 			utils.getBody(response)
 			.then (body) ->
@@ -188,7 +192,7 @@ module.exports = getRequest = ({
 				if utils.isErrorCode(response.statusCode)
 					responseError = utils.getErrorMessageFromResponse(response)
 					debugRequest(options, response)
-					throw new errors.ResinRequestError(responseError, response.statusCode)
+					throw new errors.ResinRequestError(responseError, response.statusCode, options)
 
 				return response
 		.then(interceptResponse, interceptResponseError)

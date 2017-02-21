@@ -180,7 +180,12 @@ module.exports = getRequest = function(arg) {
     if (options.timeout == null) {
       options.timeout = 30000;
     }
-    return prepareOptions(options).then(interceptRequestOptions, interceptRequestError).then(utils.requestAsync).then(function(response) {
+    return prepareOptions(options).then(interceptRequestOptions, interceptRequestError).then(function(options) {
+      return utils.requestAsync(options)["catch"](function(error) {
+        error.requestOptions = options;
+        throw error;
+      });
+    }).then(function(response) {
       return utils.getBody(response).then(function(body) {
         var responseError;
         response = assign({}, response, {
@@ -189,7 +194,7 @@ module.exports = getRequest = function(arg) {
         if (utils.isErrorCode(response.statusCode)) {
           responseError = utils.getErrorMessageFromResponse(response);
           debugRequest(options, response);
-          throw new errors.ResinRequestError(responseError, response.statusCode);
+          throw new errors.ResinRequestError(responseError, response.statusCode, options);
         }
         return response;
       });

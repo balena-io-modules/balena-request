@@ -234,6 +234,37 @@ describe 'An interceptor', ->
 
 			m.chai.expect(promise).to.eventually.become(200)
 
+		it 'should give responseError the request options for server errors', ->
+			fetchMock.restore()
+			fetchMock.get 'https://500.com', (url, opts) ->
+				status: 500
+
+			request.interceptors[0] = responseError: (err) ->
+				throw err
+
+			promise = request.send
+				url: 'https://500.com'
+				anotherExtraOption: true
+			promise.catch (err) ->
+				m.chai.expect(err.requestOptions.url).to.equal('https://500.com')
+				m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
+
+		it 'should give responseError the request options for network errors', ->
+			fetchMock.restore()
+			fetchMock.get 'https://no-response.com', (url, opts) ->
+				Promise.try ->
+					throw new TypeError('Failed to fetch')
+
+			request.interceptors[0] = responseError: (err) ->
+				throw err
+
+			promise = request.send
+				url: 'https://no-response.com'
+				anotherExtraOption: true
+			promise.catch (err) ->
+				m.chai.expect(err.requestOptions.url).to.equal('https://no-response.com')
+				m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
+
 		inNodeIt 'should call responseError if the server returns an error for a stream', ->
 			fetchMock.restore()
 			fetchMock.get 'https://500.com', (url, opts) ->
