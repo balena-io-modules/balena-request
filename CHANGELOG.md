@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+- Include request config in errors from failed requests
 - Don't add `accept-encoding` in browsers by default (since it doesn't work)
 
 ## [8.2.0] - 2017-02-20
