@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [8.3.1] - 2017-04-03
+
 - Peer depend on resin-token 4.0.0
 
 ## [8.3.0] - 2017-02-23
@@ -320,6 +322,7 @@ We now clone the response object before assigning the parsed body.
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
+[8.3.1]: https://github.com/resin-io-modules/resin-request/compare/v8.3.0...v8.3.1
 [8.3.0]: https://github.com/resin-io-modules/resin-request/compare/v8.2.0...v8.3.0
 [8.2.0]: https://github.com/resin-io-modules/resin-request/compare/v8.1.0...v8.2.0
 [8.1.0]: https://github.com/resin-io-modules/resin-request/compare/v8.0.1...v8.1.0
