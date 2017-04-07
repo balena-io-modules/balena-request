@@ -26,7 +26,6 @@ defaults = require('lodash/defaults')
 isEmpty = require('lodash/isEmpty')
 
 errors = require('resin-errors')
-getToken = require('resin-token')
 utils = require('./utils')
 progress = require('./progress')
 
