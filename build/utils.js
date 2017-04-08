@@ -98,14 +98,17 @@ exports.shouldUpdateToken = function(token) {
  *			Authorization: authorizationHeader
  */
 
-exports.getAuthorizationHeader = function(token) {
+exports.getAuthorizationHeader = Promise.method(function(token) {
+  if (token == null) {
+    return;
+  }
   return token.get().then(function(sessionToken) {
     if (sessionToken == null) {
       return;
     }
     return "Bearer " + sessionToken;
   });
-};
+});
 
 
 /**
