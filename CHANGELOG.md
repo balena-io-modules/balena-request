@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+- Removed unused `resin-token` import, so that it's possible to use the module with api keys without installing `resin-token`
+
 ## [8.3.1] - 2017-04-03
 
 - Peer depend on resin-token 4.0.0
