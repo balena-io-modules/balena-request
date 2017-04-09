@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+- Updated rindle so that bluebird and lodash can be deduped
 - Removed unused `resin-token` import, so that it's possible to use the module with api keys without installing `resin-token`
 
 ## [8.3.1] - 2017-04-03
