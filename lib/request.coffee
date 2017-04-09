@@ -61,7 +61,7 @@ module.exports = getRequest = ({
 			delete options.baseUrl
 
 		Promise.try ->
-			return if not options.refreshToken
+			return if not (token? and options.refreshToken)
 
 			utils.shouldUpdateToken(token).then (shouldUpdateToken) ->
 				return if not shouldUpdateToken

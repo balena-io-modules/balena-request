@@ -76,7 +76,8 @@ exports.shouldUpdateToken = (token) ->
 #		headers =
 #			Authorization: authorizationHeader
 ###
-exports.getAuthorizationHeader = (token) ->
+exports.getAuthorizationHeader = Promise.method (token) ->
+	return if not token?
 	token.get().then (sessionToken) ->
 		return if not sessionToken?
 		return "Bearer #{sessionToken}"

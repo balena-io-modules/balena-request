@@ -68,7 +68,7 @@ module.exports = getRequest = function(arg) {
       delete options.baseUrl;
     }
     return Promise["try"](function() {
-      if (!options.refreshToken) {
+      if (!((token != null) && options.refreshToken)) {
         return;
       }
       return utils.shouldUpdateToken(token).then(function(shouldUpdateToken) {
