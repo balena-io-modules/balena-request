@@ -68,9 +68,9 @@ by calls to `.stream()` and `.send()` (some of which are made internally) and
 are executed in the order they appear in this array for requests, and in the
 reverse order for responses.
 
-**Kind**: static property of <code>[request](#module_request)</code>  
+**Kind**: static property of [<code>request</code>](#module_request)  
 **Summary**: Array of interceptors  
-**Access:** public  
+**Access**: public  
 **Example**  
 ```js
 request.interceptors.push(
@@ -86,10 +86,10 @@ This function automatically handles authorization with Resin.io.
 
 The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
 
-**Kind**: static method of <code>[request](#module_request)</code>  
+**Kind**: static method of [<code>request</code>](#module_request)  
 **Summary**: Perform an HTTP request to Resin.io  
 **Returns**: <code>Promise.&lt;Object&gt;</code> - response  
-**Access:** public  
+**Access**: public  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -134,10 +134,10 @@ The stream may also contain the following custom properties:
 
 See `request.send()` for an explanation on how this function handles authentication.
 
-**Kind**: static method of <code>[request](#module_request)</code>  
+**Kind**: static method of [<code>request</code>](#module_request)  
 **Summary**: Stream an HTTP response from Resin.io.  
 **Returns**: <code>Promise.&lt;Stream&gt;</code> - response  
-**Access:** public  
+**Access**: public  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -168,7 +168,7 @@ successfully resolves to a value.
 To halt processing, each function should throw an error or return a promise that
 rejects with an error.
 
-**Kind**: inner typedef of <code>[request](#module_request)</code>  
+**Kind**: inner typedef of [<code>request</code>](#module_request)  
 **Properties**
 
 | Name | Type | Description |

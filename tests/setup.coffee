@@ -1,5 +1,4 @@
 _ = require('lodash')
-Promise = require('bluebird')
 
 IS_BROWSER = window?
 
@@ -12,11 +11,12 @@ if not IS_BROWSER
 
 token = require('resin-token')({ dataDirectory })
 getRequest = require('../lib/request')
-getRequest._setFetch(mockedFetch)
 
-getCustomRequest = (opts) ->
-	opts = _.assign({}, opts, { token, debug: false, isBrowser: IS_BROWSER })
-	getRequest(opts)
+getCustomRequest = (opts, mockFetch = true) ->
+	opts = _.assign({}, { token, debug: false, isBrowser: IS_BROWSER }, opts)
+	request = getRequest(opts)
+	request._setFetch(mockedFetch) if mockFetch
+	return request
 
 module.exports = ->
 	IS_BROWSER: IS_BROWSER

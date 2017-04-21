@@ -71,14 +71,16 @@ getProgressStream = (total, onState = noop) ->
 #		stream.on 'progress', (state) ->
 #			console.log(state)
 ###
-exports.estimate = (options) ->
+exports.estimate = (requestAsync) -> (options) ->
+	requestAsync ?= utils.getRequestAsync()
+
 	zlib = require('zlib')
 	stream = require('stream')
 
 	options.gzip = false
 	options.headers['Accept-Encoding'] = 'gzip, deflate'
 
-	return utils.requestAsync(options)
+	return requestAsync(options)
 	.then (response) ->
 		output = new stream.PassThrough()
 		output.response = response

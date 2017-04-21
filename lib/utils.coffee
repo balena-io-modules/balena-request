@@ -15,7 +15,7 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
-{ fetch: _fetch, Headers } = require('fetch-ponyfill')({ Promise })
+{ fetch: normalFetch, Headers } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
 parseInt = require('lodash/parseInt')
@@ -28,16 +28,7 @@ IS_BROWSER = window?
 # @module utils
 ###
 
-fetch = _fetch
 exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
-
-###*
-# @summary Override the fetch implementation
-# @function
-# @protected
-###
-exports._setFetch = (_fetch) ->
-	fetch = _fetch
 
 ###*
 # @summary Determine if the token should be updated
@@ -290,7 +281,7 @@ exports.getBody = processBody = (response) ->
 
 # This is the actual implementation that hides the internal `retriesRemaining` parameter
 
-requestAsync = (options, retriesRemaining) ->
+requestAsync = (fetch, options, retriesRemaining) ->
 	[ url, opts ] = processRequestOptions(options)
 	retriesRemaining ?= opts.retries
 
@@ -309,22 +300,26 @@ requestAsync = (options, retriesRemaining) ->
 		return response
 
 	if retriesRemaining > 0 then p.catch ->
-		requestAsync(options, retriesRemaining - 1)
+		requestAsync(fetch, options, retriesRemaining - 1)
 	else p
 
 ###*
-# @summary The method that keeps partial compatibility with promisified `request` but uses `fetch` behind the scenes.
+# @summary The factory that returns the `requestAsync` function.
 # @function
 # @protected
 #
-# @param {Object} options
+# @param {Function} [fetch] - the fetch implementation, defaults to that returned by `fetch-ponyfill`.
+#
+# @description The returned function keeps partial compatibility with promisified `request`
+# but uses `fetch` behind the scenes.
+# It accepts the `options` object.
 #
 # @example
-# utils.requestAsync({ url: 'http://example.com' }).then (response) ->
+# utils.getRequestAsync()({ url: 'http://example.com' }).then (response) ->
 # 	console.log(response)
 ###
-exports.requestAsync = (options) ->
-	requestAsync(options)
+exports.getRequestAsync = (fetch = normalFetch) -> (options) ->
+	requestAsync(fetch, options)
 
 exports.notImplemented = notImplemented = ->
 	throw new Error('The method is not implemented.')
