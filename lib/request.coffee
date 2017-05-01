@@ -38,6 +38,8 @@ module.exports = getRequest = ({
 	isBrowser = false,
 	interceptors = []
 } = {}) ->
+	requestAsync = utils.getRequestAsync()
+
 	debugRequest = if not debug then noop else utils.debugRequest
 
 	exports = {}
@@ -179,7 +181,7 @@ module.exports = getRequest = ({
 		prepareOptions(options)
 		.then(interceptRequestOptions, interceptRequestError)
 		.then (options) ->
-			utils.requestAsync(options)
+			requestAsync(options)
 			.catch (error) ->
 				error.requestOptions = options
 				throw error
@@ -239,7 +241,7 @@ module.exports = getRequest = ({
 
 		prepareOptions(options)
 		.then(interceptRequestOptions, interceptRequestError)
-		.then(progress.estimate)
+		.then(progress.estimate(requestAsync))
 		.then (download) ->
 			if not utils.isErrorCode(download.response.statusCode)
 				# TODO: Move this to resin-image-manager
@@ -276,6 +278,9 @@ module.exports = getRequest = ({
 	###
 	exports.interceptors = interceptors
 
+	exports._setFetch = (fetch) ->
+		requestAsync = utils.getRequestAsync(fetch)
+
 	return exports
 
 ###*
@@ -306,5 +311,3 @@ module.exports = getRequest = ({
 # an error for the request, a network error, or an error response from the server. Should return
 # (or resolve to) a new response, or throw/reject.
 ###
-
-getRequest._setFetch = utils._setFetch
