@@ -5,6 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Fix bug with token error handling when code is minified
 - Added proxy support tests
 
 ## [8.4.0] - 2017-04-10

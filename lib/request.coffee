@@ -77,7 +77,7 @@ module.exports = getRequest = ({
 				# however the fact that /whoami returns 401 allows
 				# us to safely assume the token is expired
 				.catch
-					name: 'ResinRequestError'
+					code: 'ResinRequestError'
 					statusCode: 401
 				, ->
 					return token.get().tap(token.remove).then (sessionToken) ->
