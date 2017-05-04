@@ -81,7 +81,7 @@ module.exports = getRequest = function(arg) {
           baseUrl: baseUrl,
           refreshToken: false
         })["catch"]({
-          name: 'ResinRequestError',
+          code: 'ResinRequestError',
           statusCode: 401
         }, function() {
           return token.get().tap(token.remove).then(function(sessionToken) {
