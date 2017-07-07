@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [8.5.0] - 2017-07-07
+
 ### Changed
 
 - Added the new `responseFormat` option to `send` to define the explicit response body format
@@ -339,6 +341,8 @@ We now clone the response object before assigning the parsed body.
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
+[8.5.0]: https://github.com/resin-io-modules/resin-request/compare/v8.4.0...v8.5.0
+[8.4.0]: https://github.com/resin-io-modules/resin-request/compare/v8.3.1...v8.4.0
 [8.3.1]: https://github.com/resin-io-modules/resin-request/compare/v8.3.0...v8.3.1
 [8.3.0]: https://github.com/resin-io-modules/resin-request/compare/v8.2.0...v8.3.0
 [8.2.0]: https://github.com/resin-io-modules/resin-request/compare/v8.1.0...v8.2.0
