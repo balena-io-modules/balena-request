@@ -145,12 +145,14 @@ module.exports = getRequest = ({
 	# @description
 	# This function automatically handles authorization with Resin.io.
 	#
-	# The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` options. Otherwise, the request is made anonymously.
+	# The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` option. Otherwise, the request is made anonymously.
 	#
 	# @param {Object} options - options
 	# @param {String} [options.method='GET'] - method
 	# @param {String} options.url - relative url
 	# @param {String} [options.apiKey] - api key
+	# @param {String} [options.responseFormat] - explicit expected response format,
+	# can be one of 'blob', 'json', 'text', 'none'. Defaults to sniffing the content-type
 	# @param {*} [options.body] - body
 	#
 	# @returns {Promise<Object>} response
@@ -172,8 +174,7 @@ module.exports = getRequest = ({
 	# .get('body')
 	###
 	exports.send = (options = {}) ->
-
-		# Only set a default timeout when doing a normal HTTP
+		# Only set the default timeout when doing a normal HTTP
 		# request and not also when streaming since in the latter
 		# case we might cause unnecessary ESOCKETTIMEDOUT errors.
 		options.timeout ?= 30000
@@ -186,7 +187,7 @@ module.exports = getRequest = ({
 				error.requestOptions = options
 				throw error
 		.then (response) ->
-			utils.getBody(response)
+			utils.getBody(response, options.responseFormat)
 			.then (body) ->
 				response = assign({}, response, { body })
 
