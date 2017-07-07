@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, includes, normalFetch, notImplemented, parseInt, processBody, processRequestOptions, qs, ref, requestAsync, urlLib;
+var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, includes, normalFetch, notImplemented, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
 
 Promise = require('bluebird');
 
@@ -32,6 +32,8 @@ parseInt = require('lodash/parseInt');
 assign = require('lodash/assign');
 
 includes = require('lodash/includes');
+
+errors = require('resin-errors');
 
 IS_BROWSER = typeof window !== "undefined" && window !== null;
 
@@ -265,17 +267,22 @@ processRequestOptions = function(options) {
  * @protected
  *
  * @param {Response} response
+ * @param {String} [responseFormat] - explicit expected response format,
+ * can be one of 'blob', 'json', 'text', 'none'. Defaults to sniffing the content-type
  *
  * @example
  * utils.getBody(response).then (body) ->
  * 	console.log(body)
  */
 
-exports.getBody = processBody = function(response) {
+exports.getBody = function(response, responseFormat) {
   return Promise["try"](function() {
     var contentType;
+    if (responseFormat === 'none') {
+      return null;
+    }
     contentType = response.headers.get('Content-Type');
-    if (includes(contentType, 'binary/octet-stream')) {
+    if (responseFormat === 'blob' || ((responseFormat == null) && includes(contentType, 'binary/octet-stream'))) {
       if (typeof response.blob === 'function') {
         return response.blob();
       }
@@ -284,10 +291,13 @@ exports.getBody = processBody = function(response) {
       }
       throw new Error('This `fetch` implementation does not support decoding binary streams.');
     }
-    if (includes(contentType, 'application/json')) {
+    if (responseFormat === 'json' || ((responseFormat == null) && includes(contentType, 'application/json'))) {
       return response.json();
     }
-    return response.text();
+    if ((responseFormat == null) || responseFormat === 'text') {
+      return response.text();
+    }
+    throw new errors.ResinInvalidParameterError('responseFormat', responseFormat);
   });
 };
 

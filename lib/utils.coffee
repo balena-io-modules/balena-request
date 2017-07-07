@@ -21,6 +21,7 @@ qs = require('qs')
 parseInt = require('lodash/parseInt')
 assign = require('lodash/assign')
 includes = require('lodash/includes')
+errors = require('resin-errors')
 
 IS_BROWSER = window?
 
@@ -255,17 +256,22 @@ processRequestOptions = (options = {}) ->
 # @protected
 #
 # @param {Response} response
+# @param {String} [responseFormat] - explicit expected response format,
+# can be one of 'blob', 'json', 'text', 'none'. Defaults to sniffing the content-type
 #
 # @example
 # utils.getBody(response).then (body) ->
 # 	console.log(body)
 ###
-exports.getBody = processBody = (response) ->
+exports.getBody = (response, responseFormat) ->
 	# wrap in Bluebird promise for extra methods
 	return Promise.try ->
+		if responseFormat is 'none'
+			return null
+
 		contentType = response.headers.get('Content-Type')
 
-		if includes(contentType, 'binary/octet-stream')
+		if responseFormat is 'blob' or (not responseFormat? and includes(contentType, 'binary/octet-stream'))
 			# this is according to the standard
 			if typeof response.blob is 'function'
 				return response.blob()
@@ -274,10 +280,14 @@ exports.getBody = processBody = (response) ->
 				return response.buffer()
 			throw new Error('This `fetch` implementation does not support decoding binary streams.')
 
-		if includes(contentType, 'application/json')
+		if responseFormat is 'json' or (not responseFormat? and includes(contentType, 'application/json'))
 			return response.json()
 
-		return response.text()
+
+		if not responseFormat? or responseFormat is 'text'
+			return response.text()
+
+		throw new errors.ResinInvalidParameterError('responseFormat', responseFormat)
 
 # This is the actual implementation that hides the internal `retriesRemaining` parameter
 

@@ -5,8 +5,14 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-- Fix bug with token error handling when code is minified
+### Changed
+
+- Added the new `responseFormat` option to `send` to define the explicit response body format
 - Added proxy support tests
+
+### Fixed
+
+- Fix bug with token error handling when code is minified
 
 ## [8.4.0] - 2017-04-10
 
