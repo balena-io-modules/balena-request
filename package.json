@@ -23,7 +23,8 @@
     "test-browser": "karma start",
     "build": "gulp build",
     "prepublish": "npm test && npm run build",
-    "readme": "jsdoc2md --template doc/README.hbs build/request.js build/progress.js build/utils.js > README.md"
+		"readme": "jsdoc2md --template doc/README.hbs build/request.js build/progress.js build/utils.js > README.md",
+		"prettify": "prettier --use-tabs --single-quote --write lib/*.ts"
   },
   "author": "Juan Cruz Viotti <juanchiviotti@gmail.com>",
   "license": "Apache-2.0",

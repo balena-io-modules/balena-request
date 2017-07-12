@@ -44,7 +44,7 @@ let getProgressStream = (total, onState = noop) => {
 		length: total
 	});
 
-	progressStream.on('progress', (state) => {
+	progressStream.on('progress', state => {
 		if (state.length === 0) {
 			return onState();
 		}
@@ -76,43 +76,49 @@ let getProgressStream = (total, onState = noop) => {
  *		stream.on 'progress', (state) ->
  *			console.log(state)
  */
-export const estimate = (requestAsync) => { return (options) => {
-	if (typeof requestAsync === 'undefined' || requestAsync === null) { requestAsync = utils.getRequestAsync(); }
-
-	const zlib = require('zlib');
-	const stream = require('stream');
-
-	options.gzip = false;
-	options.headers['Accept-Encoding'] = 'gzip, deflate';
-
-	return requestAsync(options)
-	.then((response) => {
-		const output = new stream.PassThrough();
-		output.response = response;
-
-		const responseLength = utils.getResponseLength(response);
-		const total = responseLength.uncompressed || responseLength.compressed;
-
-		const responseStream = response.body;
-
-		const progressStream = getProgressStream(total, state => output.emit('progress', state)
-		);
-
-		if (utils.isResponseCompressed(response)) {
-			const gunzip = new zlib.createGunzip();
-
-			// Uncompress after or before piping trough progress
-			// depending on the response length available to us
-			if ((responseLength.compressed != null) && (responseLength.uncompressed == null)) {
-				responseStream.pipe(progressStream).pipe(gunzip).pipe(output);
-			} else {
-				responseStream.pipe(gunzip).pipe(progressStream).pipe(output);
-			}
-
-		} else {
-			responseStream.pipe(progressStream).pipe(output);
+export const estimate = requestAsync => {
+	return options => {
+		if (typeof requestAsync === 'undefined' || requestAsync === null) {
+			requestAsync = utils.getRequestAsync();
 		}
 
-		return output;
-	});
-}; }
+		const zlib = require('zlib');
+		const stream = require('stream');
+
+		options.gzip = false;
+		options.headers['Accept-Encoding'] = 'gzip, deflate';
+
+		return requestAsync(options).then(response => {
+			const output = new stream.PassThrough();
+			output.response = response;
+
+			const responseLength = utils.getResponseLength(response);
+			const total = responseLength.uncompressed || responseLength.compressed;
+
+			const responseStream = response.body;
+
+			const progressStream = getProgressStream(total, state =>
+				output.emit('progress', state)
+			);
+
+			if (utils.isResponseCompressed(response)) {
+				const gunzip = new zlib.createGunzip();
+
+				// Uncompress after or before piping trough progress
+				// depending on the response length available to us
+				if (
+					responseLength.compressed != null &&
+					responseLength.uncompressed == null
+				) {
+					responseStream.pipe(progressStream).pipe(gunzip).pipe(output);
+				} else {
+					responseStream.pipe(gunzip).pipe(progressStream).pipe(output);
+				}
+			} else {
+				responseStream.pipe(progressStream).pipe(output);
+			}
+
+			return output;
+		});
+	};
+};

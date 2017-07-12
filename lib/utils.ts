@@ -49,7 +49,7 @@ export const TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60; // 1 hour in milliseco
  *		if shouldUpdateToken
  *			console.log('Updating token!')
  */
-export const shouldUpdateToken = (token) =>
+export const shouldUpdateToken = token =>
 	token.getAge().then(age => age >= TOKEN_REFRESH_INTERVAL);
 
 /**
@@ -68,10 +68,14 @@ export const shouldUpdateToken = (token) =>
  *		headers =
  *			Authorization: authorizationHeader
  */
-export const getAuthorizationHeader = Promise.method((token) => {
-	if (token == null) { return; }
-	return token.get().then((sessionToken) => {
-		if (sessionToken == null) { return; }
+export const getAuthorizationHeader = Promise.method(token => {
+	if (token == null) {
+		return;
+	}
+	return token.get().then(sessionToken => {
+		if (sessionToken == null) {
+			return;
+		}
 		return `Bearer ${sessionToken}`;
 	});
 });
@@ -92,7 +96,7 @@ export const getAuthorizationHeader = Promise.method((token) => {
  *		throw error if error?
  *		message = utils.getErrorMessageFromResponse(response)
  */
-export const getErrorMessageFromResponse = (response) => {
+export const getErrorMessageFromResponse = response => {
 	if (!response.body) {
 		return 'The request was unsuccessful';
 	}
@@ -101,7 +105,7 @@ export const getErrorMessageFromResponse = (response) => {
 	}
 
 	return response.body;
-}
+};
 
 /**
  * @summary Check if the status code represents an error
@@ -115,8 +119,7 @@ export const getErrorMessageFromResponse = (response) => {
  * if utils.isErrorCode(400)
  *		console.log('400 is an error code!')
  */
-export const isErrorCode = (statusCode) =>
-	statusCode >= 400;
+export const isErrorCode = statusCode => statusCode >= 400;
 
 /**
  * @summary Check whether a response body is compressed
@@ -130,7 +133,7 @@ export const isErrorCode = (statusCode) =>
  * if utils.isResponseCompressed(response)
  * 	console.log('The response body is compressed')
  */
-export const isResponseCompressed = (response) =>
+export const isResponseCompressed = response =>
 	response.headers.get('Content-Encoding') === 'gzip';
 
 /**
@@ -146,14 +149,16 @@ export const isResponseCompressed = (response) =>
  * console.log(responseLength.compressed)
  * console.log(responseLength.uncompressed)
  */
-export const getResponseLength = (response) => {
+export const getResponseLength = response => {
 	return {
-		uncompressed: parseInt(response.headers.get('Content-Length'), 10) || undefined,
+		uncompressed:
+			parseInt(response.headers.get('Content-Length'), 10) || undefined,
 		// X-Transfer-Length equals the compressed size of the body.
 		// This header is sent by Image Maker when downloading OS images.
-		compressed: parseInt(response.headers.get('X-Transfer-Length'), 10) || undefined
+		compressed:
+			parseInt(response.headers.get('X-Transfer-Length'), 10) || undefined
 	};
-}
+};
 
 /**
  * @summary Print debug information about a request/response.
@@ -173,12 +178,16 @@ export const getResponseLength = (response) => {
  * 	utils.debugRequest(options, response)
  */
 export const debugRequest = (options, response) => {
-	return console.error(Object.assign({
-		statusCode: response.statusCode,
-		duration: response.duration
-	}
-	, options));
-}
+	return console.error(
+		Object.assign(
+			{
+				statusCode: response.statusCode,
+				duration: response.duration
+			},
+			options
+		)
+	);
+};
 
 // fetch adapter
 
@@ -234,7 +243,9 @@ const processRequestOptions = (options = {}) => {
 	opts.compress = options.gzip;
 
 	let { body, headers } = options;
-	if (typeof headers === 'undefined' || headers === null) { headers = {}; }
+	if (typeof headers === 'undefined' || headers === null) {
+		headers = {};
+	}
 	if (options.json && body) {
 		body = JSON.stringify(body);
 		headers['Content-Type'] = 'application/json';
@@ -243,7 +254,9 @@ const processRequestOptions = (options = {}) => {
 	opts.body = body;
 
 	if (!IS_BROWSER) {
-		if (!headers['Accept-Encoding']) { headers['Accept-Encoding'] = 'compress, gzip'; }
+		if (!headers['Accept-Encoding']) {
+			headers['Accept-Encoding'] = 'compress, gzip';
+		}
 	}
 
 	if (options.followRedirect) {
@@ -259,13 +272,15 @@ const processRequestOptions = (options = {}) => {
 	for (const i = 0; i < UNSUPPORTED_REQUEST_PARAMS.length; i++) {
 		const key = UNSUPPORTED_REQUEST_PARAMS[i];
 		if (options[key] != null) {
-			throw new Error(`The ${key} param is not supported. Value: ${options[key]}`);
+			throw new Error(
+				`The ${key} param is not supported. Value: ${options[key]}`
+			);
 		}
 	}
 
 	opts.mode = 'cors';
 
-	return [ url, opts ];
+	return [url, opts];
 };
 
 /**
@@ -290,7 +305,10 @@ export const getBody = (response, responseFormat) =>
 
 		const contentType = response.headers.get('Content-Type');
 
-		if (responseFormat === 'blob' || ((responseFormat == null) && includes(contentType, 'binary/octet-stream'))) {
+		if (
+			responseFormat === 'blob' ||
+			(responseFormat == null && includes(contentType, 'binary/octet-stream'))
+		) {
 			// this is according to the standard
 			if (typeof response.blob === 'function') {
 				return response.blob();
@@ -299,26 +317,35 @@ export const getBody = (response, responseFormat) =>
 			if (typeof response.buffer === 'function') {
 				return response.buffer();
 			}
-			throw new Error('This `fetch` implementation does not support decoding binary streams.');
+			throw new Error(
+				'This `fetch` implementation does not support decoding binary streams.'
+			);
 		}
 
-		if (responseFormat === 'json' || ((responseFormat == null) && includes(contentType, 'application/json'))) {
+		if (
+			responseFormat === 'json' ||
+			(responseFormat == null && includes(contentType, 'application/json'))
+		) {
 			return response.json();
 		}
 
-
-		if ((responseFormat == null) || responseFormat === 'text') {
+		if (responseFormat == null || responseFormat === 'text') {
 			return response.text();
 		}
 
-		throw new errors.ResinInvalidParameterError('responseFormat', responseFormat);
+		throw new errors.ResinInvalidParameterError(
+			'responseFormat',
+			responseFormat
+		);
 	});
 
 // This is the actual implementation that hides the internal `retriesRemaining` parameter
 
 const requestAsync = (fetch, options, retriesRemaining?: number) => {
-	let [ url, opts ] = processRequestOptions(options);
-	if (typeof retriesRemaining === 'undefined' || retriesRemaining === null) { retriesRemaining = opts.retries; }
+	let [url, opts] = processRequestOptions(options);
+	if (typeof retriesRemaining === 'undefined' || retriesRemaining === null) {
+		retriesRemaining = opts.retries;
+	}
 
 	const requestTime = new Date().getTime();
 	let p = fetch(url, opts);
@@ -326,7 +353,7 @@ const requestAsync = (fetch, options, retriesRemaining?: number) => {
 		p = p.timeout(opts.timeout);
 	}
 
-	p = p.then((response) => {
+	p = p.then(response => {
 		const responseTime = new Date().getTime();
 		response.duration = responseTime - requestTime;
 		response.statusCode = response.status;
@@ -337,8 +364,11 @@ const requestAsync = (fetch, options, retriesRemaining?: number) => {
 		return response;
 	});
 
-	if (retriesRemaining > 0) { return p.catch(() => requestAsync(fetch, options, retriesRemaining - 1));
-	} else { return p; }
+	if (retriesRemaining > 0) {
+		return p.catch(() => requestAsync(fetch, options, retriesRemaining - 1));
+	} else {
+		return p;
+	}
 };
 
 /**
@@ -357,11 +387,17 @@ const requestAsync = (fetch, options, retriesRemaining?: number) => {
  * 	console.log(response)
  */
 export const getRequestAsync = (fetch = normalFetch) => {
-	return options => requestAsync(fetch, options); }
+	return options => requestAsync(fetch, options);
+};
 
 export const notImplemented = () => {
 	throw new Error('The method is not implemented.');
 };
 
-export const onlyIf = (cond) => (fn) => {
-	if (cond) { return fn; } else { return notImplemented; } };
+export const onlyIf = cond => fn => {
+	if (cond) {
+		return fn;
+	} else {
+		return notImplemented;
+	}
+};

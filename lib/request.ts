@@ -31,13 +31,15 @@ import progress from './progress';
 
 const { onlyIf } = utils;
 
-const getRequest = ({
-	token,
-	debug = false,
-	retries = 0,
-	isBrowser = false,
-	interceptors = []
-} = {}) => {
+const getRequest = (
+	{
+		token,
+		debug = false,
+		retries = 0,
+		isBrowser = false,
+		interceptors = []
+	} = {}
+) => {
 	let requestAsync = utils.getRequestAsync();
 
 	const debugRequest = !debug ? noop : utils.debugRequest;
@@ -45,7 +47,6 @@ const getRequest = ({
 	const exports = {};
 
 	const prepareOptions = (options = {}) => {
-
 		defaults(options, {
 			method: 'GET',
 			json: true,
@@ -53,8 +54,7 @@ const getRequest = ({
 			headers: {},
 			refreshToken: true,
 			retries
-		}
-		);
+		});
 
 		const { baseUrl } = options;
 
@@ -67,67 +67,75 @@ const getRequest = ({
 		}
 
 		return Promise.try(() => {
-			if (!((token != null) && options.refreshToken)) { return; }
+			if (!(token != null && options.refreshToken)) {
+				return;
+			}
 
-			return utils.shouldUpdateToken(token).then((shouldUpdateToken) => {
-				if (!shouldUpdateToken) { return; }
-
-				return exports.send({
-					url: '/whoami',
-					baseUrl,
-					refreshToken: false
-				})
-
-				// At this point we're sure there is a saved token,
-				// however the fact that /whoami returns 401 allows
-				// us to safely assume the token is expired
-				.catch({
-					code: 'ResinRequestError',
-					statusCode: 401
+			return utils.shouldUpdateToken(token).then(shouldUpdateToken => {
+				if (!shouldUpdateToken) {
+					return;
 				}
-				, () =>
-					token.get().tap(token.remove).then((sessionToken) => {
-						throw new errors.ResinExpiredToken(sessionToken);
-					})
 
-				)
-
-				.get('body')
-				.then(token.set);
+				return (
+					exports
+						.send({
+							url: '/whoami',
+							baseUrl,
+							refreshToken: false
+						})
+						// At this point we're sure there is a saved token,
+						// however the fact that /whoami returns 401 allows
+						// us to safely assume the token is expired
+						.catch(
+							{
+								code: 'ResinRequestError',
+								statusCode: 401
+							},
+							() =>
+								token.get().tap(token.remove).then(sessionToken => {
+									throw new errors.ResinExpiredToken(sessionToken);
+								})
+						)
+						.get('body')
+						.then(token.set)
+				);
 			});
 		})
+			.then(() => utils.getAuthorizationHeader(token))
+			.then(authorizationHeader => {
+				if (authorizationHeader != null) {
+					options.headers.Authorization = authorizationHeader;
+				}
 
-		.then(() => utils.getAuthorizationHeader(token))
-		.then((authorizationHeader) => {
-			if (authorizationHeader != null) {
-				options.headers.Authorization = authorizationHeader;
-			}
+				if (!isEmpty(options.apiKey)) {
+					// Using `request` qs object results in dollar signs, or other
+					// special characters used to query our OData API, being escaped
+					// and thus leading to all sort of weird error.
+					// The workaround is to append the `apikey` query string manually
+					// to prevent affecting the rest of the query strings.
+					// See https://github.com/request/request/issues/2129
+					options.url += urlLib.parse(options.url).query != null ? '&' : '?';
+					options.url += `apikey=${options.apiKey}`;
+				}
 
-			if (!isEmpty(options.apiKey)) {
-				// Using `request` qs object results in dollar signs, or other
-				// special characters used to query our OData API, being escaped
-				// and thus leading to all sort of weird error.
-				// The workaround is to append the `apikey` query string manually
-				// to prevent affecting the rest of the query strings.
-				// See https://github.com/request/request/issues/2129
-				options.url += (urlLib.parse(options.url).query != null) ? '&' : '?';
-				options.url += `apikey=${options.apiKey}`;
-			}
-
-			return options;
-		});
+				return options;
+			});
 	};
 
-	const interceptRequestOptions = requestOptions => interceptRequestOrError(Promise.resolve(requestOptions));
+	const interceptRequestOptions = requestOptions =>
+		interceptRequestOrError(Promise.resolve(requestOptions));
 
-	const interceptRequestError = requestError => interceptRequestOrError(Promise.reject(requestError));
+	const interceptRequestError = requestError =>
+		interceptRequestOrError(Promise.reject(requestError));
 
-	const interceptResponse = response => interceptResponseOrError(Promise.resolve(response));
+	const interceptResponse = response =>
+		interceptResponseOrError(Promise.resolve(response));
 
-	const interceptResponseError = responseError => interceptResponseOrError(Promise.reject(responseError));
+	const interceptResponseError = responseError =>
+		interceptResponseOrError(Promise.reject(responseError));
 
 	const attachRequestHandlers = (promise, { request, requestError }) => {
-		if ((request != null) || (requestError != null)) {
+		if (request != null || requestError != null) {
 			return promise.then(request, requestError);
 		} else {
 			return promise;
@@ -137,18 +145,17 @@ const getRequest = ({
 	const interceptRequestOrError = initialPromise =>
 		Promise.resolve(
 			exports.interceptors.reduce(attachRequestHandlers, initialPromise)
-		)
-	;
+		);
 
 	const attachResponseHandlers = (promise, { response, responseError }) => {
-		if ((response != null) || (responseError != null)) {
+		if (response != null || responseError != null) {
 			return promise.then(response, responseError);
 		} else {
 			return promise;
 		}
 	};
 
-	const interceptResponseOrError = (initialPromise) => {
+	const interceptResponseOrError = initialPromise => {
 		interceptors = exports.interceptors.slice().reverse();
 		return Promise.resolve(
 			interceptors.reduce(attachResponseHandlers, initialPromise)
@@ -195,32 +202,36 @@ const getRequest = ({
 		// Only set the default timeout when doing a normal HTTP
 		// request and not also when streaming since in the latter
 		// case we might cause unnecessary ESOCKETTIMEDOUT errors.
-		if (options.timeout == null) { options.timeout = 30000; }
+		if (options.timeout == null) {
+			options.timeout = 30000;
+		}
 
 		return prepareOptions(options)
-		.then(interceptRequestOptions, interceptRequestError)
-		.then(options =>
-			requestAsync(options)
-			.catch((error) => {
-				error.requestOptions = options;
-				throw error;
-			})
-		)
-		.then(response =>
-			utils.getBody(response, options.responseFormat)
-			.then((body) => {
-				response = assign({}, response, { body });
+			.then(interceptRequestOptions, interceptRequestError)
+			.then(options =>
+				requestAsync(options).catch(error => {
+					error.requestOptions = options;
+					throw error;
+				})
+			)
+			.then(response =>
+				utils.getBody(response, options.responseFormat).then(body => {
+					response = assign({}, response, { body });
 
-				if (utils.isErrorCode(response.statusCode)) {
-					const responseError = utils.getErrorMessageFromResponse(response);
-					debugRequest(options, response);
-					throw new errors.ResinRequestError(responseError, response.statusCode, options);
-				}
+					if (utils.isErrorCode(response.statusCode)) {
+						const responseError = utils.getErrorMessageFromResponse(response);
+						debugRequest(options, response);
+						throw new errors.ResinRequestError(
+							responseError,
+							response.statusCode,
+							options
+						);
+					}
 
-				return response;
-			})
-		)
-		.then(interceptResponse, interceptResponseError);
+					return response;
+				})
+			)
+			.then(interceptResponse, interceptResponseError);
 	};
 
 	/**
@@ -265,26 +276,28 @@ const getRequest = ({
 		const rindle = require('rindle');
 
 		return prepareOptions(options)
-		.then(interceptRequestOptions, interceptRequestError)
-		.then(progress.estimate(requestAsync))
-		.then((download) => {
-			if (!utils.isErrorCode(download.response.statusCode)) {
-				// TODO: Move this to resin-image-manager
-				download.mime = download.response.headers.get('Content-Type');
+			.then(interceptRequestOptions, interceptRequestError)
+			.then(progress.estimate(requestAsync))
+			.then(download => {
+				if (!utils.isErrorCode(download.response.statusCode)) {
+					// TODO: Move this to resin-image-manager
+					download.mime = download.response.headers.get('Content-Type');
 
-				return download;
-			}
+					return download;
+				}
 
-			// If status code is an error code, interpret
-			// the body of the request as an error.
-			return rindle.extract(download)
-			.then((data) => {
-				const responseError = data || 'The request was unsuccessful';
-				debugRequest(options, download.response);
-				throw new errors.ResinRequestError(responseError, download.response.statusCode);
-			});
-		})
-		.then(interceptResponse, interceptResponseError);
+				// If status code is an error code, interpret
+				// the body of the request as an error.
+				return rindle.extract(download).then(data => {
+					const responseError = data || 'The request was unsuccessful';
+					debugRequest(options, download.response);
+					throw new errors.ResinRequestError(
+						responseError,
+						download.response.statusCode
+					);
+				});
+			})
+			.then(interceptResponse, interceptResponseError);
 	});
 
 	/**
@@ -307,7 +320,9 @@ const getRequest = ({
 	 */
 	exports.interceptors = interceptors;
 
-	exports._setFetch = fetch => requestAsync = utils.getRequestAsync(fetch);
+	exports._setFetch = fetch => {
+		requestAsync = utils.getRequestAsync(fetch);
+	};
 
 	return exports;
 };
