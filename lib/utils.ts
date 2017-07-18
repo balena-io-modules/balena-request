@@ -15,12 +15,12 @@ limitations under the License.
 */
 
 import * as Promise from 'bluebird';
-import * as fetchPonyfill from 'fetch-ponyfill';
+import fetchPonyfill = require('fetch-ponyfill');
 import * as urlLib from 'url';
 import * as qs from 'qs';
-import * as parseInt from 'lodash/parseInt';
-import * as includes from 'lodash/includes';
-import * as assign from 'lodash/assign';
+import parseInt = require('lodash/parseInt');
+import includes = require('lodash/includes');
+import assign = require('lodash/assign');
 import { ResinInvalidParameterError } from 'resin-errors';
 
 import * as ResinToken from 'resin-token';
@@ -71,17 +71,19 @@ export const shouldUpdateToken = (token: ResinToken.ResinToken) =>
  *		headers =
  *			Authorization: authorizationHeader
  */
-export const getAuthorizationHeader = Promise.method((token: ResinToken.ResinToken) => {
-	if (token == null) {
-		return;
-	}
-	return token.get().then(sessionToken => {
-		if (sessionToken == null) {
+export const getAuthorizationHeader = Promise.method(
+	(token: ResinToken.ResinToken) => {
+		if (token == null) {
 			return;
 		}
-		return `Bearer ${sessionToken}`;
-	});
-});
+		return token.get().then(sessionToken => {
+			if (sessionToken == null) {
+				return;
+			}
+			return `Bearer ${sessionToken}`;
+		});
+	}
+);
 
 /**
  * @summary Get error message from response
@@ -99,7 +101,9 @@ export const getAuthorizationHeader = Promise.method((token: ResinToken.ResinTok
  *		throw error if error?
  *		message = utils.getErrorMessageFromResponse(response)
  */
-export const getErrorMessageFromResponse = (response: Response & { body: object; }) => {
+export const getErrorMessageFromResponse = (
+	response: Response & { body: object }
+) => {
 	if (!response.body) {
 		return 'The request was unsuccessful';
 	}
@@ -182,7 +186,7 @@ export const getResponseLength = (response: Response) => {
  */
 export const debugRequest = (options, response) => {
 	return console.error(
-		Object.assign(
+		assign(
 			{
 				statusCode: response.statusCode,
 				duration: response.duration
@@ -362,8 +366,8 @@ const requestAsync = (fetch: Fetch, options, retriesRemaining?: number) => {
 			statusCode: response.status,
 			request: {
 				headers: options.headers,
-				uri: urlLib.parse(url),
-			},
+				uri: urlLib.parse(url)
+			}
 		});
 	});
 
