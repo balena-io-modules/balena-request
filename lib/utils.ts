@@ -16,11 +16,14 @@ limitations under the License.
 
 import * as Promise from 'bluebird';
 import * as fetchPonyfill from 'fetch-ponyfill';
-import urlLib from 'url';
-import qs from 'qs';
-import parseInt from 'lodash/parseInt';
-import includes from 'lodash/includes';
-import errors from 'resin-errors';
+import * as urlLib from 'url';
+import * as qs from 'qs';
+import * as parseInt from 'lodash/parseInt';
+import * as includes from 'lodash/includes';
+import * as assign from 'lodash/assign';
+import { ResinInvalidParameterError } from 'resin-errors';
+
+import * as ResinToken from 'resin-token';
 
 const { fetch: normalFetch, Headers } = fetchPonyfill({ Promise });
 
@@ -49,7 +52,7 @@ export const TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60; // 1 hour in milliseco
  *		if shouldUpdateToken
  *			console.log('Updating token!')
  */
-export const shouldUpdateToken = token =>
+export const shouldUpdateToken = (token: ResinToken.ResinToken) =>
 	token.getAge().then(age => age >= TOKEN_REFRESH_INTERVAL);
 
 /**
@@ -68,7 +71,7 @@ export const shouldUpdateToken = token =>
  *		headers =
  *			Authorization: authorizationHeader
  */
-export const getAuthorizationHeader = Promise.method(token => {
+export const getAuthorizationHeader = Promise.method((token: ResinToken.ResinToken) => {
 	if (token == null) {
 		return;
 	}
@@ -96,7 +99,7 @@ export const getAuthorizationHeader = Promise.method(token => {
  *		throw error if error?
  *		message = utils.getErrorMessageFromResponse(response)
  */
-export const getErrorMessageFromResponse = response => {
+export const getErrorMessageFromResponse = (response: Response & { body: object; }) => {
 	if (!response.body) {
 		return 'The request was unsuccessful';
 	}
@@ -119,7 +122,7 @@ export const getErrorMessageFromResponse = response => {
  * if utils.isErrorCode(400)
  *		console.log('400 is an error code!')
  */
-export const isErrorCode = statusCode => statusCode >= 400;
+export const isErrorCode = (statusCode: number) => statusCode >= 400;
 
 /**
  * @summary Check whether a response body is compressed
@@ -133,7 +136,7 @@ export const isErrorCode = statusCode => statusCode >= 400;
  * if utils.isResponseCompressed(response)
  * 	console.log('The response body is compressed')
  */
-export const isResponseCompressed = response =>
+export const isResponseCompressed = (response: Response) =>
 	response.headers.get('Content-Encoding') === 'gzip';
 
 /**
@@ -149,7 +152,7 @@ export const isResponseCompressed = response =>
  * console.log(responseLength.compressed)
  * console.log(responseLength.uncompressed)
  */
-export const getResponseLength = response => {
+export const getResponseLength = (response: Response) => {
 	return {
 		uncompressed:
 			parseInt(response.headers.get('Content-Length'), 10) || undefined,
@@ -333,15 +336,14 @@ export const getBody = (response, responseFormat) =>
 			return response.text();
 		}
 
-		throw new errors.ResinInvalidParameterError(
-			'responseFormat',
-			responseFormat
-		);
+		throw new ResinInvalidParameterError('responseFormat', responseFormat);
 	});
 
 // This is the actual implementation that hides the internal `retriesRemaining` parameter
 
-const requestAsync = (fetch, options, retriesRemaining?: number) => {
+type Fetch = typeof fetch;
+
+const requestAsync = (fetch: Fetch, options, retriesRemaining?: number) => {
 	let [url, opts] = processRequestOptions(options);
 	if (typeof retriesRemaining === 'undefined' || retriesRemaining === null) {
 		retriesRemaining = opts.retries;
@@ -355,13 +357,14 @@ const requestAsync = (fetch, options, retriesRemaining?: number) => {
 
 	p = p.then(response => {
 		const responseTime = new Date().getTime();
-		response.duration = responseTime - requestTime;
-		response.statusCode = response.status;
-		response.request = {
-			headers: options.headers,
-			uri: urlLib.parse(url)
-		};
-		return response;
+		return assign(response, {
+			duration: responseTime - requestTime,
+			statusCode: response.status,
+			request: {
+				headers: options.headers,
+				uri: urlLib.parse(url),
+			},
+		});
 	});
 
 	if (retriesRemaining > 0) {
@@ -394,7 +397,7 @@ export const notImplemented = () => {
 	throw new Error('The method is not implemented.');
 };
 
-export const onlyIf = cond => fn => {
+export const onlyIf = (cond: boolean) => (fn: Function) => {
 	if (cond) {
 		return fn;
 	} else {

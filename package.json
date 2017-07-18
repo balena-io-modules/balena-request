@@ -17,21 +17,23 @@
     "test": "tests"
   },
   "scripts": {
-    "lint": "gulp lint",
+    "lint": "tslint src/**/*.ts",
     "test": "npm run test-node && npm run test-browser",
     "test-node": "gulp test",
     "test-browser": "karma start",
-    "build": "gulp build",
-    "prepublish": "npm test && npm run build",
-		"readme": "jsdoc2md --template doc/README.hbs build/request.js build/progress.js build/utils.js > README.md",
-		"prettify": "prettier --use-tabs --single-quote --write lib/*.ts"
+    "build": "rimraf ./build && npm run prettify && tsc",
+    "prepublish": "npm run build && npm run readme && npm test",
+    "readme": "jsdoc2md --template doc/README.hbs build/request.js build/progress.js build/utils.js > README.md",
+    "prettify": "prettier --use-tabs --single-quote --write lib/*.ts"
   },
   "author": "Juan Cruz Viotti <juanchiviotti@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/bluebird": "3.5.6",
     "@types/bluebird-global": "^3.5.3",
-    "@types/lodash": "^4.14.68",
-    "@types/node": "^6.0.81",
+    "@types/lodash": "^4.14.70",
+    "@types/node": "^6.0.84",
+    "@types/qs": "^6.5.0",
     "coffee-script": "~1.12.5",
     "global-tunnel-ng": "^2.0.0",
     "gulp": "^3.9.1",
@@ -48,8 +50,10 @@
     "resin-config-karma": "^1.0.4",
     "resin-fetch-mock": "^1.0.3",
     "resin-token": "^4.0.0",
+    "rimraf": "^2.6.1",
     "temp": "^0.8.3",
     "timekeeper": "^1.0.0",
+    "tslint": "^5.5.0",
     "typescript": "^2.4.1"
   },
   "dependencies": {

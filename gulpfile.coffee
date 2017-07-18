@@ -13,11 +13,6 @@ OPTIONS =
 		app: 'lib/**/*.coffee'
 		tests: 'tests/**/*.spec.coffee'
 
-gulp.task 'coffee', ->
-	gulp.src(OPTIONS.files.app)
-		.pipe(coffee(bare: true, header: true)).on('error', gutil.log)
-		.pipe(gulp.dest('build/'))
-
 gulp.task 'test', ->
 	gulp.src(OPTIONS.files.tests, read: false)
 		.pipe(mocha({
@@ -25,18 +20,3 @@ gulp.task 'test', ->
 			compilers: 'coffee:coffee-script/register'
 		}))
 
-gulp.task 'lint', ->
-	gulp.src(OPTIONS.files.coffee)
-		.pipe(coffeelint({
-			optFile: OPTIONS.config.coffeelint
-		}))
-		.pipe(coffeelint.reporter())
-
-gulp.task 'build', [
-	'lint'
-	'test'
-	'coffee'
-]
-
-gulp.task 'watch', [ 'build' ], ->
-	gulp.watch(OPTIONS.files.coffee, [ 'build' ])
