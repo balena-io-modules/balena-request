@@ -51,6 +51,7 @@ module.exports = getRequest = ({
 			json: true
 			strictSSL: true
 			headers: {}
+			sendToken: true
 			refreshToken: true
 			retries: retries
 
@@ -63,7 +64,9 @@ module.exports = getRequest = ({
 			delete options.baseUrl
 
 		Promise.try ->
-			return if not (token? and options.refreshToken)
+			# Only refresh if we have resin-token, we're going to use it to send a
+			# token, and we haven't opted out of refresh
+			return if not (token? and options.sendToken and options.refreshToken)
 
 			utils.shouldUpdateToken(token).then (shouldUpdateToken) ->
 				return if not shouldUpdateToken
@@ -87,7 +90,8 @@ module.exports = getRequest = ({
 				.then(token.set)
 
 		.then ->
-			utils.getAuthorizationHeader(token)
+			if options.sendToken
+				utils.getAuthorizationHeader(token)
 		.then (authorizationHeader) ->
 			if authorizationHeader?
 				options.headers.Authorization = authorizationHeader

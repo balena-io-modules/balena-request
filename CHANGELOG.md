@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+- Allow requests to be sent without a token using `sendToken: false`, even if one exists
+
 ## [8.5.0] - 2017-07-07
 
 ### Changed
