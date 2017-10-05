@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [8.6.0] - 2017-10-05
 
 - Allow requests to be sent without a token using `sendToken: false`, even if one exists
 
@@ -343,6 +343,7 @@ We now clone the response object before assigning the parsed body.
 
 - `options.token` option is now obsolete, as the token is fetched automatically with [resin-token](https://github.com/resin-io-modules/resin-token).
 
+[8.6.0]: https://github.com/resin-io-modules/resin-request/compare/v8.5.0...v8.6.0
 [8.5.0]: https://github.com/resin-io-modules/resin-request/compare/v8.4.0...v8.5.0
 [8.4.0]: https://github.com/resin-io-modules/resin-request/compare/v8.3.1...v8.4.0
 [8.3.1]: https://github.com/resin-io-modules/resin-request/compare/v8.3.0...v8.3.1
