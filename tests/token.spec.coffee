@@ -48,6 +48,17 @@ describe 'Request (token):', ->
 						.get('Authorization')
 						m.chai.expect(promise).to.eventually.equal("Bearer #{johnDoeFixture.token}")
 
+					it 'should not send an Authorization header if sendToken is false', ->
+						promise = request.send
+							method: 'GET'
+							baseUrl: 'https://api.resin.io'
+							url: '/foo'
+							sendToken: false
+						.get('request')
+						.get('headers')
+						.get('Authorization')
+						m.chai.expect(promise).to.eventually.equal(undefined)
+
 				describe 'given there is no token', ->
 
 					beforeEach ->
