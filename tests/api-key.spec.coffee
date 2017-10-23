@@ -66,7 +66,7 @@ describe 'Request (api key):', ->
 				describe 'given no token', ->
 
 					beforeEach ->
-						token.remove()
+						token.removeKey()
 
 					describe '.send()', ->
 
@@ -98,7 +98,7 @@ describe 'Request (api key):', ->
 				describe 'given a token', ->
 
 					beforeEach ->
-						token.set(johnDoeFixture.token)
+						token.setKey(johnDoeFixture.token)
 
 					describe '.send()', ->
 
@@ -154,7 +154,7 @@ describe 'Request (api key):', ->
 				describe 'given no token', ->
 
 					beforeEach ->
-						token.remove()
+						token.removeKey()
 
 					describe '.send()', ->
 

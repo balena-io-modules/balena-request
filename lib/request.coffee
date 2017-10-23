@@ -69,6 +69,7 @@ module.exports = getRequest = ({
 			return if not (token? and options.sendToken and options.refreshToken)
 
 			utils.shouldUpdateToken(token).then (shouldUpdateToken) ->
+
 				return if not shouldUpdateToken
 
 				exports.send
@@ -83,12 +84,11 @@ module.exports = getRequest = ({
 					code: 'ResinRequestError'
 					statusCode: 401
 				, ->
-					return token.get().tap(token.remove).then (sessionToken) ->
+					return token.getKey().tap(token.removeKey).then (sessionToken) ->
 						throw new errors.ResinExpiredToken(sessionToken)
 
 				.get('body')
-				.then(token.set)
-
+				.then(token.setKey)
 		.then ->
 			if options.sendToken
 				utils.getAuthorizationHeader(token)
