@@ -4,12 +4,18 @@ IS_BROWSER = window?
 
 { fetchMock, mockedFetch } = require('resin-fetch-mock')
 
-dataDirectory = null
+dataDirectoryPath = null
 if not IS_BROWSER
 	temp = require('temp').track()
-	dataDirectory = temp.mkdirSync()
+	dataDirectoryPath = temp.mkdirSync()
 
-token = require('resin-token')({ dataDirectory })
+ResinAuth = require('resin-auth')['default']
+
+token = new ResinAuth({
+	dataDirectory: dataDirectoryPath,
+	tokenKey: 'token'
+})
+
 getRequest = require('../lib/request')
 
 getCustomRequest = (opts, mockFetch = true) ->

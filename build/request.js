@@ -85,10 +85,10 @@ module.exports = getRequest = function(arg) {
           code: 'ResinRequestError',
           statusCode: 401
         }, function() {
-          return token.get().tap(token.remove).then(function(sessionToken) {
+          return token.getKey().tap(token.removeKey).then(function(sessionToken) {
             throw new errors.ResinExpiredToken(sessionToken);
           });
-        }).get('body').then(token.set);
+        }).get('body').then(token.setKey);
       });
     }).then(function() {
       if (options.sendToken) {

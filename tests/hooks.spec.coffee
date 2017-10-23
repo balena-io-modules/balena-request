@@ -14,7 +14,7 @@ describe 'An interceptor', ->
 	@timeout(10000)
 
 	beforeEach ->
-		token.remove()
+		token.removeKey()
 		fetchMock.get '*', (url, opts) ->
 			body: requested: url
 			headers:

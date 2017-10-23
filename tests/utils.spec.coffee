@@ -64,7 +64,7 @@ describe 'Utils:', ->
 		describe 'given there is a token', ->
 
 			beforeEach  ->
-				token.set(johnDoeFixture.token)
+				token.setKey(johnDoeFixture.token)
 
 			it 'should eventually become the authorization header', ->
 				m.chai.expect(utils.getAuthorizationHeader(token)).to.eventually.equal("Bearer #{johnDoeFixture.token}")
@@ -72,7 +72,7 @@ describe 'Utils:', ->
 		describe 'given there is no token', ->
 
 			beforeEach ->
-				token.remove()
+				token.removeKey()
 
 			it 'should eventually be undefined', ->
 				m.chai.expect(utils.getAuthorizationHeader(token)).to.eventually.be.undefined

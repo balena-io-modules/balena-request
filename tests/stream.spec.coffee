@@ -10,7 +10,7 @@ describe 'Request (stream):', ->
 	return if IS_BROWSER
 
 	beforeEach ->
-		token.remove()
+		token.removeKey()
 
 	describe 'given a simple endpoint that responds with an error', ->
 

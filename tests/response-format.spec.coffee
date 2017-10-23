@@ -12,7 +12,7 @@ describe 'responseFormat:', ->
 	@timeout(10000)
 
 	beforeEach ->
-		token.remove()
+		token.removeKey()
 
 	afterEach ->
 		fetchMock.restore()

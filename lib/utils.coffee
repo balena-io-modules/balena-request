@@ -70,7 +70,7 @@ exports.shouldUpdateToken = (token) ->
 ###
 exports.getAuthorizationHeader = Promise.method (token) ->
 	return if not token?
-	token.get().then (sessionToken) ->
+	token.getKey().then (sessionToken) ->
 		return if not sessionToken?
 		return "Bearer #{sessionToken}"
 

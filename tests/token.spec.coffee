@@ -36,7 +36,7 @@ describe 'Request (token):', ->
 				describe 'given there is a token', ->
 
 					beforeEach ->
-						token.set(johnDoeFixture.token)
+						token.setKey(johnDoeFixture.token)
 
 					it 'should send an Authorization header', ->
 						promise = request.send
@@ -62,7 +62,7 @@ describe 'Request (token):', ->
 				describe 'given there is no token', ->
 
 					beforeEach ->
-						token.remove()
+						token.removeKey()
 
 					it 'should not send an Authorization header', ->
 						promise = request.send
@@ -80,7 +80,7 @@ describe 'Request (token):', ->
 					@utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldUpdateToken')
 					@utilsShouldUpdateToken.returns(Promise.resolve(true))
 
-					token.set(johnDoeFixture.token)
+					token.setKey(johnDoeFixture.token)
 
 
 				afterEach ->
@@ -95,14 +95,14 @@ describe 'Request (token):', ->
 						fetchMock.restore()
 
 					it 'should refresh the token', ->
-						token.get().then (savedToken) ->
+						token.getKey().then (savedToken) ->
 							m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
 							return request.send
 								baseUrl: 'https://api.resin.io'
 								url: '/foo'
 						.then (response) ->
 							m.chai.expect(response.body).to.equal('bar')
-							return token.get()
+							return token.getKey()
 						.then (savedToken) ->
 							m.chai.expect(savedToken).to.equal(janeDoeFixture.token)
 
@@ -111,7 +111,7 @@ describe 'Request (token):', ->
 					# Given the impact is minimal, the implementation aims
 					# to simplicity.
 					it 'should use the new token in the same request', ->
-						m.chai.expect(token.get()).to.eventually.equal(johnDoeFixture.token)
+						m.chai.expect(token.getKey()).to.eventually.equal(johnDoeFixture.token)
 						request.send
 							baseUrl: 'https://api.resin.io'
 							url: '/foo'
@@ -147,7 +147,7 @@ describe 'Request (token):', ->
 							baseUrl: 'https://api.resin.io'
 							url: '/foo'
 						.catch ->
-							token.has().then (hasToken) ->
+							token.hasKey().then (hasToken) ->
 								m.chai.expect(hasToken).to.be.false
 
 				describe 'given /whoami returns a non 401 status code', ->
@@ -188,7 +188,7 @@ describe 'Request (token):', ->
 				describe 'given there is a token', ->
 
 					beforeEach ->
-						token.set(johnDoeFixture.token)
+						token.setKey(johnDoeFixture.token)
 
 					it 'should send an Authorization header', ->
 						request.stream
@@ -203,7 +203,7 @@ describe 'Request (token):', ->
 				describe 'given there is no token', ->
 
 					beforeEach ->
-						token.remove()
+						token.removeKey()
 
 					it 'should not send an Authorization header', ->
 						request.stream

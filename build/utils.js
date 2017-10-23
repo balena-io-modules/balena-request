@@ -91,7 +91,7 @@ exports.getAuthorizationHeader = Promise.method(function(token) {
   if (token == null) {
     return;
   }
-  return token.get().then(function(sessionToken) {
+  return token.getKey().then(function(sessionToken) {
     if (sessionToken == null) {
       return;
     }
