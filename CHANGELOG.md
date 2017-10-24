@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+- Using resin-auth instead of resin-token
+
 ## [8.6.0] - 2017-10-05
 
 - Allow requests to be sent without a token using `sendToken: false`, even if one exists

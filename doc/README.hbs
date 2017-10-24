@@ -30,14 +30,14 @@ $ npm install --save resin-request
 Documentation
 -------------
 
-The module returns a _factory function_ that you use to get an instance of the token module.
+The module returns a _factory function_ that you use to get an instance of the auth module.
 
 It accepts the following params:
 
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>Object</code> | options |
-| options.token | <code>Object</code> | An instantiated [resin-token](https://github.com/resin-io/resin-token) instance |
+| options.auth | <code>Object</code> | An instantiated [resin-auth](https://github.com/resin-io-modules/resin-auth) instance |
 | options.debug | <code>boolean</code> | when set to `true` will log the request details in case of error. |
 | options.isBrowser | <code>boolean</code> | set to `true` if the runtime is the browser. |
 | options.interceptors | <code>Array&lt;Interceptor&gt;</code> | An initial array of interceptors |
@@ -45,7 +45,7 @@ It accepts the following params:
 **Example**
 ```js
 var request = require('resin-request')({
-	token: token,
+	auth: auth,
 	debug: false,
 	isBrowser: false
 })

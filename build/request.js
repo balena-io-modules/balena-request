@@ -42,8 +42,8 @@ progress = require('./progress');
 onlyIf = utils.onlyIf;
 
 module.exports = getRequest = function(arg) {
-  var debug, debugRequest, exports, interceptRequestError, interceptRequestOptions, interceptRequestOrError, interceptResponse, interceptResponseError, interceptResponseOrError, interceptors, isBrowser, prepareOptions, ref, ref1, ref2, ref3, ref4, requestAsync, retries, token;
-  ref = arg != null ? arg : {}, token = ref.token, debug = (ref1 = ref.debug) != null ? ref1 : false, retries = (ref2 = ref.retries) != null ? ref2 : 0, isBrowser = (ref3 = ref.isBrowser) != null ? ref3 : false, interceptors = (ref4 = ref.interceptors) != null ? ref4 : [];
+  var auth, debug, debugRequest, exports, interceptRequestError, interceptRequestOptions, interceptRequestOrError, interceptResponse, interceptResponseError, interceptResponseOrError, interceptors, isBrowser, prepareOptions, ref, ref1, ref2, ref3, ref4, requestAsync, retries;
+  ref = arg != null ? arg : {}, auth = ref.auth, debug = (ref1 = ref.debug) != null ? ref1 : false, retries = (ref2 = ref.retries) != null ? ref2 : 0, isBrowser = (ref3 = ref.isBrowser) != null ? ref3 : false, interceptors = (ref4 = ref.interceptors) != null ? ref4 : [];
   requestAsync = utils.getRequestAsync();
   debugRequest = !debug ? noop : utils.debugRequest;
   exports = {};
@@ -70,11 +70,11 @@ module.exports = getRequest = function(arg) {
       delete options.baseUrl;
     }
     return Promise["try"](function() {
-      if (!((token != null) && options.sendToken && options.refreshToken)) {
+      if (!((auth != null) && options.sendToken && options.refreshToken)) {
         return;
       }
-      return utils.shouldUpdateToken(token).then(function(shouldUpdateToken) {
-        if (!shouldUpdateToken) {
+      return utils.shouldRefreshKey(auth).then(function(shouldRefreshKey) {
+        if (!shouldRefreshKey) {
           return;
         }
         return exports.send({
@@ -85,14 +85,14 @@ module.exports = getRequest = function(arg) {
           code: 'ResinRequestError',
           statusCode: 401
         }, function() {
-          return token.get().tap(token.remove).then(function(sessionToken) {
-            throw new errors.ResinExpiredToken(sessionToken);
+          return auth.getKey().tap(auth.removeKey).then(function(key) {
+            throw new errors.ResinExpiredToken(key);
           });
-        }).get('body').then(token.set);
+        }).get('body').then(auth.setKey);
       });
     }).then(function() {
       if (options.sendToken) {
-        return utils.getAuthorizationHeader(token);
+        return utils.getAuthorizationHeader(auth);
       }
     }).then(function(authorizationHeader) {
       if (authorizationHeader != null) {

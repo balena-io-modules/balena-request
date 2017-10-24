@@ -4,13 +4,13 @@ zlib = require('zlib')
 PassThrough = require('stream').PassThrough
 rindle = require('rindle')
 
-{ token, request, fetchMock, IS_BROWSER } = require('./setup')()
+{ auth, request, fetchMock, IS_BROWSER } = require('./setup')()
 
 describe 'Request (stream):', ->
 	return if IS_BROWSER
 
 	beforeEach ->
-		token.remove()
+		auth.removeKey()
 
 	describe 'given a simple endpoint that responds with an error', ->
 
