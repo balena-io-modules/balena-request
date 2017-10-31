@@ -7,7 +7,7 @@ path = require('path')
 
 IS_BROWSER = window?
 
-{ token, getCustomRequest } = require('./setup')()
+{ auth, getCustomRequest } = require('./setup')()
 request = getCustomRequest(null, false)
 
 startProxy = (secure) ->

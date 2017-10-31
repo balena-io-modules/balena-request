@@ -5,7 +5,7 @@ m = require('mochainon')
 
 utils = require('../lib/utils')
 
-{ token, request, fetchMock, IS_BROWSER } = require('./setup')()
+{ auth, request, fetchMock, IS_BROWSER } = require('./setup')()
 
 inNodeIt = if IS_BROWSER then (->) else it
 
@@ -14,7 +14,7 @@ describe 'An interceptor', ->
 	@timeout(10000)
 
 	beforeEach ->
-		token.remove()
+		auth.removeKey()
 		fetchMock.get '*', (url, opts) ->
 			body: requested: url
 			headers:
@@ -105,28 +105,28 @@ describe 'An interceptor', ->
 
 		describe 'with an expired token', ->
 			beforeEach ->
-				@utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldUpdateToken').returns(true)
+				@utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldRefreshKey').returns(true)
 
 			afterEach ->
 				@utilsShouldUpdateToken.restore()
 
 			it 'should call requestError if the token is expired', ->
 				request.interceptors[0] =
-					requestError: m.sinon.mock().throws(new Error('intercepted token failure'))
+					requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
 
 				promise = request.send
 					url: 'https://example.com'
 
-				m.chai.expect(promise).to.be.rejectedWith('intercepted token failure')
+				m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
 
 			inNodeIt 'should call requestError if the token is expired for stream()', ->
 				request.interceptors[0] =
-					requestError: m.sinon.mock().throws(new Error('intercepted token failure'))
+					requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
 
 				promise = request.stream
 					url: 'https://example.com'
 
-				m.chai.expect(promise).to.be.rejectedWith('intercepted token failure')
+				m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
 
 	describe 'with a response hook', ->
 

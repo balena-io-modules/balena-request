@@ -2,14 +2,14 @@ _ = require('lodash')
 Promise = require('bluebird')
 m = require('mochainon')
 
-{ token, request, getCustomRequest, fetchMock, IS_BROWSER } = require('./setup')()
+{ auth, request, getCustomRequest, fetchMock, IS_BROWSER } = require('./setup')()
 
 describe 'Request:', ->
 
 	@timeout(10000)
 
 	beforeEach ->
-		token.remove()
+		auth.removeKey()
 
 	afterEach ->
 		fetchMock.restore()

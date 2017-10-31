@@ -4,7 +4,7 @@ rindle = require('rindle')
 johnDoeFixture = require('./tokens.json').johndoe
 utils = require('../lib/utils')
 
-{ token, request, fetchMock, IS_BROWSER } = require('./setup')()
+{ auth, request, fetchMock, IS_BROWSER } = require('./setup')()
 
 describe 'Request (api key):', ->
 
@@ -13,7 +13,7 @@ describe 'Request (api key):', ->
 	describe 'given the token is always fresh', ->
 
 		beforeEach ->
-			@utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldUpdateToken')
+			@utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldRefreshKey')
 			@utilsShouldUpdateToken.returns(Promise.resolve(false))
 
 		afterEach ->
@@ -66,7 +66,7 @@ describe 'Request (api key):', ->
 				describe 'given no token', ->
 
 					beforeEach ->
-						token.remove()
+						auth.removeKey()
 
 					describe '.send()', ->
 
@@ -98,7 +98,7 @@ describe 'Request (api key):', ->
 				describe 'given a token', ->
 
 					beforeEach ->
-						token.set(johnDoeFixture.token)
+						auth.setKey(johnDoeFixture.token)
 
 					describe '.send()', ->
 
@@ -154,7 +154,7 @@ describe 'Request (api key):', ->
 				describe 'given no token', ->
 
 					beforeEach ->
-						token.remove()
+						auth.removeKey()
 
 					describe '.send()', ->
 

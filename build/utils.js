@@ -54,18 +54,28 @@ exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60;
  * This function makes use of a soft user-configurable setting called `tokenRefreshInterval`.
  * That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
  *
- * @param {Object} tokenInstance - an instance of `resin-token`
+ * @param {Object} tokenInstance - an instance of `resin-auth`
  * @returns {Promise<Boolean>} the token should be updated
  *
  * @example
- * tokenUtils.shouldUpdateToken(tokenInstance).then (shouldUpdateToken) ->
- *		if shouldUpdateToken
+ * tokenUtils.shouldRefreshKey(tokenInstance).then (shouldRefreshKey) ->
+ *		if shouldRefreshKey
  *			console.log('Updating token!')
  */
 
-exports.shouldUpdateToken = function(token) {
-  return token.getAge().then(function(age) {
-    return age >= exports.TOKEN_REFRESH_INTERVAL;
+exports.shouldRefreshKey = function(auth) {
+  return auth.hasKey().then(function(hasKey) {
+    if (!hasKey) {
+      return false;
+    }
+    return auth.getType().then(function(type) {
+      if (type !== 'JWT') {
+        return false;
+      }
+      return auth.getAge().then(function(age) {
+        return age >= exports.TOKEN_REFRESH_INTERVAL;
+      });
+    });
   });
 };
 
@@ -78,7 +88,7 @@ exports.shouldUpdateToken = function(token) {
  * @description
  * This promise becomes undefined if no saved token.
  *
- * @param {Object} tokenInstance - an instance of `resin-token`
+ * @param {Object} tokenInstance - an instance of `resin-auth`
  * @returns {Promise<String>} authorization header
  *
  * @example
@@ -87,15 +97,17 @@ exports.shouldUpdateToken = function(token) {
  *			Authorization: authorizationHeader
  */
 
-exports.getAuthorizationHeader = Promise.method(function(token) {
-  if (token == null) {
+exports.getAuthorizationHeader = Promise.method(function(auth) {
+  if (auth == null) {
     return;
   }
-  return token.get().then(function(sessionToken) {
-    if (sessionToken == null) {
+  return auth.hasKey().then(function(hasKey) {
+    if (!hasKey) {
       return;
     }
-    return "Bearer " + sessionToken;
+    return auth.getKey().then(function(key) {
+      return "Bearer " + key;
+    });
   });
 });
 

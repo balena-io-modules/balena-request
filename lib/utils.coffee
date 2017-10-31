@@ -40,17 +40,23 @@ exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 # This function makes use of a soft user-configurable setting called `tokenRefreshInterval`.
 # That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
 #
-# @param {Object} tokenInstance - an instance of `resin-token`
+# @param {Object} tokenInstance - an instance of `resin-auth`
 # @returns {Promise<Boolean>} the token should be updated
 #
 # @example
-# tokenUtils.shouldUpdateToken(tokenInstance).then (shouldUpdateToken) ->
-#		if shouldUpdateToken
+# tokenUtils.shouldRefreshKey(tokenInstance).then (shouldRefreshKey) ->
+#		if shouldRefreshKey
 #			console.log('Updating token!')
 ###
-exports.shouldUpdateToken = (token) ->
-	token.getAge().then (age) ->
-		return age >= exports.TOKEN_REFRESH_INTERVAL
+exports.shouldRefreshKey = (auth) ->
+	auth.hasKey().then (hasKey) ->
+		if !hasKey
+			return false
+		auth.getType().then (type) ->
+			if type != 'JWT'
+				return false
+			return auth.getAge().then (age) ->
+				return age >= exports.TOKEN_REFRESH_INTERVAL
 
 ###*
 # @summary Get authorization header content
@@ -60,7 +66,7 @@ exports.shouldUpdateToken = (token) ->
 # @description
 # This promise becomes undefined if no saved token.
 #
-# @param {Object} tokenInstance - an instance of `resin-token`
+# @param {Object} tokenInstance - an instance of `resin-auth`
 # @returns {Promise<String>} authorization header
 #
 # @example
@@ -68,11 +74,13 @@ exports.shouldUpdateToken = (token) ->
 #		headers =
 #			Authorization: authorizationHeader
 ###
-exports.getAuthorizationHeader = Promise.method (token) ->
-	return if not token?
-	token.get().then (sessionToken) ->
-		return if not sessionToken?
-		return "Bearer #{sessionToken}"
+exports.getAuthorizationHeader = Promise.method (auth) ->
+	return if not auth?
+	auth.hasKey().then (hasKey) ->
+		if !hasKey
+			return
+		auth.getKey().then (key) ->
+			return "Bearer #{key}"
 
 ###*
 # @summary Get error message from response

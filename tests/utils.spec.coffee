@@ -5,77 +5,110 @@ m = require('mochainon')
 johnDoeFixture = require('./tokens.json').johndoe
 utils = require('../lib/utils')
 
-{ token } = require('./setup')()
+{ auth } = require('./setup')()
 
 describe 'Utils:', ->
 
-	describe '.shouldUpdateToken()', ->
+	describe '.shouldRefreshKey()', ->
+
+		describe 'given an API key ', ->
+
+			beforeEach ->
+				@tokenHasKeyStub = m.sinon.stub(auth, 'hasKey')
+				@tokenHasKeyStub.returns(Promise.resolve(true))
+				@tokenGetTypeStub = m.sinon.stub(auth, 'getType')
+				@tokenGetTypeStub.returns(Promise.resolve('APIKey'))
+
+			afterEach ->
+				@tokenHasKeyStub.restore()
+				@tokenGetTypeStub.restore()
+
+			it 'should return false', ->
+				m.chai.expect(utils.shouldRefreshKey(auth)).to.eventually.be.false
 
 		describe 'given the token is older than the specified validity time', ->
 
 			beforeEach ->
-				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
+				@tokenGetAgeStub = m.sinon.stub(auth, 'getAge')
 				@tokenGetAgeStub.returns(Promise.resolve(utils.TOKEN_REFRESH_INTERVAL + 1))
+				@tokenHasKeyStub = m.sinon.stub(auth, 'hasKey')
+				@tokenHasKeyStub.returns(Promise.resolve(true))
+				@tokenGetTypeStub = m.sinon.stub(auth, 'getType')
+				@tokenGetTypeStub.returns(Promise.resolve('JWT'))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
+				@tokenHasKeyStub.restore()
+				@tokenGetTypeStub.restore()
 
 			it 'should return true', ->
-				m.chai.expect(utils.shouldUpdateToken(token)).to.eventually.be.true
+				m.chai.expect(utils.shouldRefreshKey(auth)).to.eventually.be.true
 
 		describe 'given the token is newer than the specified validity time', ->
 
 			beforeEach ->
-				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
+				@tokenGetAgeStub = m.sinon.stub(auth, 'getAge')
 				@tokenGetAgeStub.returns(Promise.resolve(utils.TOKEN_REFRESH_INTERVAL - 1))
+				@tokenHasKeyStub = m.sinon.stub(auth, 'hasKey')
+				@tokenHasKeyStub.returns(Promise.resolve(true))
+				@tokenGetTypeStub = m.sinon.stub(auth, 'getType')
+				@tokenGetTypeStub.returns(Promise.resolve('JWT'))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
+				@tokenHasKeyStub.restore()
+				@tokenGetTypeStub.restore()
 
 			it 'should return false', ->
-				m.chai.expect(utils.shouldUpdateToken(token)).to.eventually.be.false
+				m.chai.expect(utils.shouldRefreshKey(auth)).to.eventually.be.false
 
 		describe 'given the token is equal to the specified validity time', ->
 
 			beforeEach ->
-				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
+				@tokenGetAgeStub = m.sinon.stub(auth, 'getAge')
 				@tokenGetAgeStub.returns(Promise.resolve(utils.TOKEN_REFRESH_INTERVAL))
+				@tokenHasKeyStub = m.sinon.stub(auth, 'hasKey')
+				@tokenHasKeyStub.returns(Promise.resolve(true))
+				@tokenGetTypeStub = m.sinon.stub(auth, 'getType')
+				@tokenGetTypeStub.returns(Promise.resolve('JWT'))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
+				@tokenHasKeyStub.restore()
+				@tokenGetTypeStub.restore()
 
 			it 'should return true', ->
-				m.chai.expect(utils.shouldUpdateToken(token)).to.eventually.be.true
+				m.chai.expect(utils.shouldRefreshKey(auth)).to.eventually.be.true
 
 		describe 'given no token', ->
 
 			beforeEach ->
-				@tokenGetAgeStub = m.sinon.stub(token, 'getAge')
-				@tokenGetAgeStub.returns(Promise.resolve(undefined))
+				@tokenHasKeyStub = m.sinon.stub(auth, 'hasKey')
+				@tokenHasKeyStub.returns(Promise.resolve(false))
 
 			afterEach ->
-				@tokenGetAgeStub.restore()
+				@tokenHasKeyStub.restore()
 
 			it 'should return false', ->
-				m.chai.expect(utils.shouldUpdateToken(token)).to.eventually.be.false
+				m.chai.expect(utils.shouldRefreshKey(auth)).to.eventually.be.false
 
 	describe '.getAuthorizationHeader()', ->
 
 		describe 'given there is a token', ->
 
 			beforeEach  ->
-				token.set(johnDoeFixture.token)
+				auth.setKey(johnDoeFixture.token)
 
 			it 'should eventually become the authorization header', ->
-				m.chai.expect(utils.getAuthorizationHeader(token)).to.eventually.equal("Bearer #{johnDoeFixture.token}")
+				m.chai.expect(utils.getAuthorizationHeader(auth)).to.eventually.equal("Bearer #{johnDoeFixture.token}")
 
 		describe 'given there is no token', ->
 
 			beforeEach ->
-				token.remove()
+				auth.removeKey()
 
 			it 'should eventually be undefined', ->
-				m.chai.expect(utils.getAuthorizationHeader(token)).to.eventually.be.undefined
+				m.chai.expect(utils.getAuthorizationHeader(auth)).to.eventually.be.undefined
 
 	describe '.getErrorMessageFromResponse()', ->
 

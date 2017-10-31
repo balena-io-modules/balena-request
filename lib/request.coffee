@@ -32,7 +32,7 @@ progress = require('./progress')
 { onlyIf } = utils
 
 module.exports = getRequest = ({
-	token,
+	auth,
 	debug = false,
 	retries = 0,
 	isBrowser = false,
@@ -64,12 +64,12 @@ module.exports = getRequest = ({
 			delete options.baseUrl
 
 		Promise.try ->
-			# Only refresh if we have resin-token, we're going to use it to send a
+			# Only refresh if we have resin-auth, we're going to use it to send a
 			# token, and we haven't opted out of refresh
-			return if not (token? and options.sendToken and options.refreshToken)
+			return if not (auth? and options.sendToken and options.refreshToken)
 
-			utils.shouldUpdateToken(token).then (shouldUpdateToken) ->
-				return if not shouldUpdateToken
+			utils.shouldRefreshKey(auth).then (shouldRefreshKey) ->
+				return if not shouldRefreshKey
 
 				exports.send
 					url: '/whoami'
@@ -83,15 +83,15 @@ module.exports = getRequest = ({
 					code: 'ResinRequestError'
 					statusCode: 401
 				, ->
-					return token.get().tap(token.remove).then (sessionToken) ->
-						throw new errors.ResinExpiredToken(sessionToken)
+					return auth.getKey().tap(auth.removeKey).then (key) ->
+						throw new errors.ResinExpiredToken(key)
 
 				.get('body')
-				.then(token.set)
+				.then(auth.setKey)
 
 		.then ->
 			if options.sendToken
-				utils.getAuthorizationHeader(token)
+				utils.getAuthorizationHeader(auth)
 		.then (authorizationHeader) ->
 			if authorizationHeader?
 				options.headers.Authorization = authorizationHeader

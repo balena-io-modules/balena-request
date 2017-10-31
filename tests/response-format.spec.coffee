@@ -3,7 +3,7 @@ Promise = require('bluebird')
 m = require('mochainon')
 errors = require('resin-errors')
 
-{ token, request, fetchMock, IS_BROWSER } = require('./setup')()
+{ auth, request, fetchMock, IS_BROWSER } = require('./setup')()
 
 RESPONSE_BODY = from: 'foobar'
 
@@ -12,7 +12,7 @@ describe 'responseFormat:', ->
 	@timeout(10000)
 
 	beforeEach ->
-		token.remove()
+		auth.removeKey()
 
 	afterEach ->
 		fetchMock.restore()
