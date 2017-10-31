@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [9.0.0] - 2017-10-31
 
 - Using resin-auth instead of resin-token
 
