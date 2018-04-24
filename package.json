@@ -35,7 +35,7 @@
     "gulp-coffeelint": "^0.6.0",
     "gulp-mocha": "^4.3.0",
     "gulp-util": "^3.0.1",
-    "jsdoc-to-markdown": "^3.0.0",
+    "jsdoc-to-markdown": "^4.0.1",
     "karma": "^1.3.0",
     "mocha": "^3.0.0",
     "mochainon": "^1.0.0",
