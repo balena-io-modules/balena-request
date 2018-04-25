@@ -1,6 +1,6 @@
 {
   "name": "resin-request",
-  "version": "9.0.2",
+  "version": "9.0.3",
   "description": "Resin.io HTTP client",
   "main": "build/request.js",
   "homepage": "https://github.com/resin-io-modules/resin-request",
@@ -29,13 +29,13 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "coffee-script": "~1.12.5",
-    "global-tunnel-ng": "^2.0.0",
+    "global-tunnel-ng": "2.1.0",
     "gulp": "^3.9.1",
     "gulp-coffee": "^2.3.1",
     "gulp-coffeelint": "^0.6.0",
     "gulp-mocha": "^4.3.0",
     "gulp-util": "^3.0.1",
-    "jsdoc-to-markdown": "^3.0.0",
+    "jsdoc-to-markdown": "^4.0.1",
     "karma": "^1.3.0",
     "mocha": "^3.0.0",
     "mochainon": "^1.0.0",
