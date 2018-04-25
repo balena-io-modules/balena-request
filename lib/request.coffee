@@ -283,36 +283,36 @@ module.exports = getRequest = ({
 	###
 	exports.interceptors = interceptors
 
+	###*
+	# @typedef Interceptor
+	# @type {object}
+	#
+	# @description
+	# An interceptor implements some set of the four interception hook callbacks.
+	# To continue processing, each function should return a value or a promise that
+	# successfully resolves to a value.
+	#
+	# To halt processing, each function should throw an error or return a promise that
+	# rejects with an error.
+	#
+	# @property {function} [request] - Callback invoked before requests are made. Called with
+	# the request options, should return (or resolve to) new request options, or throw/reject.
+	#
+	# @property {function} [response] - Callback invoked before responses are returned. Called with
+	# the response, should return (or resolve to) a new response, or throw/reject.
+	#
+	# @property {function} [requestError] - Callback invoked if an error happens before a request.
+	# Called with the error itself, caused by a preceeding request interceptor rejecting/throwing
+	# an error for the request, or a failing in preflight token validation. Should return (or resolve
+	# to) new request options, or throw/reject.
+	#
+	# @property {function} [responseError] - Callback invoked if an error happens in the response.
+	# Called with the error itself, caused by a preceeding response interceptor rejecting/throwing
+	# an error for the request, a network error, or an error response from the server. Should return
+	# (or resolve to) a new response, or throw/reject.
+	###
+
 	exports._setFetch = (fetch) ->
 		requestAsync = utils.getRequestAsync(fetch)
 
 	return exports
-
-###*
-# @typedef Interceptor
-# @type {object}
-#
-# @description
-# An interceptor implements some set of the four interception hook callbacks.
-# To continue processing, each function should return a value or a promise that
-# successfully resolves to a value.
-#
-# To halt processing, each function should throw an error or return a promise that
-# rejects with an error.
-#
-# @property {function} [request] - Callback invoked before requests are made. Called with
-# the request options, should return (or resolve to) new request options, or throw/reject.
-#
-# @property {function} [response] - Callback invoked before responses are returned. Called with
-# the response, should return (or resolve to) a new response, or throw/reject.
-#
-# @property {function} [requestError] - Callback invoked if an error happens before a request.
-# Called with the error itself, caused by a preceeding request interceptor rejecting/throwing
-# an error for the request, or a failing in preflight token validation. Should return (or resolve
-# to) new request options, or throw/reject.
-#
-# @property {function} [responseError] - Callback invoked if an error happens in the response.
-# Called with the error itself, caused by a preceeding response interceptor rejecting/throwing
-# an error for the request, a network error, or an error response from the server. Should return
-# (or resolve to) a new response, or throw/reject.
-###
