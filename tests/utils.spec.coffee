@@ -133,6 +133,18 @@ describe 'Utils:', ->
 				error = utils.getErrorMessageFromResponse(@response)
 				m.chai.expect(error).to.equal('An error happened')
 
+		describe 'given a response with a string error property', ->
+
+			beforeEach ->
+				@response =
+					body:
+						error: 'errorTypeSlug'
+						message: 'More details about the error'
+
+			it 'should print the error.text property', ->
+				error = utils.getErrorMessageFromResponse(@response)
+				m.chai.expect(error).to.deep.equal(@response.body)
+
 		describe 'given a response without an error object', ->
 
 			beforeEach ->

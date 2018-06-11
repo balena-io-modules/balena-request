@@ -130,11 +130,13 @@ exports.getAuthorizationHeader = Promise.method(function(auth) {
  */
 
 exports.getErrorMessageFromResponse = function(response) {
+  var errorText, ref1;
   if (!response.body) {
     return 'The request was unsuccessful';
   }
-  if (response.body.error != null) {
-    return response.body.error.text;
+  errorText = (ref1 = response.body.error) != null ? ref1.text : void 0;
+  if (errorText != null) {
+    return errorText;
   }
   return response.body;
 };
