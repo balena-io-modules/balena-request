@@ -101,8 +101,9 @@ exports.getAuthorizationHeader = Promise.method (auth) ->
 exports.getErrorMessageFromResponse = (response) ->
 	if not response.body
 		return 'The request was unsuccessful'
-	if response.body.error?
-		return response.body.error.text
+
+	errorText = response.body.error?.text
+	return errorText if errorText?
 
 	return response.body
 
