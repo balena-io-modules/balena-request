@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, includes, normalFetch, notImplemented, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
+var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, includes, normalFetch, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
 
 Promise = require('bluebird');
 
@@ -369,19 +369,5 @@ exports.getRequestAsync = function(fetch) {
   }
   return function(options) {
     return requestAsync(fetch, options);
-  };
-};
-
-exports.notImplemented = notImplemented = function() {
-  throw new Error('The method is not implemented.');
-};
-
-exports.onlyIf = function(cond) {
-  return function(fn) {
-    if (cond) {
-      return fn;
-    } else {
-      return notImplemented;
-    }
   };
 };

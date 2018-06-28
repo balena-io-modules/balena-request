@@ -7,9 +7,7 @@ mockServer = require('mockttp').getLocal()
 
 utils = require('../lib/utils')
 
-{ auth, request, IS_BROWSER } = require('./setup')()
-
-inNodeIt = if IS_BROWSER then (->) else it
+{ auth, request } = require('./setup')()
 
 describe 'An interceptor', ->
 
@@ -64,7 +62,7 @@ describe 'An interceptor', ->
 
 			m.chai.expect(promise).to.be.rejectedWith('blocked')
 
-		inNodeIt 'should be able to change a stream request before it is sent', ->
+		it 'should be able to change a stream request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
 				_.assign({}, request, url: mockServer.urlFor('/changed'))
 
@@ -125,7 +123,7 @@ describe 'An interceptor', ->
 
 				m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
 
-			inNodeIt 'should call requestError if the token is expired for stream()', ->
+			it 'should call requestError if the token is expired for stream()', ->
 				request.interceptors[0] =
 					requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
 
@@ -169,7 +167,7 @@ describe 'An interceptor', ->
 					m.chai.expect(response.body).to.deep.equal(replaced: true)
 					m.chai.expect(response.statusCode).to.equal(201)
 
-		inNodeIt 'should be able to change a stream response before it is returned', ->
+		it 'should be able to change a stream response before it is returned', ->
 			request.interceptors[0] = response: (response) ->
 				rindle.getStreamFromString('replacement stream')
 
@@ -259,7 +257,7 @@ describe 'An interceptor', ->
 					m.chai.expect(err.requestOptions.url).to.equal(targetUrl)
 					m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
 
-		inNodeIt 'should call responseError if the server returns an error for a stream', ->
+		it 'should call responseError if the server returns an error for a stream', ->
 			mockServer.get('/500').thenReply(500)
 			.then ->
 				request.interceptors[0] = responseError:

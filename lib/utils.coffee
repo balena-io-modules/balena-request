@@ -339,8 +339,3 @@ requestAsync = (fetch, options, retriesRemaining) ->
 ###
 exports.getRequestAsync = (fetch = normalFetch) -> (options) ->
 	requestAsync(fetch, options)
-
-exports.notImplemented = notImplemented = ->
-	throw new Error('The method is not implemented.')
-
-exports.onlyIf = (cond) -> (fn) -> if cond then fn else notImplemented

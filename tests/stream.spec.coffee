@@ -1,6 +1,6 @@
 Promise = require('bluebird')
 m = require('mochainon')
-zlib = require('zlib')
+zlib = require('zlib-browserify')
 PassThrough = require('stream').PassThrough
 rindle = require('rindle')
 
@@ -9,7 +9,6 @@ mockServer = require('mockttp').getLocal()
 { auth, request, IS_BROWSER } = require('./setup')()
 
 describe 'Request (stream):', ->
-	return if IS_BROWSER
 
 	beforeEach ->
 		Promise.all [

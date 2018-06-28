@@ -6,7 +6,7 @@ utils = require('../lib/utils')
 
 mockServer = require('mockttp').getLocal()
 
-{ auth, request, IS_BROWSER } = require('./setup')()
+{ auth, request } = require('./setup')()
 
 describe 'Request (api key):', ->
 
@@ -85,8 +85,6 @@ describe 'Request (api key):', ->
 
 					describe '.stream()', ->
 
-						return if IS_BROWSER
-
 						it 'should pass an apikey query string', ->
 							request.stream
 								method: 'GET'
@@ -127,8 +125,6 @@ describe 'Request (api key):', ->
 							m.chai.expect(promise).to.eventually.equal("Bearer #{johnDoeFixture.token}")
 
 					describe '.stream()', ->
-
-						return if IS_BROWSER
 
 						it 'should pass an apikey query string', ->
 							request.stream
@@ -172,8 +168,6 @@ describe 'Request (api key):', ->
 							m.chai.expect(promise).to.eventually.be.null
 
 					describe '.stream()', ->
-
-						return if IS_BROWSER
 
 						it 'should not pass an apikey query string', ->
 							request.stream

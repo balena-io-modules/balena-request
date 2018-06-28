@@ -10,7 +10,7 @@ utils = require('../lib/utils')
 
 mockServer = require('mockttp').getLocal()
 
-{ auth, request, IS_BROWSER } = require('./setup')()
+{ auth, request } = require('./setup')()
 
 describe 'Request (token):', ->
 
@@ -159,8 +159,6 @@ describe 'Request (token):', ->
 						m.chai.expect(promise).to.be.rejectedWith(errors.ResinRequestError)
 
 	describe '.stream()', ->
-
-		return if IS_BROWSER
 
 		describe 'given a simple endpoint that responds with a string', ->
 

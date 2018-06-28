@@ -15,6 +15,7 @@ limitations under the License.
 ###
 
 noop = require('lodash/noop')
+webStreams = require('node-web-streams')
 utils = require('./utils')
 
 ###*
@@ -60,8 +61,6 @@ getProgressStream = (total, onState = noop) ->
 # @function
 # @protected
 #
-# @description **Not implemented for the browser.**
-#
 # @param {Object} options - request options
 # @returns {Promise<Stream>} request stream
 #
@@ -71,7 +70,7 @@ getProgressStream = (total, onState = noop) ->
 #		stream.on 'progress', (state) ->
 #			console.log(state)
 ###
-exports.estimate = (requestAsync) -> (options) ->
+exports.estimate = (requestAsync, isBrowser) -> (options) ->
 	requestAsync ?= utils.getRequestAsync()
 
 	zlib = require('zlib')
@@ -88,12 +87,16 @@ exports.estimate = (requestAsync) -> (options) ->
 		responseLength = utils.getResponseLength(response)
 		total = responseLength.uncompressed or responseLength.compressed
 
-		responseStream = response.body
+		if response.body.getReader
+			# Convert browser (WHATWG) streams to Node streams
+			responseStream = webStreams.toNodeReadable(response.body)
+		else
+			responseStream = response.body
 
 		progressStream = getProgressStream total, (state) ->
 			output.emit('progress', state)
 
-		if utils.isResponseCompressed(response)
+		if not isBrowser and utils.isResponseCompressed(response)
 			gunzip = new zlib.createGunzip()
 
 			# Uncompress after or before piping through progress
