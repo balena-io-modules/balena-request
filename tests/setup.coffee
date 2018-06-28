@@ -16,6 +16,9 @@ auth = new ResinAuth({
 	tokenKey: 'token'
 })
 
+# Make sure any existing tokens are removed before the tests start
+auth.removeKey()
+
 getRequest = require('../lib/request')
 
 getCustomRequest = (opts, mockFetch = true) ->
