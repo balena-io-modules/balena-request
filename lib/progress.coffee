@@ -96,7 +96,7 @@ exports.estimate = (requestAsync) -> (options) ->
 		if utils.isResponseCompressed(response)
 			gunzip = new zlib.createGunzip()
 
-			# Uncompress after or before piping trough progress
+			# Uncompress after or before piping through progress
 			# depending on the response length available to us
 			if responseLength.compressed? and not responseLength.uncompressed?
 				responseStream.pipe(progressStream).pipe(gunzip).pipe(output)

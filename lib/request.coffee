@@ -312,7 +312,4 @@ module.exports = getRequest = ({
 	# (or resolve to) a new response, or throw/reject.
 	###
 
-	exports._setFetch = (fetch) ->
-		requestAsync = utils.getRequestAsync(fetch)
-
 	return exports

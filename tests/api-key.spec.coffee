@@ -4,11 +4,19 @@ rindle = require('rindle')
 johnDoeFixture = require('./tokens.json').johndoe
 utils = require('../lib/utils')
 
-{ auth, request, fetchMock, IS_BROWSER } = require('./setup')()
+mockServer = require('mockttp').getLocal()
+
+{ auth, request, IS_BROWSER } = require('./setup')()
 
 describe 'Request (api key):', ->
 
 	@timeout(10000)
+
+	beforeEach ->
+		mockServer.start()
+
+	afterEach ->
+		mockServer.stop()
 
 	describe 'given the token is always fresh', ->
 
@@ -22,17 +30,14 @@ describe 'Request (api key):', ->
 		describe 'given a simple GET endpoint containing special characters in query strings', ->
 
 			beforeEach ->
-				fetchMock.get('begin:https://api.resin.io/foo', 200)
-
-			afterEach ->
-				fetchMock.restore()
+				mockServer.get(/^\/foo/).thenReply(200)
 
 			describe 'given no api key', ->
 
 				it 'should not encode special characters automatically', ->
 					promise = request.send
 						method: 'GET'
-						baseUrl: 'https://api.resin.io'
+						baseUrl: mockServer.url
 						url: '/foo?$bar=baz'
 						apiKey: undefined
 					.get('request')
@@ -45,7 +50,7 @@ describe 'Request (api key):', ->
 				it 'should not encode special characters automatically', ->
 					promise = request.send
 						method: 'GET'
-						baseUrl: 'https://api.resin.io'
+						baseUrl: mockServer.url
 						url: '/foo?$bar=baz'
 						apiKey: '123456789'
 					.get('request')
@@ -56,10 +61,7 @@ describe 'Request (api key):', ->
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				fetchMock.get('begin:https://api.resin.io/foo', 'Foo Bar')
-
-			afterEach ->
-				fetchMock.restore()
+				mockServer.get(/^\/foo/).thenReply(200, 'Foo Bar')
 
 			describe 'given an api key', ->
 
@@ -73,7 +75,7 @@ describe 'Request (api key):', ->
 						it 'should pass an apikey query string', ->
 							promise = request.send
 								method: 'GET'
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
 							.get('request')
@@ -88,7 +90,7 @@ describe 'Request (api key):', ->
 						it 'should pass an apikey query string', ->
 							request.stream
 								method: 'GET'
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
 							.then (stream) ->
@@ -105,7 +107,7 @@ describe 'Request (api key):', ->
 						it 'should pass an apikey query string', ->
 							promise = request.send
 								method: 'GET'
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
 							.get('request')
@@ -116,7 +118,7 @@ describe 'Request (api key):', ->
 						it 'should still send an Authorization header', ->
 							promise = request.send
 								method: 'GET'
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
 							.get('request')
@@ -131,7 +133,7 @@ describe 'Request (api key):', ->
 						it 'should pass an apikey query string', ->
 							request.stream
 								method: 'GET'
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
 							.then (stream) ->
@@ -141,7 +143,7 @@ describe 'Request (api key):', ->
 						it 'should still send an Authorization header', ->
 							request.stream
 								method: 'GET'
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
 							.then (stream) ->
@@ -161,7 +163,7 @@ describe 'Request (api key):', ->
 						it 'should not pass an apikey query string', ->
 							promise = request.send
 								method: 'GET'
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: ''
 							.get('request')
@@ -176,7 +178,7 @@ describe 'Request (api key):', ->
 						it 'should not pass an apikey query string', ->
 							request.stream
 								method: 'GET'
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: ''
 							.then (stream) ->
