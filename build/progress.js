@@ -15,11 +15,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var getProgressStream, noop, utils, webStreams;
+var getProgressStream, noop, progress, stream, utils, webStreams, zlib;
 
 noop = require('lodash/noop');
 
 webStreams = require('node-web-streams');
+
+progress = require('progress-stream');
+
+zlib = require('zlib');
+
+stream = require('stream');
 
 utils = require('./utils');
 
@@ -46,11 +52,10 @@ utils = require('./utils');
  */
 
 getProgressStream = function(total, onState) {
-  var progress, progressStream;
+  var progressStream;
   if (onState == null) {
     onState = noop;
   }
-  progress = require('progress-stream');
   progressStream = progress({
     time: 500,
     length: total
@@ -87,12 +92,9 @@ getProgressStream = function(total, onState) {
 
 exports.estimate = function(requestAsync, isBrowser) {
   return function(options) {
-    var stream, zlib;
     if (requestAsync == null) {
       requestAsync = utils.getRequestAsync();
     }
-    zlib = require('zlib');
-    stream = require('stream');
     options.gzip = false;
     options.headers['Accept-Encoding'] = 'gzip, deflate';
     return requestAsync(options).then(function(response) {

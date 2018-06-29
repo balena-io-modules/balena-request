@@ -19,7 +19,7 @@ limitations under the License.
 /**
  * @module request
  */
-var Promise, assign, defaults, errors, fetchReadableStream, getRequest, isEmpty, noop, progress, urlLib, utils;
+var Promise, assign, defaults, errors, fetchReadableStream, getRequest, isEmpty, noop, progress, rindle, urlLib, utils;
 
 Promise = require('bluebird');
 
@@ -32,6 +32,8 @@ noop = require('lodash/noop');
 defaults = require('lodash/defaults');
 
 isEmpty = require('lodash/isEmpty');
+
+rindle = require('rindle');
 
 fetchReadableStream = require('fetch-readablestream');
 
@@ -244,11 +246,10 @@ module.exports = getRequest = function(arg) {
   	 * 	stream.pipe(fs.createWriteStream('/opt/download'))
    */
   exports.stream = function(options) {
-    var requestStream, rindle;
+    var requestStream;
     if (options == null) {
       options = {};
     }
-    rindle = require('rindle');
     requestStream = isBrowser ? requestBrowserStream : requestAsync;
     return prepareOptions(options).then(interceptRequestOptions, interceptRequestError).then(progress.estimate(requestStream, isBrowser)).then(function(download) {
       if (!utils.isErrorCode(download.response.statusCode)) {

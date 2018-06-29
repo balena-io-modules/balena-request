@@ -24,6 +24,7 @@ assign = require('lodash/assign')
 noop = require('lodash/noop')
 defaults = require('lodash/defaults')
 isEmpty = require('lodash/isEmpty')
+rindle = require('rindle')
 
 fetchReadableStream = require('fetch-readablestream')
 
@@ -242,7 +243,6 @@ module.exports = getRequest = ({
 	# 	stream.pipe(fs.createWriteStream('/opt/download'))
 	###
 	exports.stream = (options = {}) ->
-		rindle = require('rindle')
 
 		requestStream = if isBrowser
 			requestBrowserStream
