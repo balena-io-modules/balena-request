@@ -133,17 +133,19 @@ describe 'Request (token):', ->
 						m.chai.expect(promise).to.be.rejectedWith(errors.ResinExpiredToken)
 
 					it 'should have the session token as an error attribute', ->
-						request.send
+						m.chai.expect request.send
 							baseUrl: mockServer.url
 							url: '/foo'
-						.catch (error) ->
+						.to.be.rejected
+						.then (error) ->
 							m.chai.expect(error.token).to.equal(johnDoeFixture.token)
 
 					it 'should clear the token', ->
-						request.send
+						m.chai.expect request.send
 							baseUrl: mockServer.url
 							url: '/foo'
-						.catch ->
+						.to.be.rejected
+						.then ->
 							auth.hasKey().then (hasKey) ->
 								m.chai.expect(hasKey).to.be.false
 

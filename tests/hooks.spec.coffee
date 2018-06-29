@@ -20,7 +20,7 @@ describe 'An interceptor', ->
 			auth.removeKey(),
 			mockServer.start().then ->
 				Promise.all [
-					mockServer.get('/').thenJSON(200, { root: true })
+					mockServer.get('/').thenJSON(200, { requested: '/' })
 					mockServer.get('/original').thenJSON(200, { requested: 'original' })
 					mockServer.get('/changed').thenJSON(200, { requested: 'changed' })
 				]
@@ -66,7 +66,7 @@ describe 'An interceptor', ->
 			request.interceptors[0] = request: (request) ->
 				_.assign({}, request, url: mockServer.urlFor('/changed'))
 
-			promise = request.stream
+			request.stream
 				url: mockServer.urlFor('/original')
 			.then(rindle.extract).then (data) ->
 				body = JSON.parse(data)
@@ -81,7 +81,7 @@ describe 'An interceptor', ->
 			request.interceptors[1] =
 				requestError: m.sinon.mock()
 
-			promise = request.send
+			request.send
 				url: mockServer.urlFor('/original')
 			.get('body')
 			.then (body) ->
@@ -97,10 +97,9 @@ describe 'An interceptor', ->
 			request.interceptors[1] =
 				requestError: m.sinon.mock().throws(new Error('error overridden'))
 
-			promise = request.send
-				url: mockServer.url
-			.get('body')
-			.catch (err) ->
+			m.chai.expect(request.send(url: mockServer.url).get('body'))
+			.to.be.rejected
+			.then (err) ->
 				m.chai.expect(err.message).to.deep.equal('error overridden')
 				m.chai.expect(request.interceptors[0].requestError.called).to.equal false,
 					'Preceeding requestError hooks should not be called'
@@ -161,7 +160,7 @@ describe 'An interceptor', ->
 				request.interceptors[0] =
 					response: (response) -> _.assign({}, response, body: replaced: true)
 
-				promise = request.send
+				request.send
 					url: mockServer.urlFor('/201')
 				.then (response) ->
 					m.chai.expect(response.body).to.deep.equal(replaced: true)
@@ -171,7 +170,7 @@ describe 'An interceptor', ->
 			request.interceptors[0] = response: (response) ->
 				rindle.getStreamFromString('replacement stream')
 
-			promise = request.stream
+			request.stream
 				url: mockServer.urlFor('/original')
 			.then(rindle.extract).then (data) ->
 				m.chai.expect(data).to.equal('replacement stream')
@@ -181,11 +180,11 @@ describe 'An interceptor', ->
 		it 'should not call responseError if there are no errors', ->
 			request.interceptors[0] = responseError: m.sinon.mock()
 
-			promise = request.send
+			request.send
 				url: mockServer.url
 			.get('body')
 			.then (body) ->
-				m.chai.expect(body).to.deep.equal(root: true)
+				m.chai.expect(body).to.deep.equal(requested: '/')
 				m.chai.expect(request.interceptors[0].responseError.called).to.equal false,
 					'responseError should not have been called'
 
@@ -235,10 +234,11 @@ describe 'An interceptor', ->
 
 				targetUrl = mockServer.urlFor('/500')
 
-				promise = request.send
+				m.chai.expect request.send
 					url: targetUrl
 					anotherExtraOption: true
-				promise.catch (err) ->
+				.to.be.rejected
+				.then (err) ->
 					m.chai.expect(err.requestOptions.url).to.equal(targetUrl)
 					m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
 
@@ -250,10 +250,11 @@ describe 'An interceptor', ->
 
 				targetUrl = mockServer.urlFor('/no-response')
 
-				promise = request.send
+				m.chai.expect request.send
 					url: targetUrl
 					anotherExtraOption: true
-				promise.catch (err) ->
+				.to.be.rejected
+				.then (err) ->
 					m.chai.expect(err.requestOptions.url).to.equal(targetUrl)
 					m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
 

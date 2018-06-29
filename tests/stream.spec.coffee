@@ -4,6 +4,8 @@ zlib = require('zlib-browserify')
 PassThrough = require('stream').PassThrough
 rindle = require('rindle')
 
+gzip = Promise.promisify(zlib.gzip)
+
 mockServer = require('mockttp').getLocal()
 
 { auth, request, IS_BROWSER } = require('./setup')()
@@ -33,11 +35,12 @@ describe 'Request (stream):', ->
 			m.chai.expect(promise).to.be.rejectedWith('Something happened')
 
 		it 'should have the status code in the error object', ->
-			request.stream
+			m.chai.expect request.stream
 				method: 'GET'
 				baseUrl: mockServer.url
 				url: '/foo'
-			.catch (error) ->
+			.to.be.rejected
+			.then (error) ->
 				m.chai.expect(error.statusCode).to.equal(400)
 
 	describe 'given a simple endpoint that responds with a string', ->
@@ -84,15 +87,13 @@ describe 'Request (stream):', ->
 
 	describe 'given a gzip endpoint with an x-transfer-length header', ->
 
-		beforeEach (done) ->
+		beforeEach ->
 			message = 'Lorem ipsum dolor sit amet'
-			zlib.gzip message, (error, compressedMessage) ->
-				return done(error) if error?
+			gzip(message).then (compressedMessage) ->
 				mockServer.get('/foo').thenReply 200, compressedMessage,
 					'Content-Type': 'text/plain'
 					'X-Transfer-Length': '' + compressedMessage.length
 					'Content-Encoding': 'gzip'
-				.then(-> done())
 
 		it 'should correctly uncompress the body', ->
 			request.stream
@@ -113,15 +114,13 @@ describe 'Request (stream):', ->
 
 	describe 'given an gzip endpoint with a content-length header', ->
 
-		beforeEach (done) ->
+		beforeEach ->
 			message = 'Lorem ipsum dolor sit amet'
-			zlib.gzip message, (error, compressedMessage) ->
-				return done(error) if error?
+			gzip(message).then (compressedMessage) ->
 				mockServer.get('/foo').thenReply 200, compressedMessage,
 					'Content-Type': 'text/plain'
 					'Content-Length': '' + compressedMessage.length
 					'Content-Encoding': 'gzip'
-				.then(-> done())
 
 		it 'should correctly uncompress the body', ->
 			request.stream
@@ -135,16 +134,14 @@ describe 'Request (stream):', ->
 
 	describe 'given an gzip endpoint with a content-length and x-transfer-length headers', ->
 
-		beforeEach (done) ->
+		beforeEach ->
 			message = 'Lorem ipsum dolor sit amet'
-			zlib.gzip message, (error, compressedMessage) ->
-				return done(error) if error?
+			gzip(message).then (compressedMessage) ->
 				mockServer.get('/foo').thenReply 200, compressedMessage,
 					'Content-Type': 'text/plain'
 					'X-Transfer-Length': '' + compressedMessage.length
 					'Content-Length': '' + compressedMessage.length
 					'Content-Encoding': 'gzip'
-				.then(-> done())
 
 		it 'should correctly uncompress the body', ->
 			request.stream

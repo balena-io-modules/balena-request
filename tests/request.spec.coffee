@@ -6,6 +6,12 @@ mockServer = require('mockttp').getLocal()
 
 { auth, request, getCustomRequest, IS_BROWSER } = require('./setup')()
 
+# Grab setTimeout before we replace it with a fake later, so
+# we can still do real waiting in the tests themselves
+unstubbedSetTimeout = setTimeout
+delay = (delay) -> new Promise (resolve) ->
+	unstubbedSetTimeout(resolve, delay)
+
 describe 'Request:', ->
 
 	@timeout(10000)
@@ -45,11 +51,12 @@ describe 'Request:', ->
 
 			beforeEach ->
 				Promise.all ['get', 'post', 'put', 'patch', 'delete'].map (method) ->
-					mockServer[method]('/').thenJSON(200, method: method.toUpperCase())
+					mockServer[method]('/foo').thenJSON(200, method: method.toUpperCase())
 
 			it 'should default to GET', ->
 				promise = request.send
-					url: mockServer.url
+					baseUrl: mockServer.url
+					url: '/foo'
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(method: 'GET')
 
@@ -111,11 +118,12 @@ describe 'Request:', ->
 						m.chai.expect(promise).to.be.rejectedWith('Server Error')
 
 					it 'should have the status code in the error object', ->
-						request.send
+						m.chai.expect request.send
 							method: 'GET'
 							baseUrl: mockServer.url
 							url: '/500'
-						.catch (error) ->
+						.to.be.rejected
+						.then (error) ->
 							m.chai.expect(error.statusCode).to.equal(500)
 
 			describe 'given a HEAD endpoint', ->
@@ -206,12 +214,6 @@ describe 'Request:', ->
 
 		describe 'given an endpoint that will time out', ->
 
-			# Grab setTimeout before we replace it with a fake, so we can still
-			# do real waiting in the tests themselves
-			unstubbedSetTimeout = setTimeout
-			delay = (delay) -> new Promise (resolve) ->
-				unstubbedSetTimeout(resolve, delay)
-
 			beforeEach ->
 				@clock = m.sinon.useFakeTimers()
 				mockServer.get('/infinite-wait').thenTimeout()
@@ -219,15 +221,19 @@ describe 'Request:', ->
 			afterEach ->
 				@clock.restore()
 
+			waitForRequestConnection = ->
+				# Need to wait until the (async) request setup has completed
+				# for real, before we assume the timeout has started and start
+				# manually ticking the clock
+				delay(100)
+
 			it 'should reject the promise after 30s by default', ->
 				promise = request.send
 					method: 'GET'
 					url: mockServer.urlFor('/infinite-wait')
 				.get('body')
 
-				# Need to wait until the (async) request setup has completed
-				# before we start manually managing the clock
-				delay(100).then =>
+				waitForRequestConnection().then =>
 					@clock.tick(29000)
 					m.chai.expect(promise.isPending()).to.equal(true)
 
@@ -241,9 +247,7 @@ describe 'Request:', ->
 					timeout: 500
 				.get('body')
 
-				# Need to wait until the (async) request setup has completed
-				# before we start manually managing the clock
-				delay(100).then =>
+				waitForRequestConnection().then =>
 					@clock.tick(400)
 					m.chai.expect(promise.isPending()).to.equal(true)
 
@@ -256,9 +260,7 @@ describe 'Request:', ->
 					url: mockServer.urlFor('/infinite-wait')
 				.get('body')
 
-				# Need to wait until the (async) request setup has completed
-				# before we start manually managing the clock
-				delay(100).then =>
+				waitForRequestConnection().then =>
 					@clock.tick(30000)
 
 					if IS_BROWSER
