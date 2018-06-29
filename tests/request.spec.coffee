@@ -56,7 +56,7 @@ describe 'Request:', ->
 		describe 'given an endpoint that returns a non json response', ->
 
 			beforeEach ->
-				mockServer.get('/non-json').thenReply(200, 'Hello World');
+				mockServer.get('/non-json').thenReply(200, 'Hello World')
 
 			it 'should resolve with the plain body', ->
 				promise = request.send
