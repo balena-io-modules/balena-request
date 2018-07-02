@@ -19,7 +19,7 @@ limitations under the License.
 /**
  * @module request
  */
-var Promise, assign, defaults, errors, getRequest, isEmpty, noop, onlyIf, progress, urlLib, utils;
+var Promise, assign, defaults, errors, fetchReadableStream, getRequest, isEmpty, noop, progress, rindle, urlLib, utils;
 
 Promise = require('bluebird');
 
@@ -33,18 +33,21 @@ defaults = require('lodash/defaults');
 
 isEmpty = require('lodash/isEmpty');
 
+rindle = require('rindle');
+
+fetchReadableStream = require('fetch-readablestream');
+
 errors = require('resin-errors');
 
 utils = require('./utils');
 
 progress = require('./progress');
 
-onlyIf = utils.onlyIf;
-
 module.exports = getRequest = function(arg) {
-  var auth, debug, debugRequest, exports, interceptRequestError, interceptRequestOptions, interceptRequestOrError, interceptResponse, interceptResponseError, interceptResponseOrError, interceptors, isBrowser, prepareOptions, ref, ref1, ref2, ref3, ref4, requestAsync, retries;
+  var auth, debug, debugRequest, exports, interceptRequestError, interceptRequestOptions, interceptRequestOrError, interceptResponse, interceptResponseError, interceptResponseOrError, interceptors, isBrowser, prepareOptions, ref, ref1, ref2, ref3, ref4, requestAsync, requestBrowserStream, retries;
   ref = arg != null ? arg : {}, auth = ref.auth, debug = (ref1 = ref.debug) != null ? ref1 : false, retries = (ref2 = ref.retries) != null ? ref2 : 0, isBrowser = (ref3 = ref.isBrowser) != null ? ref3 : false, interceptors = (ref4 = ref.interceptors) != null ? ref4 : [];
   requestAsync = utils.getRequestAsync();
+  requestBrowserStream = utils.getRequestAsync(fetchReadableStream);
   debugRequest = !debug ? noop : utils.debugRequest;
   exports = {};
   prepareOptions = function(options) {
@@ -211,7 +214,6 @@ module.exports = getRequest = function(arg) {
   	 * @public
   	 *
   	 * @description
-  	 * **Not implemented for the browser.**
   	 * This function emits a `progress` event, passing an object with the following properties:
   	 *
   	 * - `Number percent`: from 0 to 100.
@@ -243,13 +245,13 @@ module.exports = getRequest = function(arg) {
   	 *
   	 * 	stream.pipe(fs.createWriteStream('/opt/download'))
    */
-  exports.stream = onlyIf(!isBrowser)(function(options) {
-    var rindle;
+  exports.stream = function(options) {
+    var requestStream;
     if (options == null) {
       options = {};
     }
-    rindle = require('rindle');
-    return prepareOptions(options).then(interceptRequestOptions, interceptRequestError).then(progress.estimate(requestAsync)).then(function(download) {
+    requestStream = isBrowser ? requestBrowserStream : requestAsync;
+    return prepareOptions(options).then(interceptRequestOptions, interceptRequestError).then(progress.estimate(requestStream, isBrowser)).then(function(download) {
       if (!utils.isErrorCode(download.response.statusCode)) {
         download.mime = download.response.headers.get('Content-Type');
         return download;
@@ -261,7 +263,7 @@ module.exports = getRequest = function(arg) {
         throw new errors.ResinRequestError(responseError, download.response.statusCode);
       });
     }).then(interceptResponse, interceptResponseError);
-  });
+  };
 
   /**
   	 * @summary Array of interceptors
@@ -311,8 +313,5 @@ module.exports = getRequest = function(arg) {
   	 * an error for the request, a network error, or an error response from the server. Should return
   	 * (or resolve to) a new response, or throw/reject.
    */
-  exports._setFetch = function(fetch) {
-    return requestAsync = utils.getRequestAsync(fetch);
-  };
   return exports;
 };

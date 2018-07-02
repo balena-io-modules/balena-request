@@ -2,39 +2,47 @@ _ = require('lodash')
 Promise = require('bluebird')
 m = require('mochainon')
 
-{ auth, request, getCustomRequest, fetchMock, IS_BROWSER } = require('./setup')()
+mockServer = require('mockttp').getLocal()
+
+{ auth, request, getCustomRequest, IS_BROWSER } = require('./setup')()
+
+# Grab setTimeout before we replace it with a fake later, so
+# we can still do real waiting in the tests themselves
+unstubbedSetTimeout = setTimeout
+delay = (delay) -> new Promise (resolve) ->
+	unstubbedSetTimeout(resolve, delay)
 
 describe 'Request:', ->
 
 	@timeout(10000)
 
 	beforeEach ->
-		auth.removeKey()
+		Promise.all [
+			auth.removeKey()
+			mockServer.start()
+		]
 
 	afterEach ->
-		fetchMock.restore()
+		mockServer.stop()
 
 	describe '.send()', ->
 
 		describe 'given a simple absolute GET endpoint', ->
 
 			beforeEach ->
-				fetchMock.get 'https://foobar.baz/foo',
-					body: from: 'foobar'
-					headers:
-						'Content-Type': 'application/json'
+				mockServer.get('/foo').thenJSON(200, from: 'foobar')
 
 			it 'should preserve the absolute url', ->
 				promise = request.send
 					method: 'GET'
-					url: 'https://foobar.baz/foo'
+					url: mockServer.urlFor('/foo')
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(from: 'foobar')
 
 			it 'should allow passing a baseUrl', ->
 				promise = request.send
 					method: 'GET'
-					baseUrl: 'https://foobar.baz'
+					baseUrl: mockServer.url
 					url: '/foo'
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(from: 'foobar')
@@ -42,30 +50,12 @@ describe 'Request:', ->
 		describe 'given multiple endpoints', ->
 
 			beforeEach ->
-				fetchMock.get 'https://api.resin.io/foo',
-					body: method: 'GET'
-					headers:
-						'Content-Type': 'application/json'
-				fetchMock.post 'https://api.resin.io/foo',
-					body: method: 'POST'
-					headers:
-						'Content-Type': 'application/json'
-				fetchMock.put 'https://api.resin.io/foo',
-					body: method: 'PUT'
-					headers:
-						'Content-Type': 'application/json'
-				fetchMock.patch 'https://api.resin.io/foo',
-					body: method: 'PATCH'
-					headers:
-						'Content-Type': 'application/json'
-				fetchMock.delete 'https://api.resin.io/foo',
-					body: method: 'DELETE'
-					headers:
-						'Content-Type': 'application/json'
+				Promise.all ['get', 'post', 'put', 'patch', 'delete'].map (method) ->
+					mockServer[method]('/foo').thenJSON(200, method: method.toUpperCase())
 
 			it 'should default to GET', ->
 				promise = request.send
-					baseUrl: 'https://api.resin.io'
+					baseUrl: mockServer.url
 					url: '/foo'
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(method: 'GET')
@@ -73,31 +63,30 @@ describe 'Request:', ->
 		describe 'given an endpoint that returns a non json response', ->
 
 			beforeEach ->
-				fetchMock.get('https://api.resin.io/foo', 'Hello World')
+				mockServer.get('/non-json').thenReply(200, 'Hello World')
 
 			it 'should resolve with the plain body', ->
 				promise = request.send
 					method: 'GET'
-					baseUrl: 'https://api.resin.io'
-					url: '/foo'
+					baseUrl: mockServer.url
+					url: '/non-json'
 				.get('body')
 				m.chai.expect(promise).to.eventually.equal('Hello World')
 
-		describe 'given an endpoint that accepts a non json body', ->
+		describe 'given an endpoint that accepts a non-json body', ->
 
 			beforeEach ->
-				fetchMock.post 'https://api.resin.io/foo', (url, opts) ->
-					return "The body is: #{opts.body}"
+				mockServer.post('/foo').withBody('Test body').thenJSON(200, { matched: true })
 
-			it 'should take the plain body successfully', ->
+			it 'should send the plain body successfully', ->
 				promise = request.send
 					method: 'POST'
-					baseUrl: 'https://api.resin.io'
+					baseUrl: mockServer.url
 					url: '/foo'
-					body: 'Qux'
+					body: 'Test body'
 					json: false
 				.get('body')
-				m.chai.expect(promise).to.eventually.equal('The body is: Qux')
+				m.chai.expect(promise).to.eventually.become({ matched: true })
 
 		describe 'given simple read only endpoints', ->
 
@@ -106,41 +95,35 @@ describe 'Request:', ->
 				describe 'given no response error', ->
 
 					beforeEach ->
-						fetchMock.get 'https://api.resin.io/foo',
-							body: hello: 'world'
-							headers:
-								'Content-Type': 'application/json'
+						mockServer.get('/hello').thenJSON(200, hello: 'world')
 
 					it 'should correctly make the request', ->
 						promise = request.send
 							method: 'GET'
-							baseUrl: 'https://api.resin.io'
-							url: '/foo'
+							baseUrl: mockServer.url
+							url: '/hello'
 						.get('body')
 						m.chai.expect(promise).to.eventually.become(hello: 'world')
 
 				describe 'given a response error', ->
 
 					beforeEach ->
-						fetchMock.get 'https://api.resin.io/foo',
-							status: 500
-							body: error: text: 'Server Error'
-							headers:
-								'Content-Type': 'application/json'
+						mockServer.get('/500').thenJSON(500, error: text: 'Server Error')
 
 					it 'should be rejected with the error message', ->
 						promise = request.send
 							method: 'GET'
-							baseUrl: 'https://api.resin.io'
-							url: '/foo'
+							baseUrl: mockServer.url
+							url: '/500'
 						m.chai.expect(promise).to.be.rejectedWith('Server Error')
 
 					it 'should have the status code in the error object', ->
-						request.send
+						m.chai.expect request.send
 							method: 'GET'
-							baseUrl: 'https://api.resin.io'
-							url: '/foo'
-						.catch (error) ->
+							baseUrl: mockServer.url
+							url: '/500'
+						.to.be.rejected
+						.then (error) ->
 							m.chai.expect(error.statusCode).to.equal(500)
 
 			describe 'given a HEAD endpoint', ->
@@ -148,12 +131,12 @@ describe 'Request:', ->
 				describe 'given no response error', ->
 
 					beforeEach ->
-						fetchMock.head('https://api.resin.io/foo', 200)
+						mockServer.head('/foo').thenReply(200)
 
 					it 'should correctly make the request', ->
 						promise = request.send
 							method: 'HEAD'
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						.get('statusCode')
 						m.chai.expect(promise).to.eventually.equal(200)
@@ -161,116 +144,54 @@ describe 'Request:', ->
 				describe 'given a response error', ->
 
 					beforeEach ->
-						fetchMock.head('https://api.resin.io/foo', 500)
+						mockServer.head('/foo').thenReply(500)
 
 					it 'should be rejected with a generic error message', ->
 						promise = request.send
 							method: 'HEAD'
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						.get('statusCode')
 						m.chai.expect(promise).to.be.rejectedWith('The request was unsuccessful')
 
 		describe 'given simple endpoints that handle a request body', ->
 
-			describe 'given a POST endpoint that mirrors the request body', ->
+			['delete', 'patch', 'put', 'post'].forEach (method) ->
+				describe "given a #{method.toUpperCase()} endpoint that matches the request body", ->
 
-				beforeEach ->
-					fetchMock.post 'https://api.resin.io/foo', (url, opts) ->
-						body: opts.body
-						headers:
-							'Content-Type': 'application/json'
+					beforeEach ->
+						mockServer[method]('/')
+						.withBody(JSON.stringify({ foo: 'bar' }))
+						.thenJSON(200, { matched: true })
 
-				it 'should eventually return the body', ->
-					promise = request.send
-						method: 'POST'
-						baseUrl: 'https://api.resin.io'
-						url: '/foo'
-						body:
-							foo: 'bar'
-					.get('body')
-					m.chai.expect(promise).to.eventually.become(foo: 'bar')
-
-			describe 'given a PUT endpoint that mirrors the request body', ->
-
-				beforeEach ->
-					fetchMock.put 'https://api.resin.io/foo', (url, opts) ->
-						body: opts.body
-						headers:
-							'Content-Type': 'application/json'
-
-				it 'should eventually return the body', ->
-					promise = request.send
-						method: 'PUT'
-						baseUrl: 'https://api.resin.io'
-						url: '/foo'
-						body:
-							foo: 'bar'
-					.get('body')
-					m.chai.expect(promise).to.eventually.become(foo: 'bar')
-
-			describe 'given a PATCH endpoint that mirrors the request body', ->
-
-				beforeEach ->
-					fetchMock.patch 'https://api.resin.io/foo', (url, opts) ->
-						body: opts.body
-						headers:
-							'Content-Type': 'application/json'
-
-				it 'should eventually return the body', ->
-					promise = request.send
-						method: 'PATCH'
-						baseUrl: 'https://api.resin.io'
-						url: '/foo'
-						body:
-							foo: 'bar'
-					.get('body')
-					m.chai.expect(promise).to.eventually.become(foo: 'bar')
-
-			describe 'given a DELETE endpoint that mirrors the request body', ->
-
-				beforeEach ->
-					fetchMock.delete 'https://api.resin.io/foo', (url, opts) ->
-						body: opts.body
-						headers:
-							'Content-Type': 'application/json'
-
-				it 'should eventually return the body', ->
-					promise = request.send
-						method: 'DELETE'
-						baseUrl: 'https://api.resin.io'
-						url: '/foo'
-						body:
-							foo: 'bar'
-					.get('body')
-					m.chai.expect(promise).to.eventually.become(foo: 'bar')
+					it 'should eventually return the body', ->
+						promise = request.send
+							method: method.toUpperCase()
+							baseUrl: mockServer.url
+							url: '/'
+							body:
+								foo: 'bar'
+						.get('body')
+						m.chai.expect(promise).to.eventually.become(matched: true)
 
 		describe 'given an endpoint that fails the first two times', ->
 
 			beforeEach ->
-				requestsSeen = 0
-				fetchMock.get 'https://example.com/initially-failing', Promise.method ->
-					requestsSeen += 1
-					if requestsSeen <= 2
-						throw new Error('low-level network error')
-					else
-						return {
-							body: result: 'success'
-							headers:
-								'Content-Type': 'application/json'
-						}
+				mockServer.get('/initially-failing').twice().thenCloseConnection()
+				.then ->
+					mockServer.get('/initially-failing').thenJSON(200, result: 'success')
 
 			it 'should fail by default', ->
 				promise = request.send
 					method: 'GET'
-					url: 'https://example.com/initially-failing'
+					url: mockServer.urlFor('/initially-failing')
 				.get('body')
 				m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
 
 			it 'should retry and fail if set to retry just once', ->
 				promise = request.send
 					method: 'GET'
-					url: 'https://example.com/initially-failing'
+					url: mockServer.urlFor('/initially-failing')
 					retries: 1
 				.get('body')
 				m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
@@ -278,7 +199,7 @@ describe 'Request:', ->
 			it 'should retry and eventually succeed if set to retry more than once', ->
 				promise = request.send
 					method: 'GET'
-					url: 'https://example.com/initially-failing'
+					url: mockServer.urlFor('/initially-failing')
 					retries: 2
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(result: 'success')
@@ -287,38 +208,32 @@ describe 'Request:', ->
 				retryingRequest = getCustomRequest({ retries: 2 })
 				promise = retryingRequest.send
 					method: 'GET'
-					url: 'https://example.com/initially-failing'
+					url: mockServer.urlFor('/initially-failing')
 				.get('body')
 				m.chai.expect(promise).to.eventually.become(result: 'success')
 
 		describe 'given an endpoint that will time out', ->
 
-			NODE_TIMEOUT_ERROR = new Error('node timeout error')
-
 			beforeEach ->
 				@clock = m.sinon.useFakeTimers()
+				mockServer.get('/infinite-wait').thenTimeout()
 
 			afterEach ->
 				@clock.restore()
 
-			stubTimeout = -> new Promise (resolve, reject) ->
-				fetchMock.get 'http://infinite-wait.com', (url, opts) ->
-					resolve()
-
-					# Emulate node-fetch timeout behaviour if we use it
-					if not IS_BROWSER and opts.timeout
-						Promise.delay(opts.timeout).throw(NODE_TIMEOUT_ERROR)
-					# Browser/no timeout fetch() simply never resolves.
-					else
-						new Promise(_.noop)
+			waitForRequestConnection = ->
+				# Need to wait until the (async) request setup has completed
+				# for real, before we assume the timeout has started and start
+				# manually ticking the clock
+				delay(100)
 
 			it 'should reject the promise after 30s by default', ->
 				promise = request.send
 					method: 'GET'
-					url: 'http://infinite-wait.com'
+					url: mockServer.urlFor('/infinite-wait')
 				.get('body')
 
-				stubTimeout().then =>
+				waitForRequestConnection().then =>
 					@clock.tick(29000)
 					m.chai.expect(promise.isPending()).to.equal(true)
 
@@ -328,27 +243,27 @@ describe 'Request:', ->
 			it 'should use a provided timeout option', ->
 				promise = request.send
 					method: 'GET'
-					url: 'http://infinite-wait.com'
-					timeout: 5000
+					url: mockServer.urlFor('/infinite-wait')
+					timeout: 500
 				.get('body')
 
-				stubTimeout().then =>
-					@clock.tick(4000)
+				waitForRequestConnection().then =>
+					@clock.tick(400)
 					m.chai.expect(promise.isPending()).to.equal(true)
 
-					@clock.tick(1000)
+					@clock.tick(100)
 					m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
 
 			it 'should be rejected by the correct error', ->
 				promise = request.send
 					method: 'GET'
-					url: 'http://infinite-wait.com'
+					url: mockServer.urlFor('/infinite-wait')
 				.get('body')
 
-				stubTimeout().then =>
+				waitForRequestConnection().then =>
 					@clock.tick(30000)
 
 					if IS_BROWSER
 						m.chai.expect(promise).to.be.rejectedWith(Promise.TimeoutError)
 					else
-						m.chai.expect(promise).to.be.rejectedWith(NODE_TIMEOUT_ERROR)
+						m.chai.expect(promise).to.be.rejectedWith(Error, 'network timeout')

@@ -24,12 +24,13 @@ assign = require('lodash/assign')
 noop = require('lodash/noop')
 defaults = require('lodash/defaults')
 isEmpty = require('lodash/isEmpty')
+rindle = require('rindle')
+
+fetchReadableStream = require('fetch-readablestream')
 
 errors = require('resin-errors')
 utils = require('./utils')
 progress = require('./progress')
-
-{ onlyIf } = utils
 
 module.exports = getRequest = ({
 	auth,
@@ -39,6 +40,7 @@ module.exports = getRequest = ({
 	interceptors = []
 } = {}) ->
 	requestAsync = utils.getRequestAsync()
+	requestBrowserStream = utils.getRequestAsync(fetchReadableStream)
 
 	debugRequest = if not debug then noop else utils.debugRequest
 
@@ -209,7 +211,6 @@ module.exports = getRequest = ({
 	# @public
 	#
 	# @description
-	# **Not implemented for the browser.**
 	# This function emits a `progress` event, passing an object with the following properties:
 	#
 	# - `Number percent`: from 0 to 100.
@@ -241,12 +242,16 @@ module.exports = getRequest = ({
 	#
 	# 	stream.pipe(fs.createWriteStream('/opt/download'))
 	###
-	exports.stream = onlyIf(not isBrowser) (options = {}) ->
-		rindle = require('rindle')
+	exports.stream = (options = {}) ->
+
+		requestStream = if isBrowser
+			requestBrowserStream
+		else
+			requestAsync
 
 		prepareOptions(options)
 		.then(interceptRequestOptions, interceptRequestError)
-		.then(progress.estimate(requestAsync))
+		.then(progress.estimate(requestStream, isBrowser))
 		.then (download) ->
 			if not utils.isErrorCode(download.response.statusCode)
 				# TODO: Move this to resin-image-manager
@@ -311,8 +316,5 @@ module.exports = getRequest = ({
 	# an error for the request, a network error, or an error response from the server. Should return
 	# (or resolve to) a new response, or throw/reject.
 	###
-
-	exports._setFetch = (fetch) ->
-		requestAsync = utils.getRequestAsync(fetch)
 
 	return exports

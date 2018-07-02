@@ -3,85 +3,89 @@ rindle = require('rindle')
 Promise = require('bluebird')
 m = require('mochainon')
 
+mockServer = require('mockttp').getLocal()
+
 utils = require('../lib/utils')
 
-{ auth, request, fetchMock, IS_BROWSER } = require('./setup')()
-
-inNodeIt = if IS_BROWSER then (->) else it
+{ auth, request } = require('./setup')()
 
 describe 'An interceptor', ->
 
 	@timeout(10000)
 
 	beforeEach ->
-		auth.removeKey()
-		fetchMock.get '*', (url, opts) ->
-			body: requested: url
-			headers:
-				'Content-Type': 'application/json'
-
 		request.interceptors = []
 
+		Promise.all [
+			auth.removeKey(),
+			mockServer.start().then ->
+				Promise.all [
+					mockServer.get('/').thenJSON(200, { requested: '/' })
+					mockServer.get('/original').thenJSON(200, { requested: 'original' })
+					mockServer.get('/changed').thenJSON(200, { requested: 'changed' })
+				]
+		]
+
 	afterEach ->
-		fetchMock.restore()
+		mockServer.stop()
 
 	describe 'with a request hook', ->
 
 		it 'should be able to change a request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
-				_.assign({}, request, url: 'https://changed.com')
+				_.assign({}, request, url: mockServer.urlFor('/changed'))
 
 			promise = request.send
-				url: 'https://original.com'
+				url: mockServer.urlFor('/original')
 			.get('body')
 
-			m.chai.expect(promise).to.eventually.become(requested: 'https://changed.com')
+			m.chai.expect(promise).to.eventually.become(requested: 'changed')
 
 		it 'should be able to asynchronously change a request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
 				Promise.delay(100).then ->
-					_.assign({}, request, url: 'https://changed.com')
+					_.assign({}, request, url: mockServer.urlFor('/changed'))
 
 			promise = request.send
-				url: 'https://original.com'
+				url: mockServer.urlFor('/original')
 			.get('body')
 
-			m.chai.expect(promise).to.eventually.become(requested: 'https://changed.com')
+			m.chai.expect(promise).to.eventually.become(requested: 'changed')
 
 		it 'should be able to stop a request', ->
 			request.interceptors[0] = request: ->
 				throw new Error('blocked')
 
 			promise = request.send
-				url: 'https://example.com'
+				url: mockServer.url
 			.get('body')
 
 			m.chai.expect(promise).to.be.rejectedWith('blocked')
 
-		inNodeIt 'should be able to change a stream request before it is sent', ->
+		it 'should be able to change a stream request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
-				_.assign({}, request, url: 'https://changed.com')
+				_.assign({}, request, url: mockServer.urlFor('/changed'))
 
-			promise = request.stream
-				url: 'https://original.com'
+			request.stream
+				url: mockServer.urlFor('/original')
 			.then(rindle.extract).then (data) ->
 				body = JSON.parse(data)
-				m.chai.expect(body).to.deep.equal(requested: 'https://changed.com')
+				m.chai.expect(body).to.deep.equal(requested: 'changed')
 
 	describe 'with a requestError hook', ->
 
 		it 'should not call requestError if there are no errors', ->
 			request.interceptors[0] =
-				request: (request) -> _.assign({}, request, url: 'https://changed.com')
+				request: (request) -> _.assign({}, request, url: mockServer.urlFor('/changed'))
 				requestError: m.sinon.mock()
 			request.interceptors[1] =
 				requestError: m.sinon.mock()
 
-			promise = request.send
-				url: 'https://original.com'
+			request.send
+				url: mockServer.urlFor('/original')
 			.get('body')
 			.then (body) ->
-				m.chai.expect(body).to.deep.equal(requested: 'https://changed.com')
+				m.chai.expect(body).to.deep.equal(requested: 'changed')
 				request.interceptors.forEach (interceptor) ->
 					m.chai.expect(interceptor.requestError.called).to.equal false,
 						'requestError should not have been called'
@@ -93,10 +97,9 @@ describe 'An interceptor', ->
 			request.interceptors[1] =
 				requestError: m.sinon.mock().throws(new Error('error overridden'))
 
-			promise = request.send
-				url: 'https://example.com'
-			.get('body')
-			.catch (err) ->
+			m.chai.expect(request.send(url: mockServer.url).get('body'))
+			.to.be.rejected
+			.then (err) ->
 				m.chai.expect(err.message).to.deep.equal('error overridden')
 				m.chai.expect(request.interceptors[0].requestError.called).to.equal false,
 					'Preceeding requestError hooks should not be called'
@@ -115,16 +118,16 @@ describe 'An interceptor', ->
 					requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
 
 				promise = request.send
-					url: 'https://example.com'
+					url: mockServer.url
 
 				m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
 
-			inNodeIt 'should call requestError if the token is expired for stream()', ->
+			it 'should call requestError if the token is expired for stream()', ->
 				request.interceptors[0] =
 					requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
 
 				promise = request.stream
-					url: 'https://example.com'
+					url: mockServer.url
 
 				m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
 
@@ -135,7 +138,7 @@ describe 'An interceptor', ->
 				_.assign({}, response, body: replaced: true)
 
 			promise = request.send
-				url: 'https://example.com'
+				url: mockServer.url
 			.get('body')
 
 			m.chai.expect(promise).to.eventually.become(replaced: true)
@@ -146,34 +149,29 @@ describe 'An interceptor', ->
 					_.assign({}, response, body: replaced: true)
 
 			promise = request.send
-				url: 'https://example.com'
+				url: mockServer.url
 			.get('body')
 
 			m.chai.expect(promise).to.eventually.become(replaced: true)
 
 		it 'should call the response hook for non-200 successful responses', ->
-			fetchMock.restore()
-			fetchMock.get 'https://201.com', (url, opts) ->
-				status: 201
-				body: requested: url
-				headers:
-					'Content-Type': 'application/json'
+			mockServer.get('/201').thenReply(201)
+			.then ->
+				request.interceptors[0] =
+					response: (response) -> _.assign({}, response, body: replaced: true)
 
-			request.interceptors[0] =
-				response: (response) -> _.assign({}, response, body: replaced: true)
+				request.send
+					url: mockServer.urlFor('/201')
+				.then (response) ->
+					m.chai.expect(response.body).to.deep.equal(replaced: true)
+					m.chai.expect(response.statusCode).to.equal(201)
 
-			promise = request.send
-				url: 'https://201.com'
-			.then (response) ->
-				m.chai.expect(response.body).to.deep.equal(replaced: true)
-				m.chai.expect(response.statusCode).to.equal(201)
-
-		inNodeIt 'should be able to change a stream response before it is sent', ->
+		it 'should be able to change a stream response before it is returned', ->
 			request.interceptors[0] = response: (response) ->
 				rindle.getStreamFromString('replacement stream')
 
-			promise = request.stream
-				url: 'https://original.com'
+			request.stream
+				url: mockServer.urlFor('/original')
 			.then(rindle.extract).then (data) ->
 				m.chai.expect(data).to.equal('replacement stream')
 
@@ -182,98 +180,91 @@ describe 'An interceptor', ->
 		it 'should not call responseError if there are no errors', ->
 			request.interceptors[0] = responseError: m.sinon.mock()
 
-			promise = request.send
-				url: 'https://example.com'
+			request.send
+				url: mockServer.url
 			.get('body')
 			.then (body) ->
-				m.chai.expect(body).to.deep.equal(requested: 'https://example.com')
+				m.chai.expect(body).to.deep.equal(requested: '/')
 				m.chai.expect(request.interceptors[0].responseError.called).to.equal false,
 					'responseError should not have been called'
 
 		it 'should call responseError if the server returns a server error', ->
-			fetchMock.restore()
-			fetchMock.get 'https://500.com', (url, opts) ->
-				status: 500
+			mockServer.get('/500').thenReply(500)
+			.then ->
+				request.interceptors[0] = responseError:
+					m.sinon.mock().throws(new Error('caught error'))
 
-			request.interceptors[0] = responseError:
-				m.sinon.mock().throws(new Error('caught error'))
+				promise = request.send
+					url: mockServer.urlFor('/500')
 
-			promise = request.send
-				url: 'https://500.com'
-
-			m.chai.expect(promise).to.be.rejectedWith('caught error')
+				m.chai.expect(promise).to.be.rejectedWith('caught error')
 
 		it 'should call responseError if the server returns an authentication error', ->
-			fetchMock.restore()
-			fetchMock.get 'https://401.com', (url, opts) ->
-				status: 401
+			mockServer.get('/401').thenReply(401)
+			.then ->
+				request.interceptors[0] = responseError:
+					m.sinon.mock().throws(new Error('caught auth error'))
 
-			request.interceptors[0] = responseError:
-				m.sinon.mock().throws(new Error('caught auth error'))
+				promise = request.send
+					url: mockServer.urlFor('/401')
 
-			promise = request.send
-				url: 'https://401.com'
-
-			m.chai.expect(promise).to.be.rejectedWith('caught auth error')
+				m.chai.expect(promise).to.be.rejectedWith('caught auth error')
 
 		it 'should let responseError retry a different request', ->
-			fetchMock.restore()
-			fetchMock.get '*', (url, opts) ->
-				if url is 'https://ok.com'
-					status: 200
-				else
-					status: 500
+			Promise.all [
+				mockServer.get('/ok').thenReply(200)
+				mockServer.get('/fail').thenReply(500)
+			]
+			.then ->
+				request.interceptors[0] = responseError: (response) ->
+					request.send
+						url: mockServer.urlFor('/ok')
 
-			request.interceptors[0] = responseError: (response) ->
-				request.send
-					url: 'https://ok.com'
+				promise = request.send
+					url: mockServer.urlFor('/fail')
+				.get('status')
 
-			promise = request.send
-				url: 'https://error.com'
-			.get('status')
-
-			m.chai.expect(promise).to.eventually.become(200)
+				m.chai.expect(promise).to.eventually.become(200)
 
 		it 'should give responseError the request options for server errors', ->
-			fetchMock.restore()
-			fetchMock.get 'https://500.com', (url, opts) ->
-				status: 500
+			mockServer.get('/500').thenReply(500)
+			.then ->
+				request.interceptors[0] = responseError: (err) ->
+					throw err
 
-			request.interceptors[0] = responseError: (err) ->
-				throw err
+				targetUrl = mockServer.urlFor('/500')
 
-			promise = request.send
-				url: 'https://500.com'
-				anotherExtraOption: true
-			promise.catch (err) ->
-				m.chai.expect(err.requestOptions.url).to.equal('https://500.com')
-				m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
+				m.chai.expect request.send
+					url: targetUrl
+					anotherExtraOption: true
+				.to.be.rejected
+				.then (err) ->
+					m.chai.expect(err.requestOptions.url).to.equal(targetUrl)
+					m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
 
 		it 'should give responseError the request options for network errors', ->
-			fetchMock.restore()
-			fetchMock.get 'https://no-response.com', (url, opts) ->
-				Promise.try ->
-					throw new TypeError('Failed to fetch')
+			mockServer.get('/no-response').thenCloseConnection()
+			.then ->
+				request.interceptors[0] = responseError: (err) ->
+					throw err
 
-			request.interceptors[0] = responseError: (err) ->
-				throw err
+				targetUrl = mockServer.urlFor('/no-response')
 
-			promise = request.send
-				url: 'https://no-response.com'
-				anotherExtraOption: true
-			promise.catch (err) ->
-				m.chai.expect(err.requestOptions.url).to.equal('https://no-response.com')
-				m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
+				m.chai.expect request.send
+					url: targetUrl
+					anotherExtraOption: true
+				.to.be.rejected
+				.then (err) ->
+					m.chai.expect(err.requestOptions.url).to.equal(targetUrl)
+					m.chai.expect(err.requestOptions.anotherExtraOption).to.equal(true)
 
-		inNodeIt 'should call responseError if the server returns an error for a stream', ->
-			fetchMock.restore()
-			fetchMock.get 'https://500.com', (url, opts) ->
-				status: 500
+		it 'should call responseError if the server returns an error for a stream', ->
+			mockServer.get('/500').thenReply(500)
+			.then ->
+				request.interceptors[0] = responseError:
+					m.sinon.mock().throws(new Error('caught error'))
 
-			request.interceptors[0] = responseError:
-				m.sinon.mock().throws(new Error('caught error'))
+				promise = request.stream
+					url: mockServer.urlFor('/500')
 
-			promise = request.stream
-				url: 'https://500.com'
-
-			m.chai.expect(promise).to.be.rejectedWith('caught error')
+				m.chai.expect(promise).to.be.rejectedWith('caught error')

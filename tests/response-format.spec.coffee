@@ -3,7 +3,9 @@ Promise = require('bluebird')
 m = require('mochainon')
 errors = require('resin-errors')
 
-{ auth, request, fetchMock, IS_BROWSER } = require('./setup')()
+mockServer = require('mockttp').getLocal()
+
+{ auth, request, IS_BROWSER } = require('./setup')()
 
 RESPONSE_BODY = from: 'foobar'
 
@@ -12,32 +14,34 @@ describe 'responseFormat:', ->
 	@timeout(10000)
 
 	beforeEach ->
-		auth.removeKey()
+		Promise.all [
+			auth.removeKey()
+			mockServer.start()
+		]
 
 	afterEach ->
-		fetchMock.restore()
+		mockServer.stop()
 
 	describe 'given a JSON response with custom content-type', ->
 
 		beforeEach ->
-			fetchMock.get 'https://foobar.baz/foo',
-				body: RESPONSE_BODY
-				headers:
-					'Content-Type': 'application/x-my-json'
+			mockServer.get('/').thenReply 200,
+				JSON.stringify(RESPONSE_BODY)
+				'Content-Type': 'application/x-my-json'
 
 		it 'should return the plain string given no `responseFormat`', ->
 			promise = request.send
 				method: 'GET'
-				baseUrl: 'https://foobar.baz'
-				url: '/foo'
+				baseUrl: mockServer.url
+				url: '/'
 			.get('body')
 			m.chai.expect(promise).to.eventually.become(JSON.stringify(RESPONSE_BODY))
 
 		it "should properly parse the response given the 'json' `responseFormat`", ->
 			promise = request.send
 				method: 'GET'
-				baseUrl: 'https://foobar.baz'
-				url: '/foo'
+				baseUrl: mockServer.url
+				url: '/'
 				responseFormat: 'json'
 			.get('body')
 			m.chai.expect(promise).to.eventually.become(RESPONSE_BODY)
@@ -45,8 +49,8 @@ describe 'responseFormat:', ->
 		it "should return null given the 'none' `responseFormat`", ->
 			promise = request.send
 				method: 'GET'
-				baseUrl: 'https://foobar.baz'
-				url: '/foo'
+				baseUrl: mockServer.url
+				url: '/'
 				responseFormat: 'none'
 			.get('body')
 			m.chai.expect(promise).to.eventually.become(null)
@@ -54,8 +58,8 @@ describe 'responseFormat:', ->
 		it "should return a blob/buffer given the 'blob' `responseFormat`", ->
 			promise = request.send
 				method: 'GET'
-				baseUrl: 'https://foobar.baz'
-				url: '/foo'
+				baseUrl: mockServer.url
+				url: '/'
 				responseFormat: 'blob'
 			.get('body')
 			.then (body) ->
@@ -79,8 +83,8 @@ describe 'responseFormat:', ->
 		it 'should throw given invalid `responseFormat`', ->
 			promise = request.send
 				method: 'GET'
-				baseUrl: 'https://foobar.baz'
-				url: '/foo'
+				baseUrl: mockServer.url
+				url: '/'
 				responseFormat: 'uzabzabza'
 			.get('body')
 			m.chai.expect(promise).to.be.rejectedWith(errors.ResinInvalidParameterError)

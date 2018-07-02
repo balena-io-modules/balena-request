@@ -121,7 +121,6 @@ request.send
 <a name="module_request.stream"></a>
 
 ### request.stream(options) ⇒ <code>Promise.&lt;Stream&gt;</code>
-**Not implemented for the browser.**
 This function emits a `progress` event, passing an object with the following properties:
 
 - `Number percent`: from 0 to 100.

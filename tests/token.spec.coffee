@@ -8,21 +8,26 @@ johnDoeFixture = tokens.johndoe
 janeDoeFixture = tokens.janedoe
 utils = require('../lib/utils')
 
-{ auth, request, fetchMock, IS_BROWSER } = require('./setup')()
+mockServer = require('mockttp').getLocal()
+
+{ auth, request } = require('./setup')()
 
 describe 'Request (token):', ->
 
 	@timeout(10000)
+
+	beforeEach ->
+		mockServer.start()
+
+	afterEach ->
+		mockServer.stop()
 
 	describe '.send()', ->
 
 		describe 'given a simple GET endpoint', ->
 
 			beforeEach ->
-				fetchMock.get('begin:https://api.resin.io/foo', 'bar')
-
-			afterEach ->
-				fetchMock.restore()
+				mockServer.get(/^\/foo/).thenReply(200, 'bar')
 
 			describe 'given the token is always fresh', ->
 
@@ -41,7 +46,7 @@ describe 'Request (token):', ->
 					it 'should send an Authorization header', ->
 						promise = request.send
 							method: 'GET'
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						.get('request')
 						.get('headers')
@@ -51,7 +56,7 @@ describe 'Request (token):', ->
 					it 'should not send an Authorization header if sendToken is false', ->
 						promise = request.send
 							method: 'GET'
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 							sendToken: false
 						.get('request')
@@ -67,7 +72,7 @@ describe 'Request (token):', ->
 					it 'should not send an Authorization header', ->
 						promise = request.send
 							method: 'GET'
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						.get('request')
 						.get('headers')
@@ -89,16 +94,13 @@ describe 'Request (token):', ->
 				describe 'given a working /whoami endpoint', ->
 
 					beforeEach ->
-						fetchMock.get('https://api.resin.io/whoami', janeDoeFixture.token)
-
-					afterEach ->
-						fetchMock.restore()
+						mockServer.get('/whoami').thenReply(200, janeDoeFixture.token)
 
 					it 'should refresh the token', ->
 						auth.getKey().then (savedToken) ->
 							m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
 							return request.send
-								baseUrl: 'https://api.resin.io'
+								baseUrl: mockServer.url
 								url: '/foo'
 						.then (response) ->
 							m.chai.expect(response.body).to.equal('bar')
@@ -113,7 +115,7 @@ describe 'Request (token):', ->
 					it 'should use the new token in the same request', ->
 						m.chai.expect(auth.getKey()).to.eventually.equal(johnDoeFixture.token)
 						request.send
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						.then (response) ->
 							authorizationHeader = response.request.headers.Authorization
@@ -122,59 +124,48 @@ describe 'Request (token):', ->
 				describe 'given /whoami returns 401', ->
 
 					beforeEach ->
-						fetchMock.get 'https://api.resin.io/whoami',
-							status: 401
-							body: 'Unauthorized'
-
-					afterEach ->
-						fetchMock.restore()
+						mockServer.get('/whoami').thenReply(401, 'Unauthorized')
 
 					it 'should be rejected with an expiration error', ->
 						promise = request.send
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						m.chai.expect(promise).to.be.rejectedWith(errors.ResinExpiredToken)
 
 					it 'should have the session token as an error attribute', ->
-						request.send
-							baseUrl: 'https://api.resin.io'
+						m.chai.expect request.send
+							baseUrl: mockServer.url
 							url: '/foo'
-						.catch (error) ->
+						.to.be.rejected
+						.then (error) ->
 							m.chai.expect(error.token).to.equal(johnDoeFixture.token)
 
 					it 'should clear the token', ->
-						request.send
-							baseUrl: 'https://api.resin.io'
+						m.chai.expect request.send
+							baseUrl: mockServer.url
 							url: '/foo'
-						.catch ->
+						.to.be.rejected
+						.then ->
 							auth.hasKey().then (hasKey) ->
 								m.chai.expect(hasKey).to.be.false
 
 				describe 'given /whoami returns a non 401 status code', ->
 
 					beforeEach ->
-						fetchMock.get('https://api.resin.io/whoami', 500)
-
-					afterEach ->
-						fetchMock.restore()
+						mockServer.get('/whoami').thenReply(500)
 
 					it 'should be rejected with a request error', ->
 						promise = request.send
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						m.chai.expect(promise).to.be.rejectedWith(errors.ResinRequestError)
 
 	describe '.stream()', ->
 
-		return if IS_BROWSER
-
 		describe 'given a simple endpoint that responds with a string', ->
 
 			beforeEach ->
-				fetchMock.get('https://api.resin.io/foo', 'Lorem ipsum dolor sit amet')
-
-			afterEach ->
-				fetchMock.restore()
+				mockServer.get('/foo').thenReply(200, 'Lorem ipsum dolor sit amet')
 
 			describe 'given the token is always fresh', ->
 
@@ -193,7 +184,7 @@ describe 'Request (token):', ->
 					it 'should send an Authorization header', ->
 						request.stream
 							method: 'GET'
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						.then (stream) ->
 							headers = stream.response.request.headers
@@ -208,7 +199,7 @@ describe 'Request (token):', ->
 					it 'should not send an Authorization header', ->
 						request.stream
 							method: 'GET'
-							baseUrl: 'https://api.resin.io'
+							baseUrl: mockServer.url
 							url: '/foo'
 						.then (stream) ->
 							headers = stream.response.request.headers
