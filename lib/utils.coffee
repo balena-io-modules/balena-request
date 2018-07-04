@@ -311,6 +311,16 @@ requestAsync = (fetch, options, retriesRemaining) ->
 		p = p.timeout(opts.timeout)
 
 	p = p.then (response) ->
+		if opts.signal? && response.body?.cancel
+			# We've passed an AbortController, but we have an XHR-emulated transport,
+			# so it won't be used. Fake it!
+			# Context: https://github.com/jonnyreeves/fetch-readablestream/issues/6
+			if opts.signal.aborted
+				response.body.cancel()
+			else
+				opts.signal.addEventListener 'abort', ->
+					response.body.cancel()
+
 		responseTime = new Date()
 		response.duration = responseTime - requestTime
 		response.statusCode = response.status

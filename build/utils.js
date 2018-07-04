@@ -328,7 +328,16 @@ requestAsync = function(fetch, options, retriesRemaining) {
     p = p.timeout(opts.timeout);
   }
   p = p.then(function(response) {
-    var responseTime;
+    var ref2, responseTime;
+    if ((opts.signal != null) && ((ref2 = response.body) != null ? ref2.cancel : void 0)) {
+      if (opts.signal.aborted) {
+        response.body.cancel();
+      } else {
+        opts.signal.addEventListener('abort', function() {
+          return response.body.cancel();
+        });
+      }
+    }
     responseTime = new Date();
     response.duration = responseTime - requestTime;
     response.statusCode = response.status;
