@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, includes, normalFetch, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
+var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, handleAbortIfNotSupported, includes, normalFetch, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
 
 Promise = require('bluebird');
 
@@ -328,15 +328,9 @@ requestAsync = function(fetch, options, retriesRemaining) {
     p = p.timeout(opts.timeout);
   }
   p = p.then(function(response) {
-    var ref2, responseTime;
-    if ((opts.signal != null) && ((ref2 = response.body) != null ? ref2.cancel : void 0)) {
-      if (opts.signal.aborted) {
-        response.body.cancel();
-      } else {
-        opts.signal.addEventListener('abort', function() {
-          return response.body.cancel();
-        });
-      }
+    var responseTime;
+    if (opts.signal != null) {
+      handleAbortIfNotSupported(opts.signal, response);
     }
     responseTime = new Date();
     response.duration = responseTime - requestTime;
@@ -353,6 +347,26 @@ requestAsync = function(fetch, options, retriesRemaining) {
     });
   } else {
     return p;
+  }
+};
+
+handleAbortIfNotSupported = function(signal, response) {
+  var emulateAbort, ref1, ref2;
+  emulateAbort = ((ref1 = response.body) != null ? ref1.cancel : void 0) ? function() {
+    return response.body.cancel();
+  } : ((ref2 = response.body) != null ? ref2.destroy : void 0) ? function() {
+    return response.body.destroy();
+  } : void 0;
+  if (emulateAbort) {
+    if (signal.aborted) {
+      return emulateAbort();
+    } else {
+      return signal.addEventListener('abort', function() {
+        return emulateAbort();
+      }, {
+        once: true
+      });
+    }
   }
 };
 
