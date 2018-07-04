@@ -231,6 +231,7 @@ processRequestOptions = (options = {}) ->
 	opts.retries = options.retries
 	opts.method = options.method
 	opts.compress = options.gzip
+	opts.signal = options.signal
 
 	{ body, headers } = options
 	headers ?= {}

@@ -245,6 +245,7 @@ processRequestOptions = function(options) {
   opts.retries = options.retries;
   opts.method = options.method;
   opts.compress = options.gzip;
+  opts.signal = options.signal;
   body = options.body, headers = options.headers;
   if (headers == null) {
     headers = {};
