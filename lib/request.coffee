@@ -154,7 +154,7 @@ module.exports = getRequest = ({
 	# The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` option. Otherwise, the request is made anonymously.
 	#
 	# Requests can be aborted using an AbortController (with a polyfill like https://www.npmjs.com/package/abortcontroller-polyfill
-	# if necessary). Request abortion is not well supported everywhere yet, is on a best-efforts basis, and should not be relied upon.
+	# if necessary). This is not well supported everywhere yet, is on a best-efforts basis, and should not be relied upon.
 	#
 	# @param {Object} options - options
 	# @param {String} [options.method='GET'] - method

@@ -311,7 +311,7 @@ requestAsync = (fetch, options, retriesRemaining) ->
 		p = p.timeout(opts.timeout)
 
 	p = p.then (response) ->
-		if opts.signal?
+		if opts.signal
 			handleAbortIfNotSupported(opts.signal, response)
 
 		responseTime = new Date()

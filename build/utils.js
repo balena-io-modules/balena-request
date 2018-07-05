@@ -329,7 +329,7 @@ requestAsync = function(fetch, options, retriesRemaining) {
   }
   p = p.then(function(response) {
     var responseTime;
-    if (opts.signal != null) {
+    if (opts.signal) {
       handleAbortIfNotSupported(opts.signal, response);
     }
     responseTime = new Date();
