@@ -78,6 +78,18 @@ exports.estimate = (requestAsync, isBrowser) -> (options) ->
 	options.gzip = false
 	options.headers['Accept-Encoding'] = 'gzip, deflate'
 
+	reader = null
+
+	if options.signal?
+		options.signal.addEventListener 'abort', ->
+			# We need to react to Abort events at this level, because otherwise our
+			# reader locks the stream and lower-level cancellation causes error.
+			if reader
+				reader.cancel()
+				reader.releaseLock()
+		, once: true
+
+
 	return requestAsync(options)
 	.then (response) ->
 		output = new stream.PassThrough()
@@ -89,6 +101,7 @@ exports.estimate = (requestAsync, isBrowser) -> (options) ->
 		if response.body.getReader
 			# Convert browser (WHATWG) streams to Node streams
 			responseStream = webStreams.toNodeReadable(response.body)
+			reader = responseStream._reader
 		else
 			responseStream = response.body
 

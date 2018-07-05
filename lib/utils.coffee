@@ -231,6 +231,7 @@ processRequestOptions = (options = {}) ->
 	opts.retries = options.retries
 	opts.method = options.method
 	opts.compress = options.gzip
+	opts.signal = options.signal
 
 	{ body, headers } = options
 	headers ?= {}
@@ -310,6 +311,9 @@ requestAsync = (fetch, options, retriesRemaining) ->
 		p = p.timeout(opts.timeout)
 
 	p = p.then (response) ->
+		if opts.signal
+			handleAbortIfNotSupported(opts.signal, response)
+
 		responseTime = new Date()
 		response.duration = responseTime - requestTime
 		response.statusCode = response.status
@@ -321,6 +325,26 @@ requestAsync = (fetch, options, retriesRemaining) ->
 	if retriesRemaining > 0 then p.catch ->
 		requestAsync(fetch, options, retriesRemaining - 1)
 	else p
+
+handleAbortIfNotSupported = (signal, response) ->
+	emulateAbort = if response.body?.cancel
+		# We have an XHR-emulated stream - cancel kills the underlying XHR
+		# Context: https://github.com/jonnyreeves/fetch-readablestream/issues/6
+		-> response.body.cancel()
+	else if response.body?.destroy
+		# We have a Node stream - destroy kills the stream, and seems to kill
+		# the underlying connection (hard to confirm - but it definitely stops streaming)
+		# Once https://github.com/bitinn/node-fetch/issues/95 is released, we should
+		# use that instead.
+		-> response.body.destroy()
+
+	if emulateAbort
+		if signal.aborted
+			emulateAbort()
+		else
+			signal.addEventListener 'abort', ->
+				emulateAbort()
+			, { once: true }
 
 ###*
 # @summary The factory that returns the `requestAsync` function.

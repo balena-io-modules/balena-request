@@ -92,11 +92,23 @@ getProgressStream = function(total, onState) {
 
 exports.estimate = function(requestAsync, isBrowser) {
   return function(options) {
+    var reader;
     if (requestAsync == null) {
       requestAsync = utils.getRequestAsync();
     }
     options.gzip = false;
     options.headers['Accept-Encoding'] = 'gzip, deflate';
+    reader = null;
+    if (options.signal != null) {
+      options.signal.addEventListener('abort', function() {
+        if (reader) {
+          reader.cancel();
+          return reader.releaseLock();
+        }
+      }, {
+        once: true
+      });
+    }
     return requestAsync(options).then(function(response) {
       var gunzip, output, progressStream, responseLength, responseStream, total;
       output = new stream.PassThrough();
@@ -105,6 +117,7 @@ exports.estimate = function(requestAsync, isBrowser) {
       total = responseLength.uncompressed || responseLength.compressed;
       if (response.body.getReader) {
         responseStream = webStreams.toNodeReadable(response.body);
+        reader = responseStream._reader;
       } else {
         responseStream = response.body;
       }

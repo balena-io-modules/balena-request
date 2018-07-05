@@ -153,12 +153,16 @@ module.exports = getRequest = ({
 	#
 	# The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` option. Otherwise, the request is made anonymously.
 	#
+	# Requests can be aborted using an AbortController (with a polyfill like https://www.npmjs.com/package/abortcontroller-polyfill
+	# if necessary). This is not well supported everywhere yet, is on a best-efforts basis, and should not be relied upon.
+	#
 	# @param {Object} options - options
 	# @param {String} [options.method='GET'] - method
 	# @param {String} options.url - relative url
 	# @param {String} [options.apiKey] - api key
 	# @param {String} [options.responseFormat] - explicit expected response format,
 	# can be one of 'blob', 'json', 'text', 'none'. Defaults to sniffing the content-type
+	# @param {AbortSignal} [options.signal] - a signal from an AbortController
 	# @param {*} [options.body] - body
 	#
 	# @returns {Promise<Object>} response
@@ -222,7 +226,8 @@ module.exports = getRequest = ({
 	#
 	# - `String .mime`: Equals the value of the `Content-Type` HTTP header.
 	#
-	# See `request.send()` for an explanation on how this function handles authentication.
+	# See `request.send()` for an explanation on how this function handles authentication, and details
+	# on how to abort requests.
 	#
 	# @param {Object} options - options
 	# @param {String} [options.method='GET'] - method

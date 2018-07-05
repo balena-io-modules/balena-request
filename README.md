@@ -86,6 +86,9 @@ This function automatically handles authorization with Resin.io.
 
 The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` option. Otherwise, the request is made anonymously.
 
+Requests can be aborted using an AbortController (with a polyfill like https://www.npmjs.com/package/abortcontroller-polyfill
+if necessary). This is not well supported everywhere yet, is on a best-efforts basis, and should not be relied upon.
+
 **Kind**: static method of [<code>request</code>](#module_request)  
 **Summary**: Perform an HTTP request to Resin.io  
 **Returns**: <code>Promise.&lt;Object&gt;</code> - response  
@@ -98,6 +101,7 @@ The module scans your environment for a saved session token. Alternatively, you 
 | options.url | <code>String</code> |  | relative url |
 | [options.apiKey] | <code>String</code> |  | api key |
 | [options.responseFormat] | <code>String</code> |  | explicit expected response format, can be one of 'blob', 'json', 'text', 'none'. Defaults to sniffing the content-type |
+| [options.signal] | <code>AbortSignal</code> |  | a signal from an AbortController |
 | [options.body] | <code>\*</code> |  | body |
 
 **Example**  
@@ -132,7 +136,8 @@ The stream may also contain the following custom properties:
 
 - `String .mime`: Equals the value of the `Content-Type` HTTP header.
 
-See `request.send()` for an explanation on how this function handles authentication.
+See `request.send()` for an explanation on how this function handles authentication, and details
+on how to abort requests.
 
 **Kind**: static method of [<code>request</code>](#module_request)  
 **Summary**: Stream an HTTP response from Resin.io.  
