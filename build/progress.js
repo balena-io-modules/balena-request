@@ -134,6 +134,9 @@ exports.estimate = function(requestAsync, isBrowser) {
       } else {
         responseStream.pipe(progressStream).pipe(output);
       }
+      responseStream.on('error', function(e) {
+        return output.emit('error', e);
+      });
       return output;
     });
   };

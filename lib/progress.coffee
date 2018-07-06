@@ -121,4 +121,8 @@ exports.estimate = (requestAsync, isBrowser) -> (options) ->
 		else
 			responseStream.pipe(progressStream).pipe(output)
 
+		# Stream any request errors on downstream
+		responseStream.on 'error', (e) ->
+			output.emit('error', e)
+
 		return output
