@@ -330,7 +330,7 @@ handleAbortIfNotSupported = (signal, response) ->
 	emulateAbort = if response.body?.cancel
 		# We have an XHR-emulated stream - cancel kills the underlying XHR
 		# Context: https://github.com/jonnyreeves/fetch-readablestream/issues/6
-		-> response.body.cancel()
+		-> response.body.cancel().catch(->)
 	else if response.body?.destroy
 		# We have a Node stream - destroy kills the stream, and seems to kill
 		# the underlying connection (hard to confirm - but it definitely stops streaming)

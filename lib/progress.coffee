@@ -85,7 +85,7 @@ exports.estimate = (requestAsync, isBrowser) -> (options) ->
 			# We need to react to Abort events at this level, because otherwise our
 			# reader locks the stream and lower-level cancellation causes error.
 			if reader
-				reader.cancel()
+				reader.cancel().catch(->)
 				reader.releaseLock()
 		, once: true
 

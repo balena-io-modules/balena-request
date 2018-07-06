@@ -102,7 +102,7 @@ exports.estimate = function(requestAsync, isBrowser) {
     if (options.signal != null) {
       options.signal.addEventListener('abort', function() {
         if (reader) {
-          reader.cancel();
+          reader.cancel()["catch"](function() {});
           return reader.releaseLock();
         }
       }, {
