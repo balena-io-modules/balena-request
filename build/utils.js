@@ -353,7 +353,7 @@ requestAsync = function(fetch, options, retriesRemaining) {
 handleAbortIfNotSupported = function(signal, response) {
   var emulateAbort, ref1, ref2;
   emulateAbort = ((ref1 = response.body) != null ? ref1.cancel : void 0) ? function() {
-    return response.body.cancel();
+    return response.body.cancel()["catch"](function() {});
   } : ((ref2 = response.body) != null ? ref2.destroy : void 0) ? function() {
     return response.body.destroy();
   } : void 0;
