@@ -73,23 +73,7 @@ module.exports = getRequest = ({
 			utils.shouldRefreshKey(auth).then (shouldRefreshKey) ->
 				return if not shouldRefreshKey
 
-				exports.send
-					url: '/whoami'
-					baseUrl: baseUrl
-					refreshToken: false
-
-				# At this point we're sure there is a saved token,
-				# however the fact that /whoami returns 401 allows
-				# us to safely assume the token is expired
-				.catch
-					code: 'ResinRequestError'
-					statusCode: 401
-				, ->
-					return auth.getKey().tap(auth.removeKey).then (key) ->
-						throw new errors.ResinExpiredToken(key)
-
-				.get('body')
-				.then(auth.setKey)
+				exports.refreshToken(options)
 
 		.then ->
 			if options.sendToken
@@ -321,5 +305,51 @@ module.exports = getRequest = ({
 	# an error for the request, a network error, or an error response from the server. Should return
 	# (or resolve to) a new response, or throw/reject.
 	###
+
+	###*
+	# @summary Refresh token on user request
+	# @function
+	# @public
+	#
+	# @description
+	# This function automatically refresh token on user request.
+	# The token is refreshed even if it is not expired yet.
+	# Error is thrown if user is not authorized.
+	#
+	# @param {String} options.url - relative url
+	#
+	# @returns {String} token - new token
+	#
+	# @example
+	# request.refreshToken
+	# 	baseUrl: 'https://api.resin.io'
+	###
+
+	exports.refreshToken = (options = {}) ->
+
+		{ baseUrl } = options
+
+		# Only refresh if we have resin-auth
+		if not (auth?)
+			throw new Error ('Auth module not provided in initializer')
+
+		exports.send
+			url: '/whoami'
+			baseUrl: baseUrl
+			refreshToken: false
+
+		# At this point we're sure there is a saved token,
+		# however the fact that /whoami returns 401 allows
+		# us to safely assume the token is expired
+
+		.catch
+			code: 'ResinRequestError'
+			statusCode: 401
+		, ->
+			return auth.getKey().tap(auth.removeKey).then (key) ->
+				throw new errors.ResinExpiredToken(key)
+
+		.get('body')
+		.tap(auth.setKey)
 
 	return exports

@@ -80,18 +80,7 @@ module.exports = getRequest = function(arg) {
         if (!shouldRefreshKey) {
           return;
         }
-        return exports.send({
-          url: '/whoami',
-          baseUrl: baseUrl,
-          refreshToken: false
-        })["catch"]({
-          code: 'ResinRequestError',
-          statusCode: 401
-        }, function() {
-          return auth.getKey().tap(auth.removeKey).then(function(key) {
-            throw new errors.ResinExpiredToken(key);
-          });
-        }).get('body').then(auth.setKey);
+        return exports.refreshToken(options);
       });
     }).then(function() {
       if (options.sendToken) {
@@ -318,5 +307,46 @@ module.exports = getRequest = function(arg) {
   	 * an error for the request, a network error, or an error response from the server. Should return
   	 * (or resolve to) a new response, or throw/reject.
    */
+
+  /**
+  	 * @summary Refresh token on user request
+  	 * @function
+  	 * @public
+  	 *
+  	 * @description
+  	 * This function automatically refresh token on user request.
+  	 * The token is refreshed even if it is not expired yet.
+  	 * Error is thrown if user is not authorized.
+  	 *
+  	 * @param {String} options.url - relative url
+  	 *
+  	 * @returns {String} token - new token
+  	 *
+  	 * @example
+  	 * request.refreshToken
+  	 * 	baseUrl: 'https://api.resin.io'
+   */
+  exports.refreshToken = function(options) {
+    var baseUrl;
+    if (options == null) {
+      options = {};
+    }
+    baseUrl = options.baseUrl;
+    if (!(auth != null)) {
+      throw new Error('Unauthorized');
+    }
+    return exports.send({
+      url: '/whoami',
+      baseUrl: baseUrl,
+      refreshToken: false
+    })["catch"]({
+      code: 'ResinRequestError',
+      statusCode: 401
+    }, function() {
+      return auth.getKey().tap(auth.removeKey).then(function(key) {
+        throw new errors.ResinExpiredToken(key);
+      });
+    }).get('body').tap(auth.setKey);
+  };
   return exports;
 };

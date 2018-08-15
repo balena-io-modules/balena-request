@@ -57,6 +57,7 @@ var request = require('resin-request')({
         * [.interceptors](#module_request.interceptors) : <code>Array.&lt;Interceptor&gt;</code>
         * [.send(options)](#module_request.send) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.stream(options)](#module_request.stream) ⇒ <code>Promise.&lt;Stream&gt;</code>
+        * [.refreshToken()](#module_request.refreshToken) ⇒ <code>String</code>
     * _inner_
         * [~Interceptor](#module_request..Interceptor) : <code>object</code>
 
@@ -162,6 +163,27 @@ request.stream
 		console.log(state)
 
 	stream.pipe(fs.createWriteStream('/opt/download'))
+```
+<a name="module_request.refreshToken"></a>
+
+### request.refreshToken() ⇒ <code>String</code>
+This function automatically refresh token on user request.
+The token is refreshed even if it is not expired yet.
+Error is thrown if user is not authorized.
+
+**Kind**: static method of [<code>request</code>](#module_request)  
+**Summary**: Refresh token on user request  
+**Returns**: <code>String</code> - token - new token  
+**Access**: public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options.url | <code>String</code> | relative url |
+
+**Example**  
+```js
+request.refreshToken
+	baseUrl: 'https://api.resin.io'
 ```
 <a name="module_request..Interceptor"></a>
 

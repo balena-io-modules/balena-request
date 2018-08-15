@@ -205,3 +205,19 @@ describe 'Request (token):', ->
 							headers = stream.response.request.headers
 							m.chai.expect(headers.Authorization).to.not.exist
 							rindle.extract(stream)
+
+	describe '.refreshToken()', ->
+
+		describe 'given a working /whoami endpoint', ->
+
+			beforeEach ->
+				auth.setKey(johnDoeFixture.token)
+				mockServer.get('/whoami').thenReply(200, janeDoeFixture.token)
+
+			it 'should refresh the token', ->
+				auth.getKey().then (savedToken) ->
+					m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
+					return request.refreshToken
+						baseUrl: mockServer.url
+					.then (freshToken) ->
+						m.chai.expect(freshToken).to.equal(janeDoeFixture.token)
