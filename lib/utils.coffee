@@ -15,7 +15,7 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
-{ fetch: normalFetch, Headers } = require('fetch-ponyfill')({ Promise })
+{ fetch: normalFetch, Headers: HeadersPonyfill } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
 parseInt = require('lodash/parseInt')
@@ -217,7 +217,7 @@ UNSUPPORTED_REQUEST_PARAMS = [
 	'callback'
 ]
 
-processRequestOptions = (options = {}) ->
+processRequestOptions = (options = {}, HeadersCtor = HeadersPonyfill) ->
 	url = options.url or options.uri
 	if options.baseUrl
 		url = urlLib.resolve(options.baseUrl, url)
@@ -247,7 +247,15 @@ processRequestOptions = (options = {}) ->
 	if options.followRedirect
 		opts.redirect = 'follow'
 
-	opts.headers = new Headers(headers)
+	if not (headers instanceof HeadersCtor) and typeof headers.forEach == 'function'
+		# Edge's Headers(args) ctor doesn't work as expected when passing in a polyfilled
+		# headers object, treating it as a plain object instead of using the iterator symbol,
+		# which causes it to invalidly send a single `map` header to the server
+		headers = new HeadersCtor()
+		opts.headers.forEach (value, name) -> headers.append(name, value)
+		opts.headers = headers
+	else
+		opts.headers = new HeadersCtor(headers)
 
 	if options.strictSSL is false
 		throw new Error('`strictSSL` must be true or absent')
@@ -302,7 +310,13 @@ exports.getBody = (response, responseFormat) ->
 # This is the actual implementation that hides the internal `retriesRemaining` parameter
 
 requestAsync = (fetch, options, retriesRemaining) ->
-	[ url, opts ] = processRequestOptions(options)
+	# When streaming, prefer using the native Headers object if available
+	# In order to avoid a bug where when fetch-readablestream uses the native fetch on Edge,
+	# the headers sent to the server only contain a `map` property and not the actual headers that we want.
+	useNativeHeaderCtor = fetch == require('fetch-readablestream') && typeof Headers == 'function'
+	HeadersCtor = if useNativeHeaderCtor then Headers else HeadersPonyfill
+
+	[ url, opts ] = processRequestOptions(options, HeadersCtor)
 	retriesRemaining ?= opts.retries
 
 	requestTime = new Date()

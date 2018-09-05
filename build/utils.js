@@ -15,13 +15,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, handleAbortIfNotSupported, includes, normalFetch, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
+var HeadersPonyfill, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, handleAbortIfNotSupported, includes, normalFetch, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
 
 Promise = require('bluebird');
 
 ref = require('fetch-ponyfill')({
   Promise: Promise
-}), normalFetch = ref.fetch, Headers = ref.Headers;
+}), normalFetch = ref.fetch, HeadersPonyfill = ref.Headers;
 
 urlLib = require('url');
 
@@ -227,10 +227,13 @@ exports.debugRequest = function(options, response) {
 
 UNSUPPORTED_REQUEST_PARAMS = ['qsParseOptions', 'qsStringifyOptions', 'useQuerystring', 'form', 'formData', 'multipart', 'preambleCRLF', 'postambleCRLF', 'jsonReviver', 'jsonReplacer', 'auth', 'oauth', 'aws', 'httpSignature', 'followAllRedirects', 'maxRedirects', 'removeRefererHeader', 'encoding', 'jar', 'agent', 'agentClass', 'agentOptions', 'forever', 'pool', 'localAddress', 'proxy', 'proxyHeaderWhiteList', 'proxyHeaderExclusiveList', 'time', 'har', 'callback'];
 
-processRequestOptions = function(options) {
+processRequestOptions = function(options, HeadersCtor) {
   var body, headers, i, key, len, opts, params, url;
   if (options == null) {
     options = {};
+  }
+  if (HeadersCtor == null) {
+    HeadersCtor = HeadersPonyfill;
   }
   url = options.url || options.uri;
   if (options.baseUrl) {
@@ -261,7 +264,15 @@ processRequestOptions = function(options) {
   if (options.followRedirect) {
     opts.redirect = 'follow';
   }
-  opts.headers = new Headers(headers);
+  if (!(headers instanceof HeadersCtor) && typeof headers.forEach === 'function') {
+    headers = new HeadersCtor();
+    opts.headers.forEach(function(value, name) {
+      return headers.append(name, value);
+    });
+    opts.headers = headers;
+  } else {
+    opts.headers = new HeadersCtor(headers);
+  }
   if (options.strictSSL === false) {
     throw new Error('`strictSSL` must be true or absent');
   }
@@ -317,8 +328,10 @@ exports.getBody = function(response, responseFormat) {
 };
 
 requestAsync = function(fetch, options, retriesRemaining) {
-  var opts, p, ref1, requestTime, url;
-  ref1 = processRequestOptions(options), url = ref1[0], opts = ref1[1];
+  var HeadersCtor, opts, p, ref1, requestTime, url, useNativeHeaderCtor;
+  useNativeHeaderCtor = fetch === require('fetch-readablestream') && typeof Headers === 'function';
+  HeadersCtor = useNativeHeaderCtor ? Headers : HeadersPonyfill;
+  ref1 = processRequestOptions(options, HeadersCtor), url = ref1[0], opts = ref1[1];
   if (retriesRemaining == null) {
     retriesRemaining = opts.retries;
   }
