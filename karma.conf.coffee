@@ -1,5 +1,6 @@
 karmaConfig = require('resin-config-karma')
 packageJSON = require('./package.json')
+process.env.CHROME_BIN = require('puppeteer').executablePath()
 
 module.exports = (config) ->
 	karmaConfig.plugins.push(require('karma-chrome-launcher'))
