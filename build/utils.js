@@ -15,13 +15,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Headers, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, handleAbortIfNotSupported, includes, normalFetch, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
+var HeadersPonyfill, IS_BROWSER, Promise, UNSUPPORTED_REQUEST_PARAMS, assign, errors, handleAbortIfNotSupported, includes, normalFetch, parseInt, processRequestOptions, qs, ref, requestAsync, urlLib;
 
 Promise = require('bluebird');
 
 ref = require('fetch-ponyfill')({
   Promise: Promise
-}), normalFetch = ref.fetch, Headers = ref.Headers;
+}), normalFetch = ref.fetch, HeadersPonyfill = ref.Headers;
 
 urlLib = require('url');
 
@@ -261,7 +261,7 @@ processRequestOptions = function(options) {
   if (options.followRedirect) {
     opts.redirect = 'follow';
   }
-  opts.headers = new Headers(headers);
+  opts.headers = new HeadersPonyfill(headers);
   if (options.strictSSL === false) {
     throw new Error('`strictSSL` must be true or absent');
   }
@@ -317,10 +317,17 @@ exports.getBody = function(response, responseFormat) {
 };
 
 requestAsync = function(fetch, options, retriesRemaining) {
-  var opts, p, ref1, requestTime, url;
+  var nativeHeaders, opts, p, ref1, requestTime, url;
   ref1 = processRequestOptions(options), url = ref1[0], opts = ref1[1];
   if (retriesRemaining == null) {
     retriesRemaining = opts.retries;
+  }
+  if (fetch !== normalFetch && typeof Headers === 'function') {
+    nativeHeaders = new Headers();
+    opts.headers.forEach(function(value, name) {
+      return nativeHeaders.append(name, value);
+    });
+    opts.headers = nativeHeaders;
   }
   requestTime = new Date();
   p = fetch(url, opts);
