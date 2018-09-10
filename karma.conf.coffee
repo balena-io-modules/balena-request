@@ -1,10 +1,15 @@
+process.env.CHROME_BIN = require('puppeteer').executablePath()
 karmaConfig = require('resin-config-karma')
 packageJSON = require('./package.json')
-process.env.CHROME_BIN = require('puppeteer').executablePath()
 
 module.exports = (config) ->
 	karmaConfig.plugins.push(require('karma-chrome-launcher'))
 	karmaConfig.browsers = ['ChromeHeadless']
+	karmaConfig.flags = [
+		'--disable-web-security'
+		'--disable-gpu'
+		'--no-sandbox'
+	]
 
 	karmaConfig.logLevel = config.LOG_INFO
 
