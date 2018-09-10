@@ -1,6 +1,6 @@
 {
   "name": "resin-request",
-  "version": "9.3.2",
+  "version": "9.3.3",
   "description": "Resin.io HTTP client",
   "main": "build/request.js",
   "homepage": "https://github.com/resin-io-modules/resin-request",
