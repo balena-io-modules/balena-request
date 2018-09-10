@@ -14,6 +14,7 @@ module.exports = (config) ->
 			base: 'ChromeHeadless'
 			flags: [
 				'--no-sandbox'
+				'--no-proxy-server'
 				'--headless'
 				'--disable-gpu'
 				'--disable-setuid-sandbox'
@@ -21,7 +22,7 @@ module.exports = (config) ->
 				'--disable-web-security'
 			]
 
-	karmaConfig.logLevel = config.LOG_INFO
+	karmaConfig.logLevel = config.LOG_DEBUG
 
 	karmaConfig.sauceLabs =
 		testName: "#{packageJSON.name} v#{packageJSON.version}"
