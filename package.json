@@ -42,6 +42,7 @@
     "mochainon": "^1.0.0",
     "mockttp": "^0.8.0",
     "proxy": "^0.2.4",
+    "puppeteer": "~1.4.0",
     "resin-auth": "^2.0.0",
     "resin-config-karma": "^1.0.4",
     "temp": "^0.8.3",
