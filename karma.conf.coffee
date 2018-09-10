@@ -1,7 +1,15 @@
-process = require('process')
 process.env.CHROME_BIN = require('puppeteer').executablePath()
 karmaConfig = require('resin-config-karma')
 packageJSON = require('./package.json')
+
+fs = require('fs')
+console.log('**********')
+console.log("CHROME_BIN: #{process.env.CHROME_BIN}")
+if fs.existsSync(process.env.CHROME_BIN)
+	console.log('CHROME_BIN: File exists')
+else
+	console.log('CHROME_BIN: FILE DOES NOT EXIST!')
+console.log('**********')
 
 module.exports = (config) ->
 	karmaConfig.plugins.push(require('karma-chrome-launcher'))
@@ -20,6 +28,7 @@ module.exports = (config) ->
 				'--disable-setuid-sandbox'
 				'--disable-translate'
 				'--disable-web-security'
+				'--disable-dev-shm-usage'
 			]
 
 	karmaConfig.logLevel = config.LOG_DEBUG
