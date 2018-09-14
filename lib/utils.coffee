@@ -15,7 +15,7 @@ limitations under the License.
 ###
 
 Promise = require('bluebird')
-{ fetch: normalFetch, Headers } = require('fetch-ponyfill')({ Promise })
+{ fetch: normalFetch, Headers: HeadersPonyfill } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
 parseInt = require('lodash/parseInt')
@@ -247,7 +247,7 @@ processRequestOptions = (options = {}) ->
 	if options.followRedirect
 		opts.redirect = 'follow'
 
-	opts.headers = new Headers(headers)
+	opts.headers = new HeadersPonyfill(headers)
 
 	if options.strictSSL is false
 		throw new Error('`strictSSL` must be true or absent')
@@ -304,6 +304,16 @@ exports.getBody = (response, responseFormat) ->
 requestAsync = (fetch, options, retriesRemaining) ->
 	[ url, opts ] = processRequestOptions(options)
 	retriesRemaining ?= opts.retries
+
+	# When streaming, prefer using the native Headers object if available
+	if fetch != normalFetch && typeof Headers == 'function'
+		# Edge's Headers(args) ctor doesn't work as expected when passed in a headers object
+		# from fetch-ponyfill, treating it as a plain object instead of using the iterator symbol.
+		# As a result when fetch-readablestream uses the native fetch on Edge, the headers sent
+		# to the server only contain a `map` property and not the actual headers that we want.
+		nativeHeaders = new Headers()
+		opts.headers.forEach (value, name) -> nativeHeaders.append(name, value)
+		opts.headers = nativeHeaders
 
 	requestTime = new Date()
 	p = fetch(url, opts)
