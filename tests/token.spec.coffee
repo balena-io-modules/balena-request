@@ -1,6 +1,6 @@
 Promise = require('bluebird')
 m = require('mochainon')
-errors = require('resin-errors')
+errors = require('balena-errors')
 rindle = require('rindle')
 tokens = require('./tokens.json')
 
@@ -130,7 +130,7 @@ describe 'Request (token):', ->
 						promise = request.send
 							baseUrl: mockServer.url
 							url: '/foo'
-						m.chai.expect(promise).to.be.rejectedWith(errors.ResinExpiredToken)
+						m.chai.expect(promise).to.be.rejectedWith(errors.BalenaExpiredToken)
 
 					it 'should have the session token as an error attribute', ->
 						m.chai.expect request.send
@@ -158,7 +158,7 @@ describe 'Request (token):', ->
 						promise = request.send
 							baseUrl: mockServer.url
 							url: '/foo'
-						m.chai.expect(promise).to.be.rejectedWith(errors.ResinRequestError)
+						m.chai.expect(promise).to.be.rejectedWith(errors.BalenaRequestError)
 
 	describe '.stream()', ->
 

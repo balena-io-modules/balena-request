@@ -1,7 +1,7 @@
 _ = require('lodash')
 Promise = require('bluebird')
 m = require('mochainon')
-errors = require('resin-errors')
+errors = require('balena-errors')
 
 mockServer = require('mockttp').getLocal()
 
@@ -87,4 +87,4 @@ describe 'responseFormat:', ->
 				url: '/'
 				responseFormat: 'uzabzabza'
 			.get('body')
-			m.chai.expect(promise).to.be.rejectedWith(errors.ResinInvalidParameterError)
+			m.chai.expect(promise).to.be.rejectedWith(errors.BalenaInvalidParameterError)

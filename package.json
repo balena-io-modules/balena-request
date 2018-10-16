@@ -1,15 +1,15 @@
 {
-  "name": "resin-request",
+  "name": "balena-request",
   "version": "9.3.5",
-  "description": "Resin.io HTTP client",
+  "description": "Balena HTTP client",
   "main": "build/request.js",
-  "homepage": "https://github.com/resin-io-modules/resin-request",
+  "homepage": "https://github.com/balena-io-modules/balena-request",
   "repository": {
     "type": "git",
-    "url": "git://github.com/resin-io-modules/resin-request.git"
+    "url": "git://github.com/balena-io-modules/balena-request.git"
   },
   "keywords": [
-    "resin",
+    "balena",
     "request",
     "http"
   ],
@@ -44,13 +44,14 @@
     "mockttp": "^0.8.0",
     "proxy": "^0.2.4",
     "require-npm4-to-publish": "^1.0.0",
-    "resin-auth": "^2.0.0",
+    "balena-auth": "^3.0.0",
     "resin-config-karma": "^1.0.4",
     "temp": "^0.8.3",
     "timekeeper": "^1.0.0",
     "zlib-browserify": "0.0.3"
   },
   "dependencies": {
+    "balena-errors": "^3.0.0",
     "bluebird": "^3.3.4",
     "fetch-ponyfill": "^4.0.0",
     "fetch-readablestream": "^0.1.0",
@@ -58,10 +59,9 @@
     "node-web-streams": "github:resin-io-modules/node-web-streams#emit-errors",
     "progress-stream": "^2.0.0",
     "qs": "^6.3.0",
-    "resin-errors": "^2.7.0",
     "rindle": "^1.3.1"
   },
   "peerDependencies": {
-    "resin-auth": "^2.0.0"
+    "balena-auth": "^2.0.0"
   }
 }
