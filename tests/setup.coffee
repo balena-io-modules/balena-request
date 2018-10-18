@@ -7,9 +7,9 @@ if not IS_BROWSER
 	temp = require('temp').track()
 	dataDirectoryPath = temp.mkdirSync()
 
-ResinAuth = require('resin-auth')['default']
+BalenaAuth = require('balena-auth')['default']
 
-auth = new ResinAuth({
+auth = new BalenaAuth({
 	dataDirectory: dataDirectoryPath,
 	tokenKey: 'token'
 })

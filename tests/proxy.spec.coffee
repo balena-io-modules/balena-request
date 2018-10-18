@@ -58,7 +58,7 @@ describe 'Proxy support', ->
 			proxy.stop()
 
 		it 'should make requests', ->
-			url = 'http://api.resin.io/ping'
+			url = 'http://api.balena-cloud.com/ping'
 			request.send({ url, refreshToken: false })
 			.then (res) ->
 				m.chai.expect(proxyReached).to.be.true
@@ -91,7 +91,7 @@ describe 'Proxy support', ->
 			process.env.NODE_TLS_REJECT_UNAUTHORIZED = NODE_TLS_REJECT_UNAUTHORIZED
 
 		it 'should make requests', ->
-			url = 'https://api.resin.io/ping'
+			url = 'https://api.balena-cloud.com/ping'
 			request.send({ url, refreshToken: false })
 			.then (res) ->
 				m.chai.expect(proxyReached).to.be.true

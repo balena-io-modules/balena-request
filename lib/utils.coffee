@@ -1,5 +1,5 @@
 ###
-Copyright 2016 Resin.io
+Copyright 2016 Balena
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ qs = require('qs')
 parseInt = require('lodash/parseInt')
 assign = require('lodash/assign')
 includes = require('lodash/includes')
-errors = require('resin-errors')
+errors = require('balena-errors')
 
 IS_BROWSER = window?
 
@@ -40,7 +40,7 @@ exports.TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60 # 1 hour in milliseconds
 # This function makes use of a soft user-configurable setting called `tokenRefreshInterval`.
 # That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
 #
-# @param {Object} tokenInstance - an instance of `resin-auth`
+# @param {Object} tokenInstance - an instance of `balena-auth`
 # @returns {Promise<Boolean>} the token should be updated
 #
 # @example
@@ -66,7 +66,7 @@ exports.shouldRefreshKey = (auth) ->
 # @description
 # This promise becomes undefined if no saved token.
 #
-# @param {Object} tokenInstance - an instance of `resin-auth`
+# @param {Object} tokenInstance - an instance of `balena-auth`
 # @returns {Promise<String>} authorization header
 #
 # @example
@@ -297,7 +297,7 @@ exports.getBody = (response, responseFormat) ->
 		if not responseFormat? or responseFormat is 'text'
 			return response.text()
 
-		throw new errors.ResinInvalidParameterError('responseFormat', responseFormat)
+		throw new errors.BalenaInvalidParameterError('responseFormat', responseFormat)
 
 # This is the actual implementation that hides the internal `retriesRemaining` parameter
 

@@ -1,30 +1,30 @@
-resin-request
+balena-request
 =============
 
-> Resin.io HTTP client.
+> Balena HTTP client.
 
-[![npm version](https://badge.fury.io/js/resin-request.svg)](http://badge.fury.io/js/resin-request)
-[![dependencies](https://david-dm.org/resin-io-modules/resin-request.svg)](https://david-dm.org/resin-io-modules/resin-request.svg)
-[![Build Status](https://travis-ci.org/resin-io-modules/resin-request.svg?branch=master)](https://travis-ci.org/resin-io-modules/resin-request)
-[![Build status](https://ci.appveyor.com/api/projects/status/8qmwhh1vhm27otn4/branch/master?svg=true)](https://ci.appveyor.com/project/resin-io/resin-request/branch/master)
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/resin-io/chat)
+[![npm version](https://badge.fury.io/js/balena-request.svg)](http://badge.fury.io/js/balena-request)
+[![dependencies](https://david-dm.org/balena-io-modules/balena-request.svg)](https://david-dm.org/balena-io-modules/balena-request.svg)
+[![Build Status](https://travis-ci.org/balena-io-modules/balena-request.svg?branch=master)](https://travis-ci.org/balena-io-modules/balena-request)
+[![Build status](https://ci.appveyor.com/api/projects/status/8qmwhh1vhm27otn4/branch/master?svg=true)](https://ci.appveyor.com/project/balena-io/balena-request/branch/master)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/balena-io/chat)
 
 Role
 ----
 
-The intention of this module is to provide an exclusive client to make HTTP requests to the Resin.io servers.
+The intention of this module is to provide an exclusive client to make HTTP requests to the balena servers.
 
 **THIS MODULE IS LOW LEVEL AND IS NOT MEANT TO BE USED BY END USERS DIRECTLY**.
 
-Unless you know what you're doing, use the [Resin SDK](https://github.com/resin-io/resin-sdk) instead.
+Unless you know what you're doing, use the [balena SDK](https://github.com/balena-io/balena-sdk) instead.
 
 Installation
 ------------
 
-Install `resin-request` by running:
+Install `balena-request` by running:
 
 ```sh
-$ npm install --save resin-request
+$ npm install --save balena-request
 ```
 
 Documentation
@@ -37,14 +37,14 @@ It accepts the following params:
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>Object</code> | options |
-| options.auth | <code>Object</code> | An instantiated [resin-auth](https://github.com/resin-io-modules/resin-auth) instance |
+| options.auth | <code>Object</code> | An instantiated [balena-auth](https://github.com/balena-io-modules/balena-auth) instance |
 | options.debug | <code>boolean</code> | when set to `true` will log the request details in case of error. |
 | options.isBrowser | <code>boolean</code> | set to `true` if the runtime is the browser. |
 | options.interceptors | <code>Array&lt;Interceptor&gt;</code> | An initial array of interceptors |
 
 **Example**
 ```js
-var request = require('resin-request')({
+var request = require('balena-request')({
 	auth: auth,
 	debug: false,
 	isBrowser: false
@@ -83,7 +83,7 @@ request.interceptors.push(
 <a name="module_request.send"></a>
 
 ### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
-This function automatically handles authorization with Resin.io.
+This function automatically handles authorization with balena.
 
 The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` option. Otherwise, the request is made anonymously.
 
@@ -91,7 +91,7 @@ Requests can be aborted using an AbortController (with a polyfill like https://w
 if necessary). This is not well supported everywhere yet, is on a best-efforts basis, and should not be relied upon.
 
 **Kind**: static method of [<code>request</code>](#module_request)  
-**Summary**: Perform an HTTP request to Resin.io  
+**Summary**: Perform an HTTP request to balena  
 **Returns**: <code>Promise.&lt;Object&gt;</code> - response  
 **Access**: public  
 
@@ -109,7 +109,7 @@ if necessary). This is not well supported everywhere yet, is on a best-efforts b
 ```js
 request.send
 	method: 'GET'
-	baseUrl: 'https://api.resin.io'
+	baseUrl: 'https://api.balena-cloud.com'
 	url: '/foo'
 .get('body')
 ```
@@ -117,7 +117,7 @@ request.send
 ```js
 request.send
 	method: 'POST'
-	baseUrl: 'https://api.resin.io'
+	baseUrl: 'https://api.balena-cloud.com'
 	url: '/bar'
 	data:
 		hello: 'world'
@@ -141,7 +141,7 @@ See `request.send()` for an explanation on how this function handles authenticat
 on how to abort requests.
 
 **Kind**: static method of [<code>request</code>](#module_request)  
-**Summary**: Stream an HTTP response from Resin.io.  
+**Summary**: Stream an HTTP response from balena.  
 **Returns**: <code>Promise.&lt;Stream&gt;</code> - response  
 **Access**: public  
 
@@ -156,7 +156,7 @@ on how to abort requests.
 ```js
 request.stream
 	method: 'GET'
-	baseUrl: 'https://img.resin.io'
+	baseUrl: 'https://img.balena-cloud.com'
 	url: '/download/foo'
 .then (stream) ->
 	stream.on 'progress', (state) ->
@@ -181,7 +181,7 @@ This function automatically refreshes the authentication token.
 **Example**  
 ```js
 request.refreshToken
-	baseUrl: 'https://api.resin.io'
+	baseUrl: 'https://api.balena-cloud.com'
 ```
 <a name="module_request..Interceptor"></a>
 
@@ -207,7 +207,7 @@ rejects with an error.
 Support
 -------
 
-If you're having any problem, please [raise an issue](https://github.com/resin-io-modules/resin-request/issues/new) on GitHub and the Resin.io team will be happy to help.
+If you're having any problem, please [raise an issue](https://github.com/balena-io-modules/balena-request/issues/new) on GitHub and the balena team will be happy to help.
 
 Tests
 -----
@@ -221,8 +221,8 @@ $ npm test
 Contribute
 ----------
 
-- Issue Tracker: [github.com/resin-io-modules/resin-request/issues](https://github.com/resin-io-modules/resin-request/issues)
-- Source Code: [github.com/resin-io-modules/resin-request](https://github.com/resin-io-modules/resin-request)
+- Issue Tracker: [github.com/balena-io-modules/balena-request/issues](https://github.com/balena-io-modules/balena-request/issues)
+- Source Code: [github.com/balena-io-modules/balena-request](https://github.com/balena-io-modules/balena-request)
 
 Before submitting a PR, please make sure that you include tests, and that [coffeelint](http://www.coffeelint.org/) runs without any warning:
 

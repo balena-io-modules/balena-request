@@ -1,5 +1,5 @@
 ###
-Copyright 2016 Resin.io
+Copyright 2016 Balena
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ rindle = require('rindle')
 
 fetchReadableStream = require('fetch-readablestream')
 
-errors = require('resin-errors')
+errors = require('balena-errors')
 utils = require('./utils')
 progress = require('./progress')
 
@@ -66,7 +66,7 @@ module.exports = getRequest = ({
 			delete options.baseUrl
 
 		Promise.try ->
-			# Only refresh if we have resin-auth, we're going to use it to send a
+			# Only refresh if we have balena-auth, we're going to use it to send a
 			# token, and we haven't opted out of refresh
 			return if not (auth? and options.sendToken and options.refreshToken)
 
@@ -128,12 +128,12 @@ module.exports = getRequest = ({
 		)
 
 	###*
-	# @summary Perform an HTTP request to Resin.io
+	# @summary Perform an HTTP request to balena
 	# @function
 	# @public
 	#
 	# @description
-	# This function automatically handles authorization with Resin.io.
+	# This function automatically handles authorization with balena.
 	#
 	# The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` option. Otherwise, the request is made anonymously.
 	#
@@ -154,14 +154,14 @@ module.exports = getRequest = ({
 	# @example
 	# request.send
 	# 	method: 'GET'
-	# 	baseUrl: 'https://api.resin.io'
+	# 	baseUrl: 'https://api.balena-cloud.com'
 	# 	url: '/foo'
 	# .get('body')
 	#
 	# @example
 	# request.send
 	# 	method: 'POST'
-	# 	baseUrl: 'https://api.resin.io'
+	# 	baseUrl: 'https://api.balena-cloud.com'
 	# 	url: '/bar'
 	# 	data:
 	# 		hello: 'world'
@@ -188,13 +188,13 @@ module.exports = getRequest = ({
 				if utils.isErrorCode(response.statusCode)
 					responseError = utils.getErrorMessageFromResponse(response)
 					debugRequest(options, response)
-					throw new errors.ResinRequestError(responseError, response.statusCode, options)
+					throw new errors.BalenaRequestError(responseError, response.statusCode, options)
 
 				return response
 		.then(interceptResponse, interceptResponseError)
 
 	###*
-	# @summary Stream an HTTP response from Resin.io.
+	# @summary Stream an HTTP response from balena.
 	# @function
 	# @public
 	#
@@ -223,7 +223,7 @@ module.exports = getRequest = ({
 	# @example
 	# request.stream
 	# 	method: 'GET'
-	# 	baseUrl: 'https://img.resin.io'
+	# 	baseUrl: 'https://img.balena-cloud.com'
 	# 	url: '/download/foo'
 	# .then (stream) ->
 	# 	stream.on 'progress', (state) ->
@@ -243,7 +243,7 @@ module.exports = getRequest = ({
 		.then(progress.estimate(requestStream, isBrowser))
 		.then (download) ->
 			if not utils.isErrorCode(download.response.statusCode)
-				# TODO: Move this to resin-image-manager
+				# TODO: Move this to balena-image-manager
 				download.mime = download.response.headers.get('Content-Type')
 
 				return download
@@ -254,7 +254,7 @@ module.exports = getRequest = ({
 			.then (data) ->
 				responseError = data or 'The request was unsuccessful'
 				debugRequest(options, download.response)
-				throw new errors.ResinRequestError(responseError, download.response.statusCode)
+				throw new errors.BalenaRequestError(responseError, download.response.statusCode)
 		.then(interceptResponse, interceptResponseError)
 
 	###*
@@ -320,14 +320,14 @@ module.exports = getRequest = ({
 	#
 	# @example
 	# request.refreshToken
-	# 	baseUrl: 'https://api.resin.io'
+	# 	baseUrl: 'https://api.balena-cloud.com'
 	###
 
 	exports.refreshToken = (options = {}) ->
 
 		{ baseUrl } = options
 
-		# Only refresh if we have resin-auth
+		# Only refresh if we have balena-auth
 		if not (auth?)
 			throw new Error ('Auth module not provided in initializer')
 
@@ -341,11 +341,11 @@ module.exports = getRequest = ({
 		# us to safely assume the token is expired
 
 		.catch
-			code: 'ResinRequestError'
+			code: 'BalenaRequestError'
 			statusCode: 401
 		, ->
 			return auth.getKey().tap(auth.removeKey).then (key) ->
-				throw new errors.ResinExpiredToken(key)
+				throw new errors.BalenaExpiredToken(key)
 
 		.get('body')
 		.tap(auth.setKey)
