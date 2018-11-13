@@ -54,7 +54,7 @@
     "balena-errors": "^3.0.0",
     "bluebird": "^3.3.4",
     "fetch-ponyfill": "^4.0.0",
-    "fetch-readablestream": "^0.1.0",
+    "fetch-readablestream": "^0.2.0",
     "lodash": "^4.6.1",
     "node-web-streams": "github:resin-io-modules/node-web-streams#emit-errors",
     "progress-stream": "^2.0.0",
