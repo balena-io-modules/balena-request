@@ -171,7 +171,7 @@ module.exports = getRequest = ({
 		# Only set the default timeout when doing a normal HTTP
 		# request and not also when streaming since in the latter
 		# case we might cause unnecessary ESOCKETTIMEDOUT errors.
-		options.timeout ?= 30000
+		options.timeout ?= 59000
 
 		prepareOptions(options)
 		.then(interceptRequestOptions, interceptRequestError)
