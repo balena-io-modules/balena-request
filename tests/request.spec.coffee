@@ -227,14 +227,14 @@ describe 'Request:', ->
 				# manually ticking the clock
 				delay(100)
 
-			it 'should reject the promise after 30s by default', ->
+			it 'should reject the promise after 59s by default', ->
 				promise = request.send
 					method: 'GET'
 					url: mockServer.urlFor('/infinite-wait')
 				.get('body')
 
 				waitForRequestConnection().then =>
-					@clock.tick(29000)
+					@clock.tick(58000)
 					m.chai.expect(promise.isPending()).to.equal(true)
 
 					@clock.tick(1000)
@@ -261,7 +261,7 @@ describe 'Request:', ->
 				.get('body')
 
 				waitForRequestConnection().then =>
-					@clock.tick(30000)
+					@clock.tick(59000)
 
 					if IS_BROWSER
 						m.chai.expect(promise).to.be.rejectedWith(Promise.TimeoutError)

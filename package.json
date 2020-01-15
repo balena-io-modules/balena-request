@@ -23,7 +23,7 @@
     "test-browser": "mockttp -c karma start",
     "build": "gulp build",
     "prepublish": "require-npm4-to-publish",
-    "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
     "readme": "jsdoc2md --template doc/README.hbs build/request.js build/progress.js build/utils.js > README.md"
   },
   "author": "Juan Cruz Viotti <juanchiviotti@gmail.com>",
