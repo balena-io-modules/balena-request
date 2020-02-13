@@ -51,12 +51,12 @@
     "zlib-browserify": "0.0.3"
   },
   "dependencies": {
+    "@balena/node-web-streams": "^0.2.3",
     "balena-errors": "^4.2.1",
     "bluebird": "^3.7.2",
     "fetch-ponyfill": "^4.1.0",
     "fetch-readablestream": "^0.2.0",
     "lodash": "^4.17.15",
-    "node-web-streams": "github:balena-io-modules/node-web-streams#emit-errors",
     "progress-stream": "^2.0.0",
     "qs": "^6.9.1",
     "rindle": "^1.3.4"

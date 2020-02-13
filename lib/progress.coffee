@@ -15,7 +15,7 @@ limitations under the License.
 ###
 
 noop = require('lodash/noop')
-webStreams = require('node-web-streams')
+webStreams = require('@balena/node-web-streams')
 progress = require('progress-stream')
 zlib = require('zlib')
 stream = require('stream')
