@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ###
 
-noop = require('lodash/noop')
 webStreams = require('@balena/node-web-streams')
 progress = require('progress-stream')
 zlib = require('zlib')
@@ -41,20 +40,21 @@ utils = require('./utils')
 #
 # return responseStream.pipe(progressStream).pipe(output)
 ###
-getProgressStream = (total, onState = noop) ->
+getProgressStream = (total, onState) ->
 	progressStream = progress
 		time: 500
 		length: total
 
 	progressStream.on 'progress', (state) ->
 		if state.length is 0
-			return onState(undefined)
+			return onState?(undefined)
 
-		return onState
+		return onState?(
 			total: state.length
 			received: state.transferred
 			eta: state.eta
 			percentage: state.percentage
+		)
 
 	return progressStream
 

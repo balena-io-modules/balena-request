@@ -20,10 +20,6 @@ limitations under the License.
 
 Promise = require('bluebird')
 urlLib = require('url')
-assign = require('lodash/assign')
-noop = require('lodash/noop')
-defaults = require('lodash/defaults')
-isEmpty = require('lodash/isEmpty')
 rindle = require('rindle')
 
 fetchReadableStream = require('fetch-readablestream')
@@ -42,13 +38,13 @@ module.exports = getRequest = ({
 	requestAsync = utils.getRequestAsync()
 	requestBrowserStream = utils.getRequestAsync(fetchReadableStream)
 
-	debugRequest = if not debug then noop else utils.debugRequest
+	debugRequest = if not debug then -> else utils.debugRequest
 
 	exports = {}
 
 	prepareOptions = (options = {}) ->
 
-		defaults options,
+		options = Object.assign({
 			method: 'GET'
 			json: true
 			strictSSL: true
@@ -56,6 +52,7 @@ module.exports = getRequest = ({
 			sendToken: true
 			refreshToken: true
 			retries: retries
+		}, options)
 
 		{ baseUrl } = options
 
@@ -82,7 +79,7 @@ module.exports = getRequest = ({
 			if authorizationHeader?
 				options.headers.Authorization = authorizationHeader
 
-			if not isEmpty(options.apiKey)
+			if typeof options.apiKey == 'string' and options.apiKey.length > 0
 				# Using `request` qs object results in dollar signs, or other
 				# special characters used to query our OData API, being escaped
 				# and thus leading to all sort of weird error.
@@ -183,7 +180,7 @@ module.exports = getRequest = ({
 		.then (response) ->
 			utils.getBody(response, options.responseFormat)
 			.then (body) ->
-				response = assign({}, response, { body })
+				response = Object.assign({}, response, { body })
 
 				if utils.isErrorCode(response.statusCode)
 					responseError = utils.getErrorMessageFromResponse(response)

@@ -1,4 +1,3 @@
-_ = require('lodash')
 m = require('mochainon')
 globalTunnel = require('global-tunnel-ng')
 EventEmitter = require('events')
@@ -96,5 +95,3 @@ describe 'Proxy support', ->
 			.then (res) ->
 				m.chai.expect(proxyReached).to.be.true
 				m.chai.expect(res.body).to.equal('OK')
-
-
