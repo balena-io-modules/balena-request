@@ -20,7 +20,6 @@ limitations under the License.
 
 Promise = require('bluebird')
 urlLib = require('url')
-noop = require('lodash/noop')
 defaults = require('lodash/defaults')
 isEmpty = require('lodash/isEmpty')
 rindle = require('rindle')
@@ -41,7 +40,7 @@ module.exports = getRequest = ({
 	requestAsync = utils.getRequestAsync()
 	requestBrowserStream = utils.getRequestAsync(fetchReadableStream)
 
-	debugRequest = if not debug then noop else utils.debugRequest
+	debugRequest = if not debug then -> else utils.debugRequest
 
 	exports = {}
 
