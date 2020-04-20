@@ -18,7 +18,6 @@ Promise = require('bluebird')
 { fetch: normalFetch, Headers: HeadersPonyfill } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
-includes = require('lodash/includes')
 errors = require('balena-errors')
 
 IS_BROWSER = window?
@@ -279,7 +278,7 @@ exports.getBody = (response, responseFormat) ->
 
 		contentType = response.headers.get('Content-Type')
 
-		if responseFormat is 'blob' or (not responseFormat? and includes(contentType, 'binary/octet-stream'))
+		if responseFormat is 'blob' or (not responseFormat? and contentType?.includes('binary/octet-stream'))
 			# this is according to the standard
 			if typeof response.blob is 'function'
 				return response.blob()
@@ -288,7 +287,7 @@ exports.getBody = (response, responseFormat) ->
 				return response.buffer()
 			throw new Error('This `fetch` implementation does not support decoding binary streams.')
 
-		if responseFormat is 'json' or (not responseFormat? and includes(contentType, 'application/json'))
+		if responseFormat is 'json' or (not responseFormat? and contentType?.includes('application/json'))
 			return response.json()
 
 
