@@ -20,7 +20,6 @@ limitations under the License.
 
 Promise = require('bluebird')
 urlLib = require('url')
-isEmpty = require('lodash/isEmpty')
 rindle = require('rindle')
 
 fetchReadableStream = require('fetch-readablestream')
@@ -80,7 +79,7 @@ module.exports = getRequest = ({
 			if authorizationHeader?
 				options.headers.Authorization = authorizationHeader
 
-			if not isEmpty(options.apiKey)
+			if typeof options.apiKey == 'string' and options.apiKey.length > 0
 				# Using `request` qs object results in dollar signs, or other
 				# special characters used to query our OData API, being escaped
 				# and thus leading to all sort of weird error.
