@@ -18,7 +18,6 @@ Promise = require('bluebird')
 { fetch: normalFetch, Headers: HeadersPonyfill } = require('fetch-ponyfill')({ Promise })
 urlLib = require('url')
 qs = require('qs')
-assign = require('lodash/assign')
 includes = require('lodash/includes')
 errors = require('balena-errors')
 
@@ -175,7 +174,7 @@ exports.getResponseLength = (response) ->
 # 	utils.debugRequest(options, response)
 ###
 exports.debugRequest = (options, response) ->
-	console.error(assign(
+	console.error(Object.assign(
 		statusCode: response.statusCode
 		duration: response.duration
 	, options))

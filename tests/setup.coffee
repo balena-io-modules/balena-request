@@ -1,5 +1,3 @@
-_ = require('lodash')
-
 IS_BROWSER = window?
 
 dataDirectoryPath = null
@@ -20,7 +18,7 @@ auth.removeKey()
 getRequest = require('../lib/request')
 
 getCustomRequest = (opts) ->
-	opts = _.assign({}, { auth, debug: false, isBrowser: IS_BROWSER }, opts)
+	opts = Object.assign({}, { auth, debug: false, isBrowser: IS_BROWSER }, opts)
 	return getRequest(opts)
 
 module.exports = ->

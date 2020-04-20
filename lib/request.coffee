@@ -20,7 +20,6 @@ limitations under the License.
 
 Promise = require('bluebird')
 urlLib = require('url')
-assign = require('lodash/assign')
 noop = require('lodash/noop')
 defaults = require('lodash/defaults')
 isEmpty = require('lodash/isEmpty')
@@ -183,7 +182,7 @@ module.exports = getRequest = ({
 		.then (response) ->
 			utils.getBody(response, options.responseFormat)
 			.then (body) ->
-				response = assign({}, response, { body })
+				response = Object.assign({}, response, { body })
 
 				if utils.isErrorCode(response.statusCode)
 					responseError = utils.getErrorMessageFromResponse(response)

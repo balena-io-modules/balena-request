@@ -1,4 +1,3 @@
-_ = require('lodash')
 rindle = require('rindle')
 Promise = require('bluebird')
 m = require('mochainon')
@@ -33,7 +32,7 @@ describe 'An interceptor', ->
 
 		it 'should be able to change a request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
-				_.assign({}, request, url: mockServer.urlFor('/changed'))
+				Object.assign({}, request, url: mockServer.urlFor('/changed'))
 
 			promise = request.send
 				url: mockServer.urlFor('/original')
@@ -44,7 +43,7 @@ describe 'An interceptor', ->
 		it 'should be able to asynchronously change a request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
 				Promise.delay(100).then ->
-					_.assign({}, request, url: mockServer.urlFor('/changed'))
+					Object.assign({}, request, url: mockServer.urlFor('/changed'))
 
 			promise = request.send
 				url: mockServer.urlFor('/original')
@@ -64,7 +63,7 @@ describe 'An interceptor', ->
 
 		it 'should be able to change a stream request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
-				_.assign({}, request, url: mockServer.urlFor('/changed'))
+				Object.assign({}, request, url: mockServer.urlFor('/changed'))
 
 			request.stream
 				url: mockServer.urlFor('/original')
@@ -76,7 +75,7 @@ describe 'An interceptor', ->
 
 		it 'should not call requestError if there are no errors', ->
 			request.interceptors[0] =
-				request: (request) -> _.assign({}, request, url: mockServer.urlFor('/changed'))
+				request: (request) -> Object.assign({}, request, url: mockServer.urlFor('/changed'))
 				requestError: m.sinon.mock()
 			request.interceptors[1] =
 				requestError: m.sinon.mock()
@@ -135,7 +134,7 @@ describe 'An interceptor', ->
 
 		it 'should be able to change a response before it is returned', ->
 			request.interceptors[0] = response: (response) ->
-				_.assign({}, response, body: replaced: true)
+				Object.assign({}, response, body: replaced: true)
 
 			promise = request.send
 				url: mockServer.url
@@ -146,7 +145,7 @@ describe 'An interceptor', ->
 		it 'should be able to asynchronously change a response before it is returned', ->
 			request.interceptors[0] = response: (response) ->
 				Promise.delay(100).then ->
-					_.assign({}, response, body: replaced: true)
+					Object.assign({}, response, body: replaced: true)
 
 			promise = request.send
 				url: mockServer.url
@@ -158,7 +157,7 @@ describe 'An interceptor', ->
 			mockServer.get('/201').thenReply(201)
 			.then ->
 				request.interceptors[0] =
-					response: (response) -> _.assign({}, response, body: replaced: true)
+					response: (response) -> Object.assign({}, response, body: replaced: true)
 
 				request.send
 					url: mockServer.urlFor('/201')
