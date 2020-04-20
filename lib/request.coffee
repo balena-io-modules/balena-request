@@ -20,7 +20,6 @@ limitations under the License.
 
 Promise = require('bluebird')
 urlLib = require('url')
-defaults = require('lodash/defaults')
 isEmpty = require('lodash/isEmpty')
 rindle = require('rindle')
 
@@ -46,7 +45,7 @@ module.exports = getRequest = ({
 
 	prepareOptions = (options = {}) ->
 
-		defaults options,
+		options = Object.assign({
 			method: 'GET'
 			json: true
 			strictSSL: true
@@ -54,6 +53,7 @@ module.exports = getRequest = ({
 			sendToken: true
 			refreshToken: true
 			retries: retries
+		}, options)
 
 		{ baseUrl } = options
 
