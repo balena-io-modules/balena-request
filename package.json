@@ -36,6 +36,7 @@
     "@types/progress-stream": "^2.0.0",
     "@types/qs": "^6.9.3",
     "balena-auth": "^3.1.1",
+    "bluebird": "^3.7.2",
     "coffeescript": "~1.12.7",
     "global-tunnel-ng": "2.1.0",
     "jsdoc-to-markdown": "^6.0.1",
@@ -55,7 +56,6 @@
   "dependencies": {
     "@balena/node-web-streams": "^0.2.3",
     "balena-errors": "^4.4.0",
-    "bluebird": "^3.7.2",
     "fetch-ponyfill": "^4.1.0",
     "fetch-readablestream": "^0.2.0",
     "progress-stream": "^2.0.0",

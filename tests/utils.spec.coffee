@@ -1,5 +1,4 @@
 ReadableStream = require('stream').Readable
-Promise = require('bluebird')
 { Headers } = require('fetch-ponyfill')({ Promise })
 m = require('mochainon')
 johnDoeFixture = require('./tokens.json').johndoe

@@ -1,5 +1,5 @@
 rindle = require('rindle')
-Promise = require('bluebird')
+Bluebird = require('bluebird')
 m = require('mochainon')
 
 mockServer = require('mockttp').getLocal()
@@ -36,18 +36,18 @@ describe 'An interceptor', ->
 
 			promise = request.send
 				url: mockServer.urlFor('/original')
-			.get('body')
+			.then((v) -> v.body)
 
 			m.chai.expect(promise).to.eventually.become(requested: 'changed')
 
 		it 'should be able to asynchronously change a request before it is sent', ->
 			request.interceptors[0] = request: (request) ->
-				Promise.delay(100).then ->
+				Bluebird.delay(100).then ->
 					Object.assign({}, request, url: mockServer.urlFor('/changed'))
 
 			promise = request.send
 				url: mockServer.urlFor('/original')
-			.get('body')
+			.then((v) -> v.body)
 
 			m.chai.expect(promise).to.eventually.become(requested: 'changed')
 
@@ -57,7 +57,7 @@ describe 'An interceptor', ->
 
 			promise = request.send
 				url: mockServer.url
-			.get('body')
+			.then((v) -> v.body)
 
 			m.chai.expect(promise).to.be.rejectedWith('blocked')
 
@@ -82,8 +82,7 @@ describe 'An interceptor', ->
 
 			request.send
 				url: mockServer.urlFor('/original')
-			.get('body')
-			.then (body) ->
+			.then ({ body }) ->
 				m.chai.expect(body).to.deep.equal(requested: 'changed')
 				request.interceptors.forEach (interceptor) ->
 					m.chai.expect(interceptor.requestError.called).to.equal false,
@@ -96,7 +95,7 @@ describe 'An interceptor', ->
 			request.interceptors[1] =
 				requestError: m.sinon.mock().throws(new Error('error overridden'))
 
-			m.chai.expect(request.send(url: mockServer.url).get('body'))
+			m.chai.expect(request.send(url: mockServer.url))
 			.to.be.rejected
 			.then (err) ->
 				m.chai.expect(err.message).to.deep.equal('error overridden')
@@ -138,18 +137,18 @@ describe 'An interceptor', ->
 
 			promise = request.send
 				url: mockServer.url
-			.get('body')
+			.then((v) -> v.body)
 
 			m.chai.expect(promise).to.eventually.become(replaced: true)
 
 		it 'should be able to asynchronously change a response before it is returned', ->
 			request.interceptors[0] = response: (response) ->
-				Promise.delay(100).then ->
+				Bluebird.delay(100).then ->
 					Object.assign({}, response, body: replaced: true)
 
 			promise = request.send
 				url: mockServer.url
-			.get('body')
+			.then((v) -> v.body)
 
 			m.chai.expect(promise).to.eventually.become(replaced: true)
 
@@ -181,8 +180,7 @@ describe 'An interceptor', ->
 
 			request.send
 				url: mockServer.url
-			.get('body')
-			.then (body) ->
+			.then ({ body }) ->
 				m.chai.expect(body).to.deep.equal(requested: '/')
 				m.chai.expect(request.interceptors[0].responseError.called).to.equal false,
 					'responseError should not have been called'
@@ -221,7 +219,7 @@ describe 'An interceptor', ->
 
 				promise = request.send
 					url: mockServer.urlFor('/fail')
-				.get('status')
+				.then((v) -> v.status)
 
 				m.chai.expect(promise).to.eventually.become(200)
 

@@ -1,4 +1,3 @@
-Promise = require('bluebird')
 m = require('mochainon')
 rindle = require('rindle')
 johnDoeFixture = require('./tokens.json').johndoe
@@ -40,9 +39,7 @@ describe 'Request (api key):', ->
 						baseUrl: mockServer.url
 						url: '/foo?$bar=baz'
 						apiKey: undefined
-					.get('request')
-					.get('uri')
-					.get('path')
+					.then((v) -> v.request.uri.path)
 					m.chai.expect(promise).to.eventually.equal('/foo?$bar=baz')
 
 			describe 'given an api key', ->
@@ -53,9 +50,7 @@ describe 'Request (api key):', ->
 						baseUrl: mockServer.url
 						url: '/foo?$bar=baz'
 						apiKey: '123456789'
-					.get('request')
-					.get('uri')
-					.get('path')
+					.then((v) -> v.request.uri.path)
 					m.chai.expect(promise).to.eventually.equal('/foo?$bar=baz&apikey=123456789')
 
 		describe 'given a simple GET endpoint', ->
@@ -78,9 +73,7 @@ describe 'Request (api key):', ->
 								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
-							.get('request')
-							.get('uri')
-							.get('query')
+							.then((v) -> v.request.uri.query)
 							m.chai.expect(promise).to.eventually.equal('apikey=123456789')
 
 					describe '.stream()', ->
@@ -108,9 +101,7 @@ describe 'Request (api key):', ->
 								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
-							.get('request')
-							.get('uri')
-							.get('query')
+							.then((v) -> v.request.uri.query)
 							m.chai.expect(promise).to.eventually.equal('apikey=123456789')
 
 						it 'should still send an Authorization header', ->
@@ -119,9 +110,7 @@ describe 'Request (api key):', ->
 								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: '123456789'
-							.get('request')
-							.get('headers')
-							.get('Authorization')
+							.then((v) -> v.request.headers.Authorization)
 							m.chai.expect(promise).to.eventually.equal("Bearer #{johnDoeFixture.token}")
 
 					describe '.stream()', ->
@@ -162,9 +151,7 @@ describe 'Request (api key):', ->
 								baseUrl: mockServer.url
 								url: '/foo'
 								apiKey: ''
-							.get('request')
-							.get('uri')
-							.get('query')
+							.then((v) -> v.request.uri.query)
 							m.chai.expect(promise).to.eventually.be.null
 
 					describe '.stream()', ->
