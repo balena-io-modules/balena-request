@@ -3,7 +3,9 @@ Promise = require('bluebird')
 { Headers } = require('fetch-ponyfill')({ Promise })
 m = require('mochainon')
 johnDoeFixture = require('./tokens.json').johndoe
-utils = require('../lib/utils')
+utils = require('../build/utils')
+
+{ TokenType } = require('balena-auth/build/token')
 
 { auth } = require('./setup')()
 
@@ -34,7 +36,7 @@ describe 'Utils:', ->
 				@tokenHasKeyStub = m.sinon.stub(auth, 'hasKey')
 				@tokenHasKeyStub.returns(Promise.resolve(true))
 				@tokenGetTypeStub = m.sinon.stub(auth, 'getType')
-				@tokenGetTypeStub.returns(Promise.resolve('JWT'))
+				@tokenGetTypeStub.returns(Promise.resolve(TokenType.JWT))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
@@ -52,7 +54,7 @@ describe 'Utils:', ->
 				@tokenHasKeyStub = m.sinon.stub(auth, 'hasKey')
 				@tokenHasKeyStub.returns(Promise.resolve(true))
 				@tokenGetTypeStub = m.sinon.stub(auth, 'getType')
-				@tokenGetTypeStub.returns(Promise.resolve('JWT'))
+				@tokenGetTypeStub.returns(Promise.resolve(TokenType.JWT))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()
@@ -70,7 +72,7 @@ describe 'Utils:', ->
 				@tokenHasKeyStub = m.sinon.stub(auth, 'hasKey')
 				@tokenHasKeyStub.returns(Promise.resolve(true))
 				@tokenGetTypeStub = m.sinon.stub(auth, 'getType')
-				@tokenGetTypeStub.returns(Promise.resolve('JWT'))
+				@tokenGetTypeStub.returns(Promise.resolve(TokenType.JWT))
 
 			afterEach ->
 				@tokenGetAgeStub.restore()

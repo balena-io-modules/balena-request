@@ -4,7 +4,7 @@ m = require('mochainon')
 
 mockServer = require('mockttp').getLocal()
 
-utils = require('../lib/utils')
+utils = require('../build/utils')
 
 { auth, request } = require('./setup')()
 

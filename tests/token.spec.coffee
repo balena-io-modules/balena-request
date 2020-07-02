@@ -6,7 +6,7 @@ tokens = require('./tokens.json')
 
 johnDoeFixture = tokens.johndoe
 janeDoeFixture = tokens.janedoe
-utils = require('../lib/utils')
+utils = require('../build/utils')
 
 mockServer = require('mockttp').getLocal()
 

@@ -2,7 +2,7 @@ Promise = require('bluebird')
 m = require('mochainon')
 rindle = require('rindle')
 johnDoeFixture = require('./tokens.json').johndoe
-utils = require('../lib/utils')
+utils = require('../build/utils')
 
 mockServer = require('mockttp').getLocal()
 
