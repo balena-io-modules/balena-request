@@ -219,7 +219,7 @@ describe 'An interceptor', ->
 
 				promise = request.send
 					url: mockServer.urlFor('/fail')
-				.then((v) -> v.status)
+				.then((v) -> v.statusCode)
 
 				m.chai.expect(promise).to.eventually.become(200)
 

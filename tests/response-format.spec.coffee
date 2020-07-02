@@ -61,9 +61,9 @@ describe 'responseFormat:', ->
 				url: '/'
 				responseFormat: 'blob'
 			.then ({ body }) ->
-				# in node it's already a Buffer
+				# in node we convert to a Buffer
 				if not IS_BROWSER
-					return body
+					return body.arrayBuffer().then(Buffer.from)
 				# use the FileReader to read the blob content as a string
 				return new Promise (resolve) ->
 					reader = new FileReader()
@@ -75,8 +75,9 @@ describe 'responseFormat:', ->
 				if IS_BROWSER
 					return body is s
 				else
-					b = new Buffer(s, 'utf-8')
-					return b.compare(body) is 0
+					b = Buffer.from(s, 'utf-8')
+
+					return b.equals(body)
 
 		it 'should throw given invalid `responseFormat`', ->
 			promise = request.send
