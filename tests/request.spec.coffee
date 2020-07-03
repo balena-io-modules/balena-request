@@ -266,7 +266,4 @@ describe 'Request:', ->
 				waitForRequestConnection().then =>
 					@clock.tick(59000)
 
-					if IS_BROWSER
-						m.chai.expect(promise).to.be.rejectedWith(Bluebird.TimeoutError)
-					else
-						m.chai.expect(promise).to.be.rejectedWith(Error, 'network timeout')
+					m.chai.expect(promise).to.be.rejectedWith(Error, 'network timeout')
