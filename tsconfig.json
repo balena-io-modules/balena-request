@@ -17,7 +17,8 @@
             "node_modules/@resin.io"
         ],
         "allowJs": true,
-        "checkJs": true
+        "checkJs": true,
+        "importHelpers": true
     },
     "include": [
         "lib/**/*",

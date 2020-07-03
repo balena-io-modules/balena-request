@@ -58,7 +58,8 @@
     "fetch-ponyfill": "^6.1.1",
     "fetch-readablestream": "^0.2.0",
     "progress-stream": "^2.0.0",
-    "qs": "^6.9.4"
+    "qs": "^6.9.4",
+    "tslint": "^6.1.2"
   },
   "peerDependencies": {
     "balena-auth": "^4.0.0"
