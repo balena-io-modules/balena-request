@@ -1,4 +1,3 @@
-Promise = require('bluebird')
 m = require('mochainon')
 errors = require('balena-errors')
 rindle = require('rindle')
@@ -6,7 +5,7 @@ tokens = require('./tokens.json')
 
 johnDoeFixture = tokens.johndoe
 janeDoeFixture = tokens.janedoe
-utils = require('../lib/utils')
+utils = require('../build/utils')
 
 mockServer = require('mockttp').getLocal()
 
@@ -48,9 +47,7 @@ describe 'Request (token):', ->
 							method: 'GET'
 							baseUrl: mockServer.url
 							url: '/foo'
-						.get('request')
-						.get('headers')
-						.get('Authorization')
+						.then((v) -> v.request.headers.Authorization)
 						m.chai.expect(promise).to.eventually.equal("Bearer #{johnDoeFixture.token}")
 
 					it 'should not send an Authorization header if sendToken is false', ->
@@ -59,9 +56,7 @@ describe 'Request (token):', ->
 							baseUrl: mockServer.url
 							url: '/foo'
 							sendToken: false
-						.get('request')
-						.get('headers')
-						.get('Authorization')
+						.then((v) -> v.request.headers.Authorization)
 						m.chai.expect(promise).to.eventually.equal(undefined)
 
 				describe 'given there is no token', ->
@@ -74,9 +69,7 @@ describe 'Request (token):', ->
 							method: 'GET'
 							baseUrl: mockServer.url
 							url: '/foo'
-						.get('request')
-						.get('headers')
-						.get('Authorization')
+						.then((v) -> v.request.headers.Authorization)
 						m.chai.expect(promise).to.eventually.not.exist
 
 			describe 'given the token needs to be updated', ->

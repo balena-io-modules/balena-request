@@ -15,7 +15,7 @@ auth = new BalenaAuth({
 # Make sure any existing tokens are removed before the tests start
 auth.removeKey()
 
-getRequest = require('../lib/request')
+{ getRequest } = require('../build/request')
 
 getCustomRequest = (opts) ->
 	opts = Object.assign({}, { auth, debug: false, isBrowser: IS_BROWSER }, opts)

@@ -1,10 +1,10 @@
-Promise = require('bluebird')
+Bluebird = require('bluebird')
 m = require('mochainon')
 zlib = require('zlib-browserify')
 PassThrough = require('stream').PassThrough
 rindle = require('rindle')
 
-gzip = Promise.promisify(zlib.gzip)
+gzip = Bluebird.promisify(zlib.gzip)
 
 mockServer = require('mockttp').getLocal()
 
@@ -62,7 +62,7 @@ describe 'Request (stream):', ->
 				baseUrl: mockServer.url
 				url: '/foo'
 			.then (stream) ->
-				return Promise.delay(200).return(stream)
+				return Bluebird.delay(200).return(stream)
 			.then (stream) ->
 				pass = new PassThrough()
 				stream.pipe(pass)

@@ -11,12 +11,12 @@ cache:
 # what combinations to test
 environment:
   matrix:
-    - nodejs_version: 6
-    - nodejs_version: 4
+    - nodejs_version: 10
+    - nodejs_version: 12
+    - nodejs_version: 14
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - npm install -g npm@4
   - npm config set loglevel="warn"
   - npm install
 

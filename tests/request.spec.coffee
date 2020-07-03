@@ -1,4 +1,4 @@
-Promise = require('bluebird')
+Bluebird = require('bluebird')
 m = require('mochainon')
 
 mockServer = require('mockttp').getLocal()
@@ -35,7 +35,7 @@ describe 'Request:', ->
 				promise = request.send
 					method: 'GET'
 					url: mockServer.urlFor('/foo')
-				.get('body')
+				.then((v) -> v.body)
 				m.chai.expect(promise).to.eventually.become(from: 'foobar')
 
 			it 'should allow passing a baseUrl', ->
@@ -43,7 +43,7 @@ describe 'Request:', ->
 					method: 'GET'
 					baseUrl: mockServer.url
 					url: '/foo'
-				.get('body')
+				.then((v) -> v.body)
 				m.chai.expect(promise).to.eventually.become(from: 'foobar')
 
 		describe 'given multiple endpoints', ->
@@ -56,7 +56,7 @@ describe 'Request:', ->
 				promise = request.send
 					baseUrl: mockServer.url
 					url: '/foo'
-				.get('body')
+				.then((v) -> v.body)
 				m.chai.expect(promise).to.eventually.become(method: 'GET')
 
 		describe 'given an endpoint that returns a non json response', ->
@@ -69,7 +69,7 @@ describe 'Request:', ->
 					method: 'GET'
 					baseUrl: mockServer.url
 					url: '/non-json'
-				.get('body')
+				.then((v) -> v.body)
 				m.chai.expect(promise).to.eventually.equal('Hello World')
 
 		describe 'given an endpoint that accepts a non-json body', ->
@@ -84,7 +84,7 @@ describe 'Request:', ->
 					url: '/foo'
 					body: 'Test body'
 					json: false
-				.get('body')
+				.then((v) -> v.body)
 				m.chai.expect(promise).to.eventually.become({ matched: true })
 
 		describe 'given simple read only endpoints', ->
@@ -101,7 +101,7 @@ describe 'Request:', ->
 							method: 'GET'
 							baseUrl: mockServer.url
 							url: '/hello'
-						.get('body')
+						.then((v) -> v.body)
 						m.chai.expect(promise).to.eventually.become(hello: 'world')
 
 				describe 'given a response error', ->
@@ -137,7 +137,7 @@ describe 'Request:', ->
 							method: 'HEAD'
 							baseUrl: mockServer.url
 							url: '/foo'
-						.get('statusCode')
+						.then((v) -> v.statusCode)
 						m.chai.expect(promise).to.eventually.equal(200)
 
 				describe 'given a response error', ->
@@ -150,7 +150,7 @@ describe 'Request:', ->
 							method: 'HEAD'
 							baseUrl: mockServer.url
 							url: '/foo'
-						.get('statusCode')
+						.then((v) -> v.statusCode)
 						m.chai.expect(promise).to.be.rejectedWith('The request was unsuccessful')
 
 		describe 'given simple endpoints that handle a request body', ->
@@ -170,7 +170,7 @@ describe 'Request:', ->
 							url: '/'
 							body:
 								foo: 'bar'
-						.get('body')
+						.then((v) -> v.body)
 						m.chai.expect(promise).to.eventually.become(matched: true)
 
 		describe 'given an endpoint that fails the first two times', ->
@@ -184,7 +184,6 @@ describe 'Request:', ->
 				promise = request.send
 					method: 'GET'
 					url: mockServer.urlFor('/initially-failing')
-				.get('body')
 				m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
 
 			it 'should retry and fail if set to retry just once', ->
@@ -192,7 +191,6 @@ describe 'Request:', ->
 					method: 'GET'
 					url: mockServer.urlFor('/initially-failing')
 					retries: 1
-				.get('body')
 				m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
 
 			it 'should retry and eventually succeed if set to retry more than once', ->
@@ -200,7 +198,7 @@ describe 'Request:', ->
 					method: 'GET'
 					url: mockServer.urlFor('/initially-failing')
 					retries: 2
-				.get('body')
+				.then((v) -> v.body)
 				m.chai.expect(promise).to.eventually.become(result: 'success')
 
 			it 'should retry and eventually succeed if set to retry more than once by default', ->
@@ -208,7 +206,7 @@ describe 'Request:', ->
 				promise = retryingRequest.send
 					method: 'GET'
 					url: mockServer.urlFor('/initially-failing')
-				.get('body')
+				.then((v) -> v.body)
 				m.chai.expect(promise).to.eventually.become(result: 'success')
 
 		describe 'given an endpoint that will time out', ->
@@ -227,28 +225,34 @@ describe 'Request:', ->
 				delay(100)
 
 			it 'should reject the promise after 59s by default', ->
+				pending = true
 				promise = request.send
 					method: 'GET'
 					url: mockServer.urlFor('/infinite-wait')
-				.get('body')
+				.then (v) ->
+					pending = false
+					return v.body
 
 				waitForRequestConnection().then =>
 					@clock.tick(58000)
-					m.chai.expect(promise.isPending()).to.equal(true)
+					m.chai.expect(pending).to.equal(true)
 
 					@clock.tick(1000)
 					m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
 
 			it 'should use a provided timeout option', ->
+				pending = true
 				promise = request.send
 					method: 'GET'
 					url: mockServer.urlFor('/infinite-wait')
 					timeout: 500
-				.get('body')
+				.then (v) ->
+					pending = false
+					return v.body
 
 				waitForRequestConnection().then =>
 					@clock.tick(400)
-					m.chai.expect(promise.isPending()).to.equal(true)
+					m.chai.expect(pending).to.equal(true)
 
 					@clock.tick(100)
 					m.chai.expect(promise).to.eventually.be.rejectedWith(Error)
@@ -257,12 +261,9 @@ describe 'Request:', ->
 				promise = request.send
 					method: 'GET'
 					url: mockServer.urlFor('/infinite-wait')
-				.get('body')
+				.then((v) -> v.body)
 
 				waitForRequestConnection().then =>
 					@clock.tick(59000)
 
-					if IS_BROWSER
-						m.chai.expect(promise).to.be.rejectedWith(Promise.TimeoutError)
-					else
-						m.chai.expect(promise).to.be.rejectedWith(Error, 'network timeout')
+					m.chai.expect(promise).to.be.rejectedWith(Error, 'network timeout')
