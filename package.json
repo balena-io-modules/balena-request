@@ -58,7 +58,7 @@
     "fetch-readablestream": "^0.2.0",
     "progress-stream": "^2.0.0",
     "qs": "^6.9.4",
-    "tslint": "^6.1.2"
+    "tslib": "^2.0.0"
   },
   "peerDependencies": {
     "balena-auth": "^4.0.0"
