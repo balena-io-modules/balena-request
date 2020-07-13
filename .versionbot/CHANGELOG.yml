@@ -1,0 +1,680 @@
+- commits:
+  - author: Thodoris Greasidis
+    body: |-
+      Stops using circleCI for npm deploys.
+      No longer runs the tests before publishing, since that resinCI
+      step is meant to be really slim and also the image used doesn't
+      have Chrome installed (see attached discussion).
+      Should not be a concern since:
+      * the tests were run before merging to master
+      * we are moving away from manual publishing.
+      ResinCI requires zero configuration so most of the time
+      there is no reason to publish anything manually.
+    footers:
+      change-type: patch
+      resolves: '#126'
+      see: https://www.flowdock.com/app/rulemotion/r-beginners/threads/fnuvWdmMTYdgY4sAitqaYvA0-f3
+      signed-off-by: Thodoris Greasidis <thodoris@resin.io>
+    hash: ba50fe34f970182279e4ec580c9a2d209d11b9e6
+    subject: Use resinCI for publishing to npm
+  date: "2018-09-17T11:33:27Z"
+  version: 9.3.5
+- commits:
+  - author: Thodoris Greasidis
+    body: ""
+    footers:
+      change-type: patch
+      connects-to: '#121'
+      signed-off-by: Thodoris Greasidis <thodoris@resin.io>
+    hash: c8e5b5ced6100ea4b8d47059edd2eee046e05a72
+    subject: 'stream: Fix Edge bug that causes sending wrong request headers'
+  date: "2018-09-14T10:24:53Z"
+  version: 9.3.4
+- commits:
+  - author: Thodoris Greasidis
+    body: ""
+    footers:
+      change-type: patch
+      depends-on: https://github.com/resin-io/resin-concourse/pull/248/
+      signed-off-by: Thodoris Greasidis <thodoris@resin.io>
+    hash: ea7378ef49177dc48669ee9e8457f322e4b9199f
+    subject: 'chore: Add headless Chrome parameters to work on ResinCi'
+  date: "2018-09-14T08:30:55Z"
+  version: 9.3.3
+- commits:
+  - author: amdomanska
+    body: 'connects-to: https://github.com/resin-io/resin-sdk/issues/292'
+    footers:
+      change-type: patch
+      signed-off-by: amdomanska <aga@resin.io>
+    hash: 38366d2e59dbb85018373410be479d836a5aaf11
+    subject: Add method to do the token refresh
+  date: "2018-08-17T14:15:02Z"
+  version: 9.3.2
+- commits:
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: patch
+    hash: d54d3a118bb727a5becbbbafe3eec7fd956e8786
+    subject: Handle errors in aborted requests to avoid uncaught exception warnings
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: patch
+    hash: 9059f903abc20f495f7f1efdd5c8693d68411585
+    subject: Ensure request errors whilst streaming are passed on
+  date: "2018-07-09T10:24:34Z"
+  version: 9.3.1
+- commits:
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: minor
+    hash: c9778753308400d8e8351605a20efb426d4e0462
+    subject: Support Abort signals where natively available
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: patch
+    hash: 233bc8e719bf58be2ba74a1fd713cbcf541ef82b
+    subject: Fake Abort in environments with cancellable response bodies
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: patch
+    hash: c96b3e51d8124238c0e37dbb7c05ea53504189b4
+    subject: Fake Abort in environments with Node streams
+  - author: Tim Perry
+    body: ""
+    hash: e5917d28c59bd2d9d069e0c09ed0a872e3bd6c50
+    subject: Add basic docs for request aborting
+  - author: Tim Perry
+    body: ""
+    hash: df47d7e7535d1a916630ea7af209cdc3da1f784d
+    subject: Tweaks after review
+  date: "2018-07-05T12:47:00Z"
+  version: 9.3.0
+- commits:
+  - author: Tim Perry
+    body: ""
+    hash: 6059daf5b10cdf704632af8217f9aa91be6d32bd
+    subject: Remove package-lock.json entirely
+  - author: Tim Perry
+    body: ""
+    hash: 037ca5fb8e5ad7ce93a07b5e351ef940ba50baaa
+    subject: Make sure tests are always run without any preexisting tokens from the
+      environment
+  - author: Tim Perry
+    body: ""
+    hash: a6484886bf21a625d74e6cfe48ba7a9705021bde
+    subject: Run tests in headless Chrome, not PhantomJS
+  - author: Tim Perry
+    body: ""
+    hash: 0b6ac3cb972bbd4113410fd90454a6446ac6b5da
+    subject: Move tests from fetch-mock to mockttp, to test real HTTP
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: minor
+    hash: c00a6bc8bb54f73d5651b2b6dbe8f8c1ec324cc6
+    subject: Add support for streaming in the browser
+  - author: Tim Perry
+    body: ""
+    hash: 6de6e46335609dc4629b6ffe66259564bd5f99e5
+    subject: Fixing an automated review nit
+  - author: Tim Perry
+    body: ""
+    hash: 47f79856f6edf62b0b88487a51e7686c04275400
+    subject: Lots of test tweaks and clarification after review
+  - author: Tim Perry
+    body: ""
+    hash: 2db226b445937d18fded0655c459783edb74d315
+    subject: Require streaming dependencies upfront, not dynamically, now they're
+      not node-only
+  date: "2018-07-02T13:22:38Z"
+  version: 9.2.0
+- commits:
+  - author: Thodoris Greasidis
+    body: ""
+    footers:
+      change-type: minor
+      resolves: '#113'
+      see: https://github.com/resin-io/resin-api/blob/e6d53fe97ea91bf406415ab46dbbeac78645e7ed/src/models/hooks/index.coffee#L1171
+    hash: 3175d3e1556ebc7c87bc6dd8a101f6cf35954537
+    subject: Return the whole body when having a non-object error property
+  date: "2018-06-12T11:30:12Z"
+  version: 9.1.0
+- commits:
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: patch
+    hash: c65a00656226cbaf08e483c1e71191e620860040
+    subject: 'Update jsdoc-to-markdown to fix #110'
+  - author: Tim Perry
+    body: ""
+    hash: 8364b057998223530443e3bfb4b0eec6eb1f6ee7
+    subject: Fix JSDoc for interceptor type definitions
+  - author: Tim Perry
+    body: ""
+    hash: 82200f48ccebdb88bd426ac08b8ac043b979e50c
+    subject: Temporarily pin global-tunnel-ng to a working version (#111)
+  date: "2018-04-25T09:58:57Z"
+  version: 9.0.3
+- commits:
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: patch
+    hash: 61d479b71638b1b3a49634d98171f335d0f98177
+    subject: Set up circleci npm autopublishing
+  date: "2017-11-22T17:45:58Z"
+  version: 9.0.2
+- commits:
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: patch
+    hash: d9712b07ac05c8aed116c052e15ae86079226de1
+    subject: Reformat changelog to add versionbot
+  date: "2017-11-01T12:52:45Z"
+  version: 9.0.1
+- commits:
+  - author: MoranF
+    body: 'Connects-To: #106'
+    footers:
+      change-type: major
+    hash: 1e17e2f5edc3899f5da9575263ab402d3571307a
+    subject: Update resin-request to use resin-auth, so that when it sends requests,
+      they work with either the JWT or the API key
+  date: "2017-10-31T09:54:53Z"
+  version: 9.0.0
+- commits:
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: minor
+    hash: cd70f1627a9e7ff13d885a67dd3612eaf40fd62c
+    subject: Allow requests to be sent without a token, even if one exists
+  date: "2017-10-05T16:30:29Z"
+  version: 8.6.0
+- commits:
+  - author: Eugene Mirotin
+    body: ""
+    hash: c3a24f21ed768d13a45cbe4fd47d788669b8b540
+    subject: add package-lock.json
+  - author: Eugene Mirotin
+    body: ""
+    hash: ae080cc7e9f4f9a320b25d4115afd3bc9bb58851
+    subject: allow passing the explicit response format
+  - author: Tim Perry
+    body: |-
+      `name` depends on the actual name of the class, which changes during
+      minification. In this case, resin-ui would catch errors correctly in
+      dev, but not in staging/production (as name was `t`).
+    hash: e4d635b1361e6788dd82ae35cdb2676af216bbe5
+    subject: Fix bug with token error handling when code is minified
+  - author: Eugene Mirotin
+    body: make fetch injectable per-instance
+    hash: 75e2062d6e13372323a4404e70bee1e39dd1ddc4
+    subject: proxy tests
+  date: "2017-07-07T14:10:27Z"
+  version: 8.5.0
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    hash: 9800f63a8e913190daf5484588c2c5e5910a7a32
+    subject: Update rindle so that bluebird and lodash can be deduped
+  - author: Pagan Gazzard
+    body: ""
+    hash: 250c95298fa35425676f51e8ead393a5361034ba
+    subject: Don't try to resolve the token when none is provided
+  - author: Pagan Gazzard
+    body: ""
+    hash: b9ce4320ffe099c991271ceb241cc9701053d8a0
+    subject: Remove unused `resin-token` import, so that it's possible to use the
+      module with api keys without installing `resin-token`
+  date: "2017-04-09T05:08:58Z"
+  version: 8.4.0
+- commits:
+  - author: Tim Perry
+    body: ""
+    hash: 04723baa1072021c5aa430935db98ce1dbb5d7bf
+    subject: Include request options in request errors
+  - author: Tim Perry
+    body: |-
+      Outside the browser this is correct, but in a browser the encoding
+      process is outside our control, and the browser will ignore this and
+      log a warning.
+    hash: 5d02a4b0705073135e07ab2f35d55dc3e04c56b4
+    subject: Don't automatically add accept-encoding when running in a browser
+  date: "2017-02-23T19:34:32Z"
+  version: 8.3.0
+- commits:
+  - author: Tim Perry
+    body: ""
+    hash: 4c3a820d0872ef0183e49a4857ea2135ee4c5ae8
+    subject: Add intercept hooks for requests
+  - author: Tim Perry
+    body: ""
+    hash: 35f3195fae0919823a33bf5c3ea11dcc80be9608
+    subject: Add intercept hooks for responses
+  - author: Tim Perry
+    body: ""
+    hash: 80c1470f0bd559868f961cbeb65255c3d4a40166
+    subject: Make sure requestError intercept intercepts token issues
+  - author: Tim Perry
+    body: ""
+    hash: 70247a3e96b6cf0c27dca3de64b900901cef5a50
+    subject: Support .stream() in interception hooks too
+  - author: Tim Perry
+    body: ""
+    hash: c8d1f9747a88f0a2513d161544460d77512aaac4
+    subject: Test tweaks and tidyup
+  - author: Tim Perry
+    body: ""
+    hash: 59a6f3113ce79d089fd7478b203b3c55d893516f
+    subject: Improve interceptors documentation
+  - author: Tim Perry
+    body: ""
+    hash: ca0d0c89907db2c8925f28c107960335e183bb36
+    subject: Avoid Bluebird warnings and add some style tweaks, from review
+  date: "2017-02-20T12:34:02Z"
+  version: 8.2.0
+- commits:
+  - author: Eugene Mirotin
+    body: ""
+    hash: 30b4ceecee18be6e695c68e5522ac6dd5039b6a4
+    subject: switch to using the resin-fetch-mock module and expose the proper hook
+      to inject the mocked fetch
+  date: "2017-01-06T14:40:15Z"
+  version: 8.1.0
+- commits:
+  - author: Tim Perry
+    body: ""
+    hash: 1bd3b760e1dada3a77a0bb5d40d69f87c5df478f
+    subject: Fix tiny bug that broke everything, except in the tests
+  date: "2017-01-05T14:27:28Z"
+  version: 8.0.1
+- commits:
+  - author: Tim Perry
+    body: ""
+    hash: 7d837056918ea0c0f5eef0791609f1a5baed45d2
+    subject: Move to a DI approach for resin-token
+  - author: Tim Perry
+    body: ""
+    hash: a80eb396c18be3ded0e528df62e3375193b3819a
+    subject: Fix timeouts, and abort underlying requests where possible
+  - author: Tim Perry
+    body: ""
+    hash: 8f237ac78bd5dbb7290d24821b16eae7f01d1634
+    subject: Improve Promise code readability (from review)
+  - author: Tim Perry
+    body: ""
+    hash: 870dab9a535a9d7878d90b64c350dd896bcdd8a4
+    subject: Tweak style after review
+  - author: Tim Perry
+    body: |-
+      This import is exposed as exports.fetch, so it can be changed outside
+      this module. All uses inside the module should consistently use the _
+      prefixed version, to make sure they all get consistently stubbed.
+    hash: e720041c788f51feda6b5fef2a8844f65485fc51
+    subject: Make it clear that fetch import in utils should never be used directly
+  date: "2017-01-04T14:49:11Z"
+  version: 8.0.0
+- commits:
+  - author: Tim Perry
+    body: |-
+      This is functionally working and passing the tests now, but still a
+      little messy in how it manages its globals and mocking.
+    hash: 6d2fed0f20a8dc14d6fb7bd98be8617c42cca856
+    subject: Move to fetch-ponyfill instead of expecting fetch globals
+  - author: Tim Perry
+    body: ""
+    hash: f71815b4a7009b248649b6ecf059144aac872c59
+    subject: Move from ^ to 'begin:' (new fetch-mock api)
+  - author: Tim Perry
+    body: ""
+    hash: 8df19e1ca10b95790311791065394a076fb031e9
+    subject: Delete duplicated test
+  - author: Tim Perry
+    body: ""
+    hash: bdd86bc7dd035520c3b3f1075da24e1b2fa1ee8d
+    subject: Fix bug in fetch-mock that breaks custom Promise usage
+  - author: Tim Perry
+    body: |-
+      This also removes global.Promise - that workaround was independently
+      solved by setting fetchMock.fetchMock.Promise
+    hash: 6cb6f6ed66000a52036e4573b6ebfed96a87c643
+    subject: Document fetch-mock issue workarounds so we can remove them later
+  - author: Tim Perry
+    body: ""
+    hash: 80a23c5a9c5a18296b94b0f49495a45468fa7fc7
+    subject: Small style tweaks after review
+  - author: Tim Perry
+    body: ""
+    hash: 95f6298daa19d0a318f9d6980072f0269df41712
+    subject: Move optional indicator for requestAsync param to JSDoc instead
+  - author: Tim Perry
+    body: ""
+    hash: 4adbf0bc20e8590560759020cc868def2d7f6d0c
+    subject: Simplify request catch&retry logic
+  - author: Tim Perry
+    body: ""
+    hash: 32199fab8befd4b0a78e5295c22bc0ddde60b782
+    subject: Use bluebird's built in timeout support rather than implementing our
+      own
+  date: "2017-01-02T13:02:59Z"
+  version: 7.0.0
+- commits:
+  - author: Tim Perry
+    body: ""
+    hash: 76d52dcd7ad220395c8aa94695ce65bdb41154b7
+    subject: Track request time and include it in output when debug mode is enabled
+  - author: Tim Perry
+    body: ""
+    hash: b299ea34394cc4cb231a392b26ca331e10294a80
+    subject: Remove afterEach duplication
+  - author: Tim Perry
+    body: ""
+    hash: a08734c50d6c05020a58c045180843d6a9e80fde
+    subject: Allow (optional) retries for failing requests
+  - author: Tim Perry
+    body: ""
+    hash: 2a5f79a3e40af0365f269da0c572651b7b898684
+    subject: Tiny formatting tweak
+  - author: Tim Perry
+    body: ""
+    hash: 132bab20597eb751fcbfc515576154e52db3c310
+    subject: Update changelog to include retries option
+  - author: Tim Perry
+    body: ""
+    hash: eaa3352f5bcf25009c5dd2783a18af116f4e9264
+    subject: Allow setting a default retries property in the initial getRequest call
+  date: "2016-12-13T19:43:01Z"
+  version: 6.2.0
+- commits:
+  - author: Eugene Mirotin
+    body: ""
+    hash: 13c64669ffbe1d02972ecd1cf06b011b8ea28afe
+    subject: 'clone the response object before assigning the parsed body - fix #76'
+  - author: Eugene Mirotin
+    body: ""
+    hash: f8392767be772fb458f71e184629beac40ee28cc
+    subject: changelog
+  date: "2016-12-13T15:11:48Z"
+  version: 6.1.1
+- commits:
+  - author: Eugene Mirotin
+    body: ""
+    hash: e5fc69e01975b6af35c34e5063dc5e7740cfa5ca
+    subject: lazy-load dependencies that are not used in the browser
+  date: "2016-12-13T10:58:08Z"
+  version: 6.1.0
+- commits:
+  - author: Eugene Mirotin
+    body: ""
+    hash: 7a7a02fa786f484b3f44f4ec5f5939e9a3116a1c
+    subject: add missing qs dependency
+  date: "2016-11-24T10:31:34Z"
+  version: 6.0.1
+- commits:
+  - author: Eugene Mirotin
+    body: ""
+    hash: c61bf009534fa47cb03160e52d8a58958992f845
+    subject: standardize package.json
+  - author: Eugene Mirotin
+    body: ""
+    hash: b8016c337e1b2d3b7f667a7e0de0e31f0fe217ab
+    subject: Fix the apikey query param name
+  - author: Eugene Mirotin
+    body: ""
+    hash: ebf3d7a89aad80e07851a588e8d641d97529063b
+    subject: fix for resin-pine use-case
+  - author: Eugene Mirotin
+    body: ""
+    hash: 0e92682683f560ddb47738bba85ba4421982cefe
+    subject: fix changelog
+  - author: Eugene Mirotin
+    body: |-
+      update dependencies
+      decouple from process.env
+    hash: fbdc5ce8a55fe2bdf557bfd6cac9da6f8a6db066
+    subject: switch to factory
+  - author: Eugene Mirotin
+    body: ""
+    hash: 6fa34c70d99c41d2dfa795864a35ecdf508f9066
+    subject: remove old node 0.12 from the test matrix
+  date: "2016-11-20T20:07:40Z"
+  version: 6.0.0
+- commits:
+  - author: Eugene Mirotin
+    body: ""
+    hash: 6172f602110301c6786cabb45a832228689df0ea
+    subject: update resin-token and add browser tests runner
+  - author: Eugene Mirotin
+    body: ""
+    hash: b0c9c20cd57824d4492baf2190b155130ad89db0
+    subject: update npm before running the tests on Windows
+  date: "2016-09-15T12:33:26Z"
+  version: 5.0.0
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: 4bcb7ac6741cdb115cba767920f6264d255322f3
+    subject: Fix tslib dependency
+  date: "2020-07-06T10:51:52Z"
+  version: 11.0.2
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: 079bfeece6bf01b0ebb9e12515f1304e51fcb068
+    subject: Fix passing baseUrl to refreshToken if the request uses an absolute url
+  date: "2020-07-03T21:42:07Z"
+  version: 11.0.1
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: major
+    hash: f20a78343dae178d7bbe42f199cfdfcf017faaa0
+    subject: Convert to type checked javascript
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: major
+    hash: 85d3e6df1b23af26275ab516d8cd0ed8ab3b08b5
+    subject: Switch to returning native promises
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: major
+    hash: c53ca904ff5950271a5d8ed7911c04efc92358e6
+    subject: Drop support for nodejs < 10
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: major
+    hash: 072299f337bef7cd3e23d70c61cbc1cf8ab04df5
+    subject: Update balena-auth to 4.x
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: 812054063a073816af2b405b20c5fcec7fd43d69
+    subject: Remove rindle dependency
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: major
+    hash: a8db723a33e6c912de25581f29796bfc5c7040da
+    subject: Update fetch-ponyfill to 6.x
+  - author: Pagan Gazzard
+    body: ""
+    hash: b3851fc526d94df3da1b4e768489eb91f4aa5d91
+    subject: Remove proxy tests as global-tunnel-ng only supports nodejs < 10.16.0
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: major
+    hash: 0f67d2157ff70c8cfada7b6359ba4b58aeeacf3c
+    subject: Switch to a named export
+  - author: Pagan Gazzard
+    body: ""
+    hash: be34df9a401b1155e8b6a5ead9604fbd86164662
+    subject: Use typescript import helpers
+  - author: Thodoris Greasidis
+    body: ""
+    footers:
+      change-type: patch
+      signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+    hash: 403418796d1505c9567396e06f221d1e959d4115
+    subject: Bump balena-config-karma & convert karma.conf.coffee to js
+  - author: Thodoris Greasidis
+    body: ""
+    footers:
+      change-type: major
+    hash: 25e8293b8ed3df3c80581903ab56a42c3e41babc
+    subject: Change the browser request timeout error to be consistent with node
+  date: "2020-07-03T19:12:04Z"
+  version: 11.0.0
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: 48a92875ffa4787dd3546d90a4eebec83bf87771
+    subject: Switch to native Object.assign
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: b7c99c45c7c9581af1b73f4cea28d098dad5524c
+    subject: Remove lodash noop usage
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: d272be5d3f2613d047da39a4f698d148007d1141
+    subject: Switch to native includes
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: e02728b4ad5758bf3807fd5b22843d605afbc871
+    subject: Use Object.assign to emulate lodash/defaults
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: 56e6a5ecdb8ed317ba8bdce5731be194acae581e
+    subject: Use native check in favour of isEmpty
+  date: "2020-04-20T15:12:53Z"
+  version: 10.0.9
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: 3319bf188491da5b7e0b30e92b43251b25a09ed2
+    subject: Remove lodash/parseint
+  date: "2020-03-02T16:45:21Z"
+  version: 10.0.8
+- commits:
+  - author: Thodoris Greasidis
+    body: ""
+    footers:
+      change-type: patch
+    hash: dff1ff91a08f8d4e11caca28b0d6a4d3e304c5e6
+    subject: Use @balena/node-web-streams instead of a GitHub branch
+  date: "2020-02-13T15:13:28Z"
+  version: 10.0.7
+- commits:
+  - author: Thodoris Greasidis
+    body: ""
+    footers:
+      change-type: patch
+    hash: 293c54d18e0a2475611a6a7523f22dbfc3751393
+    subject: Add the build directory to the .gitignore
+  date: "2020-02-13T15:00:04Z"
+  version: 10.0.6
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: bd669e9884e6f605191afc4c515a634ccf309687
+    subject: Update github target
+  date: "2020-02-13T13:37:13Z"
+  version: 10.0.5
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: 097061a5c5b4a4c3a4463cca2743e4a1c6301e80
+    subject: Update dependencies
+  - author: Pagan Gazzard
+    body: ""
+    hash: db47e7c105c59f1909ae08cda622ad0d91232cda
+    subject: Update gulp
+  date: "2020-01-21T15:31:12Z"
+  version: 10.0.4
+- commits:
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: 793f2f4104a06d8a2fe019a537350b1f6cf413e3
+    subject: Use a prepare script to build on install via git and remove built files
+  - author: Pagan Gazzard
+    body: ""
+    footers:
+      change-type: patch
+    hash: b8b882b2eea4d6b52794b31b0bd64f6d04b5afbb
+    subject: Increase the default timeout from 30s to 59s
+  date: "2020-01-15T22:01:26Z"
+  version: 10.0.3
+- commits:
+  - author: Thodoris Greasidis
+    body: |-
+      This was probably missed during the rename PR.
+      It seems that we updated the devDependency to v3
+      and missed to also update the version for the
+      peerDependency.
+      Also note that balena-auth starts with v3.
+    footers:
+      change-type: patch
+      resolves: '#133'
+      see: https://github.com/balena-io/balena-sdk/issues/663
+      signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+    hash: 18174e7d3615fbc54d5b226f08b8c4da2cda46dd
+    subject: Fix invalid balena-auth peer dependency
+  date: "2019-04-12T14:16:56Z"
+  version: 10.0.2
+- commits:
+  - author: Tim Perry
+    body: |-
+      This brings in the changes from
+      https://github.com/jonnyreeves/fetch-readablestream/pull/7
+    footers:
+      change-type: patch
+    hash: e0f8613cdd9e54136558378e9d4e01af9cf9865b
+    subject: Update to new fetch-readablestream that properly supports abort()
+  date: "2018-11-13T13:21:12Z"
+  version: 10.0.1
+- commits:
+  - author: Tim Perry
+    body: ""
+    footers:
+      change-type: major
+      signed-off-by: Tim Perry <tim@balena.io>
+    hash: 54a9d4e4a1c8f588e53e9f1691b9854f36c18f95
+    subject: Rename everything 'resin' to 'balena'
+  date: "2018-10-18T09:28:00Z"
+  version: 10.0.0
