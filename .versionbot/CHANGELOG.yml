@@ -1,4 +1,14 @@
 - commits:
+    - subject: Fix body overwriting on nodejs
+      hash: 432ee302c8c55e629f4915146d4d1c7388d6b01b
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 11.0.4
+  date: 2020-07-14T09:49:16.044Z
+- commits:
     - subject: Add .versionbot/CHANGELOG.yml for nested changelogs
       hash: 6cdf460919b09a3cfe49bdfdfc1b1157117cc507
       body: ''
