@@ -1,4 +1,14 @@
 - commits:
+    - subject: Add lazy loading for most modules
+      hash: 45042aca602e44a8e4eefdf0fb57ab188530a48e
+      body: ''
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+  version: 11.1.0
+  date: 2020-07-16T13:01:21.964Z
+- commits:
     - subject: Fix body overwriting on nodejs
       hash: 432ee302c8c55e629f4915146d4d1c7388d6b01b
       body: ''
