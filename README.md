@@ -38,6 +38,7 @@ It accepts the following params:
 | --- | --- | --- |
 | options | <code>Object</code> | options |
 | options.auth | <code>Object</code> | An instantiated [balena-auth](https://github.com/balena-io-modules/balena-auth) instance |
+| [options.tokenRefreshBaseUrl] | <code>string</code> | When provided, all refresh token requests will use it as their base url. |
 | options.debug | <code>boolean</code> | when set to `true` will log the request details in case of error. |
 | options.isBrowser | <code>boolean</code> | set to `true` if the runtime is the browser. |
 | options.interceptors | <code>Array&lt;Interceptor&gt;</code> | An initial array of interceptors |

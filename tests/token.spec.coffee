@@ -8,8 +8,9 @@ janeDoeFixture = tokens.janedoe
 utils = require('../build/utils')
 
 mockServer = require('mockttp').getLocal()
+mockServer2 = require('mockttp').getLocal()
 
-{ auth, request } = require('./setup')()
+{ auth, request, getCustomRequest } = require('./setup')()
 
 describe 'Request (token):', ->
 
@@ -89,17 +90,58 @@ describe 'Request (token):', ->
 					beforeEach ->
 						mockServer.get('/whoami').thenReply(200, janeDoeFixture.token)
 
-					it 'should refresh the token', ->
-						auth.getKey().then (savedToken) ->
-							m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
-							return request.send
-								baseUrl: mockServer.url
-								url: '/foo'
-						.then (response) ->
-							m.chai.expect(response.body).to.equal('bar')
-							return auth.getKey()
-						.then (savedToken) ->
-							m.chai.expect(savedToken).to.equal(janeDoeFixture.token)
+					describe 'given no default tokenRefreshBaseUrl', ->
+
+						describe 'given a base url', ->
+
+							it 'should refresh the token', ->
+								auth.getKey().then (savedToken) ->
+									m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
+									return request.send
+										baseUrl: mockServer.url
+										url: '/foo'
+								.then (response) ->
+									m.chai.expect(response.body).to.equal('bar')
+									return auth.getKey()
+								.then (savedToken) ->
+									m.chai.expect(savedToken).to.equal(janeDoeFixture.token)
+
+					describe 'given a request instance with a tokenRefreshBaseUrl', ->
+
+						beforeEach ->
+							@requestWithTokenRefreshUrl = getCustomRequest({ tokenRefreshBaseUrl: mockServer.url })
+							mockServer2.start().then ->
+								mockServer2.get(/^\/foo/).thenReply(200, 'bar')
+
+						afterEach ->
+							mockServer2.stop()
+
+						describe 'given an absolute url', ->
+
+							it 'should properly refresh the token', ->
+								auth.getKey().then (savedToken) =>
+									m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
+									return @requestWithTokenRefreshUrl.send
+										url: mockServer2.url + '/foo'
+								.then (response) ->
+									m.chai.expect(response.body).to.equal('bar')
+									return auth.getKey()
+								.then (savedToken) ->
+									m.chai.expect(savedToken).to.equal(janeDoeFixture.token)
+
+						describe 'given a base url', ->
+
+							it 'should properly refresh the token', ->
+								auth.getKey().then (savedToken) =>
+									m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
+									return @requestWithTokenRefreshUrl.send
+										baseUrl: mockServer2.url
+										url: '/foo'
+								.then (response) ->
+									m.chai.expect(response.body).to.equal('bar')
+									return auth.getKey()
+								.then (savedToken) ->
+									m.chai.expect(savedToken).to.equal(janeDoeFixture.token)
 
 					# We could make the token request in parallel to avoid
 					# having to wait for it to make the actual request.
