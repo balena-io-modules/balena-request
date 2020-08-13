@@ -78,28 +78,34 @@ describe 'Request (token):', ->
 					@utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldRefreshKey')
 					@utilsShouldUpdateToken.returns(Promise.resolve(true))
 
+					@authIsExpired = m.sinon.stub(auth, 'isExpired')
+					@authIsExpired.returns(Promise.resolve(false))
+
 					auth.setKey(johnDoeFixture.token)
 
 
 				afterEach ->
 					@utilsShouldUpdateToken.restore()
+					@authIsExpired.restore()
 
 				describe 'given a working /whoami endpoint', ->
 
 					beforeEach ->
 						mockServer.get('/whoami').thenReply(200, janeDoeFixture.token)
 
-					it 'should refresh the token', ->
-						auth.getKey().then (savedToken) ->
-							m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
-							return request.send
-								baseUrl: mockServer.url
-								url: '/foo'
-						.then (response) ->
-							m.chai.expect(response.body).to.equal('bar')
-							return auth.getKey()
-						.then (savedToken) ->
-							m.chai.expect(savedToken).to.equal(janeDoeFixture.token)
+					describe 'given a base url', ->
+
+						it 'should refresh the token', ->
+							auth.getKey().then (savedToken) ->
+								m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
+								return request.send
+									baseUrl: mockServer.url
+									url: '/foo'
+							.then (response) ->
+								m.chai.expect(response.body).to.equal('bar')
+								return auth.getKey()
+							.then (savedToken) ->
+								m.chai.expect(savedToken).to.equal(janeDoeFixture.token)
 
 					# We could make the token request in parallel to avoid
 					# having to wait for it to make the actual request.
@@ -118,6 +124,19 @@ describe 'Request (token):', ->
 
 					beforeEach ->
 						mockServer.get('/whoami').thenReply(401, 'Unauthorized')
+
+					describe 'given an absolute url', ->
+
+						it 'should not attempt to refresh the token', ->
+							auth.getKey().then (savedToken) =>
+								m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
+								return request.send
+									url: mockServer.url + '/foo'
+							.then (response) ->
+								m.chai.expect(response.body).to.equal('bar')
+								return auth.getKey()
+							.then (savedToken) ->
+								m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
 
 					it 'should be rejected with an expiration error', ->
 						promise = request.send

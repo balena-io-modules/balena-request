@@ -111,23 +111,47 @@ describe 'An interceptor', ->
 			afterEach ->
 				@utilsShouldUpdateToken.restore()
 
-			it 'should call requestError if the token is expired', ->
-				request.interceptors[0] =
-					requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
+			describe 'when using a baseUrl', ->
 
-				promise = request.send
-					url: mockServer.url
+				it 'should call requestError if the token is expired', ->
+					request.interceptors[0] =
+						requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
 
-				m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
+					promise = request.send
+						baseUrl: mockServer.url
+						url: '/'
 
-			it 'should call requestError if the token is expired for stream()', ->
-				request.interceptors[0] =
-					requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
+					m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
 
-				promise = request.stream
-					url: mockServer.url
+				it 'should call requestError if the token is expired for stream()', ->
+					request.interceptors[0] =
+						requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
 
-				m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
+					promise = request.stream
+						baseUrl: mockServer.url
+						url: '/'
+
+					m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
+
+			describe 'when using an absolute url', ->
+
+				it 'should call requestError if the token is expired', ->
+					request.interceptors[0] =
+						requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
+
+					promise = request.send
+						url: mockServer.url
+
+					m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
+
+				it 'should call requestError if the token is expired for stream()', ->
+					request.interceptors[0] =
+						requestError: m.sinon.mock().throws(new Error('intercepted auth failure'))
+
+					promise = request.stream
+						url: mockServer.url
+
+					m.chai.expect(promise).to.be.rejectedWith('intercepted auth failure')
 
 	describe 'with a response hook', ->
 
