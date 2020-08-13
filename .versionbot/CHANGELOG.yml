@@ -1,4 +1,16 @@
 - commits:
+    - subject: Add tokenRefreshBaseUrl option to limit the refresh token targets
+      hash: 4ddc5a04025c898292ddb4ba45caa991461f0ec0
+      body: ''
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+  version: 11.2.0
+  date: 2020-08-13T08:13:19.003Z
+- commits:
     - subject: Add lazy loading for most modules
       hash: 45042aca602e44a8e4eefdf0fb57ab188530a48e
       body: ''
