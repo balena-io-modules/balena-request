@@ -1,4 +1,20 @@
 - commits:
+    - subject: Stop refreshing the token on absolute urls
+      hash: a61c8bb2a7c144748048e41b201f1ee2f7d6e7c7
+      body: |
+        Essentially reverting v11.0.1 but rejecting with a
+        better error than before.
+      footer:
+        Change-type: patch
+        change-type: patch
+        See: 'https://github.com/balena-io/balena-ui/issues/3942'
+        see: 'https://github.com/balena-io/balena-ui/issues/3942'
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+  version: 11.1.1
+  date: 2020-08-13T13:01:55.868Z
+- commits:
     - subject: Add lazy loading for most modules
       hash: 45042aca602e44a8e4eefdf0fb57ab188530a48e
       body: ''
