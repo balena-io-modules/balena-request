@@ -18,9 +18,61 @@ limitations under the License.
  * @module request
  */
 
+import type BalenaAuth from 'balena-auth';
+import type { Readable } from 'stream';
 import * as urlLib from 'url';
 import * as errors from 'balena-errors';
 import * as utils from './utils';
+
+export interface BalenaRequestOptions {
+	method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+	baseUrl?: string;
+	uri?: string;
+	url: string;
+	apiKey?: string;
+	sendToken?: boolean;
+	refreshToken?: boolean;
+	retries?: number;
+	body?: any;
+	json?: boolean;
+	strictSSL?: boolean;
+	responseFormat?: 'none' | 'blob' | 'json' | 'text';
+	headers?: Record<string, string>;
+	signal?: any;
+	timeout?: number;
+	qs?: any;
+	gzip?: boolean;
+	followRedirect?: boolean;
+}
+
+export interface BalenaRequestResponse<T = any> extends Omit<Response, 'body'> {
+	statusCode: number;
+	body: T;
+	duration: number;
+	request: {
+		headers: BalenaRequestOptions['headers'];
+		uri: urlLib.UrlWithStringQuery;
+	};
+}
+
+export interface BalenaRequestStreamResult extends Readable {
+	mime: string;
+}
+
+export interface Interceptor {
+	request?(response: any): Promise<any>;
+	response?(response: any): Promise<any>;
+	requestError?(error: Error): Promise<any>;
+	responseError?(error: Error): Promise<any>;
+}
+
+export interface RequestFactoryOptions {
+	auth: BalenaAuth;
+	debug?: boolean;
+	retries?: number;
+	isBrowser?: boolean;
+	interceptors?: Interceptor[];
+}
 
 /**
  * @param {object} options
@@ -36,7 +88,7 @@ export function getRequest({
 	retries = 0,
 	isBrowser = false,
 	interceptors = [],
-}) {
+}: RequestFactoryOptions) {
 	const requestAsync = utils.getRequestAsync();
 	const requestStream = isBrowser
 		? utils.getRequestAsync(require('fetch-readablestream'))
@@ -48,11 +100,9 @@ export function getRequest({
 		  }
 		: utils.debugRequest;
 
-	const exports = {};
-
-	const prepareOptions = async function (options) {
+	const prepareOptions = async function (options: BalenaRequestOptions) {
 		if (options == null) {
-			options = {};
+			options = {} as BalenaRequestOptions;
 		}
 
 		const { baseUrl } = options;
@@ -86,7 +136,7 @@ export function getRequest({
 			(await utils.shouldRefreshKey(auth))
 		) {
 			if (!isAbsoluteUrl) {
-				await exports.refreshToken({ baseUrl });
+				await refreshToken({ baseUrl: baseUrl! });
 			}
 			if (await auth.isExpired()) {
 				throw new errors.BalenaExpiredToken(await auth.getKey());
@@ -97,7 +147,7 @@ export function getRequest({
 			: undefined;
 
 		if (authorizationHeader != null) {
-			options.headers.Authorization = authorizationHeader;
+			options.headers!.Authorization = authorizationHeader;
 		}
 
 		if (typeof options.apiKey === 'string' && options.apiKey.length > 0) {
@@ -126,7 +176,7 @@ export function getRequest({
 	const interceptResponseError = (responseError) =>
 		interceptResponseOrError(Promise.reject(responseError));
 
-	var interceptRequestOrError = async (initialPromise) =>
+	const interceptRequestOrError = async (initialPromise) =>
 		exports.interceptors.reduce(function (promise, { request, requestError }) {
 			if (request != null || requestError != null) {
 				return promise.then(request, requestError);
@@ -135,15 +185,17 @@ export function getRequest({
 			}
 		}, initialPromise);
 
-	var interceptResponseOrError = async function (initialPromise) {
-		interceptors = exports.interceptors.slice().reverse();
-		return interceptors.reduce(function (promise, { response, responseError }) {
-			if (response != null || responseError != null) {
-				return promise.then(response, responseError);
-			} else {
-				return promise;
-			}
-		}, initialPromise);
+	const interceptResponseOrError = async function (initialPromise) {
+		return exports.interceptors
+			.slice()
+			.reverse()
+			.reduce(function (promise, { response, responseError }) {
+				if (response != null || responseError != null) {
+					return promise.then(response, responseError);
+				} else {
+					return promise;
+				}
+			}, initialPromise);
 	};
 
 	/**
@@ -187,7 +239,15 @@ export function getRequest({
 	 * 		hello: 'world'
 	 * .get('body')
 	 */
-	exports.send = async function (options) {
+	async function send(
+		options: BalenaRequestOptions,
+	): Promise<BalenaRequestResponse>;
+	async function send<T>(
+		options: BalenaRequestOptions,
+	): Promise<BalenaRequestResponse<T>>;
+	async function send(
+		options: BalenaRequestOptions,
+	): Promise<BalenaRequestResponse> {
 		// Only set the default timeout when doing a normal HTTP
 		// request and not also when streaming since in the latter
 		// case we might cause unnecessary ESOCKETTIMEDOUT errors.
@@ -228,7 +288,7 @@ export function getRequest({
 				return response;
 			})
 			.then(interceptResponse, interceptResponseError);
-	};
+	}
 
 	/**
 	 * @summary Stream an HTTP response from balena.
@@ -268,8 +328,10 @@ export function getRequest({
 	 *
 	 * 	stream.pipe(fs.createWriteStream('/opt/download'))
 	 */
-	exports.stream = function (options) {
-		const progress = require('./progress');
+	function stream(
+		options: BalenaRequestOptions,
+	): Promise<BalenaRequestStreamResult> {
+		const progress = require('./progress') as typeof import('./progress');
 		return prepareOptions(options)
 			.then(interceptRequestOptions, interceptRequestError)
 			.then(async (opts) => {
@@ -277,18 +339,17 @@ export function getRequest({
 					requestStream,
 					isBrowser,
 				)(opts);
-				// @ts-expect-error
+
 				if (!utils.isErrorCode(download.response.statusCode)) {
 					// TODO: Move this to balena-image-manager
-					// @ts-expect-error
 					download.mime = download.response.headers.get('Content-Type');
 
 					return download;
 				}
 
 				// If status code is an error code, interpret the body of the request as an error.
-				const chunks = [];
-				download.on('data', function (chunk) {
+				const chunks: unknown[] = [];
+				download.on('data', function (chunk: unknown) {
 					chunks.push(chunk);
 				});
 				await new Promise((resolve, reject) => {
@@ -298,17 +359,16 @@ export function getRequest({
 					download.on('done', resolve);
 				});
 				const responseError = chunks.join() || 'The request was unsuccessful';
-				// @ts-expect-error
+
 				debugRequest(options, download.response);
 				// @ts-expect-error
 				throw new errors.BalenaRequestError(
 					responseError,
-					// @ts-expect-error
 					download.response.statusCode,
 				);
 			})
 			.then(interceptResponse, interceptResponseError);
-	};
+	}
 
 	/**
 	 * @summary Array of interceptors
@@ -328,7 +388,6 @@ export function getRequest({
 	 * 		throw error
 	 * )
 	 */
-	exports.interceptors = interceptors;
 
 	/**
 	 * @typedef Interceptor
@@ -377,15 +436,17 @@ export function getRequest({
 	 * 	baseUrl: 'https://api.balena-cloud.com'
 	 */
 
-	exports.refreshToken = async function ({ baseUrl }) {
+	async function refreshToken({
+		baseUrl,
+	}: Pick<BalenaRequestOptions, 'baseUrl'>): Promise<string> {
 		// Only refresh if we have balena-auth
 		if (auth == null) {
 			throw new Error('Auth module not provided in initializer');
 		}
 
-		let response;
+		let response: BalenaRequestResponse<string>;
 		try {
-			response = await exports.send({
+			response = await send<string>({
 				url: '/whoami',
 				baseUrl,
 				refreshToken: false,
@@ -401,7 +462,13 @@ export function getRequest({
 		const refreshedKey = response.body;
 		await auth.setKey(refreshedKey);
 		return refreshedKey;
-	};
+	}
 
+	const exports = {
+		send,
+		stream,
+		interceptors,
+		refreshToken,
+	};
 	return exports;
 }

@@ -15,6 +15,8 @@ limitations under the License.
 */
 
 import * as utils from './utils';
+import type { BalenaRequestOptions } from './request';
+import type { getRequestAsync } from './utils';
 
 /**
  * @module progress
@@ -73,16 +75,19 @@ const getProgressStream = function (total, onState) {
  * 		stream.on 'progress', (state) ->
  * 			console.log(state)
  */
-export function estimate(requestAsync, isBrowser) {
-	return async function (options) {
+export function estimate(
+	requestAsync?: ReturnType<typeof getRequestAsync>,
+	isBrowser?: boolean,
+) {
+	return async function (options: BalenaRequestOptions) {
 		if (requestAsync == null) {
 			requestAsync = utils.getRequestAsync();
 		}
 
 		options.gzip = false;
-		options.headers['Accept-Encoding'] = 'gzip, deflate';
+		options.headers!['Accept-Encoding'] = 'gzip, deflate';
 
-		let reader = null;
+		let reader: any = null;
 
 		if (options.signal != null) {
 			options.signal.addEventListener(
@@ -105,13 +110,13 @@ export function estimate(requestAsync, isBrowser) {
 
 		const stream = require('stream');
 		const output = new stream.PassThrough();
-		// @ts-expect-error
+
 		output.response = response;
 
 		const responseLength = utils.getResponseLength(response);
 		const total = responseLength.uncompressed || responseLength.compressed;
 
-		let responseStream;
+		let responseStream: any;
 		if (response.body.getReader) {
 			const webStreams = require('@balena/node-web-streams');
 			// Convert browser (WHATWG) streams to Node streams

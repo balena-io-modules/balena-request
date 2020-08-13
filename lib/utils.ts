@@ -14,14 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import type { PonyfilledFetch, FetchPonyfill } from './typings/fetch-ponyfill';
 const {
 	fetch: normalFetch,
 	Headers: HeadersPonyfill,
-} = require('fetch-ponyfill')({ Promise });
+} = (require('fetch-ponyfill') as FetchPonyfill)({ Promise });
+
 import * as urlLib from 'url';
 import * as qs from 'qs';
 import * as errors from 'balena-errors';
+import type BalenaAuth from 'balena-auth';
 import { TokenType } from 'balena-auth/build/token';
+import type { BalenaRequestOptions, BalenaRequestResponse } from './request';
 
 const IS_BROWSER = typeof window !== 'undefined' && window !== null;
 
@@ -29,7 +33,7 @@ const IS_BROWSER = typeof window !== 'undefined' && window !== null;
  * @module utils
  */
 
-export const TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60; // 1 hour in milliseconds
+export const TOKEN_REFRESH_INTERVAL = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
 
 /**
  * @summary Determine if the token should be updated
@@ -48,7 +52,7 @@ export const TOKEN_REFRESH_INTERVAL = 1 * 1000 * 60 * 60; // 1 hour in milliseco
  * 		if shouldRefreshKey
  * 			console.log('Updating token!')
  */
-export async function shouldRefreshKey(auth) {
+export async function shouldRefreshKey(auth: BalenaAuth) {
 	const hasKey = await auth.hasKey();
 	if (!hasKey) {
 		return false;
@@ -57,8 +61,8 @@ export async function shouldRefreshKey(auth) {
 	if (type !== TokenType.JWT) {
 		return false;
 	}
-	const age = await auth.getAge();
-	// @ts-expect-error
+	const age = (await auth.getAge()) ?? 0;
+
 	return age >= TOKEN_REFRESH_INTERVAL;
 }
 
@@ -78,7 +82,7 @@ export async function shouldRefreshKey(auth) {
  * 		headers =
  * 			Authorization: authorizationHeader
  */
-export let getAuthorizationHeader = async function (auth) {
+export async function getAuthorizationHeader(auth: BalenaAuth) {
 	if (auth == null) {
 		return;
 	}
@@ -88,7 +92,7 @@ export let getAuthorizationHeader = async function (auth) {
 	}
 	const key = await auth.getKey();
 	return `Bearer ${key}`;
-};
+}
 
 /**
  * @summary Get error message from response
@@ -106,7 +110,7 @@ export let getAuthorizationHeader = async function (auth) {
  * 		throw error if error?
  * 		message = utils.getErrorMessageFromResponse(response)
  */
-export function getErrorMessageFromResponse(response) {
+export function getErrorMessageFromResponse(response: BalenaRequestResponse) {
 	if (!response.body) {
 		return 'The request was unsuccessful';
 	}
@@ -131,7 +135,7 @@ export function getErrorMessageFromResponse(response) {
  * if utils.isErrorCode(400)
  * 		console.log('400 is an error code!')
  */
-export function isErrorCode(statusCode) {
+export function isErrorCode(statusCode: number) {
 	return statusCode >= 400;
 }
 
@@ -147,7 +151,7 @@ export function isErrorCode(statusCode) {
  * if utils.isResponseCompressed(response)
  * 	console.log('The response body is compressed')
  */
-export function isResponseCompressed(response) {
+export function isResponseCompressed(response: BalenaRequestResponse) {
 	return response.headers.get('Content-Encoding') === 'gzip';
 }
 
@@ -164,14 +168,14 @@ export function isResponseCompressed(response) {
  * console.log(responseLength.compressed)
  * console.log(responseLength.uncompressed)
  */
-export function getResponseLength(response) {
+export function getResponseLength(response: BalenaRequestResponse) {
 	return {
 		uncompressed:
-			parseInt(response.headers.get('Content-Length'), 10) || undefined,
+			parseInt(response.headers.get('Content-Length')!, 10) || undefined,
 		// X-Transfer-Length equals the compressed size of the body.
 		// This header is sent by Image Maker when downloading OS images.
 		compressed:
-			parseInt(response.headers.get('X-Transfer-Length'), 10) || undefined,
+			parseInt(response.headers.get('X-Transfer-Length')!, 10) || undefined,
 	};
 }
 
@@ -192,16 +196,15 @@ export function getResponseLength(response) {
  * request(options).spread (response) ->
  * 	utils.debugRequest(options, response)
  */
-export function debugRequest(options, response) {
-	return console.error(
-		Object.assign(
-			{
-				statusCode: response.statusCode,
-				duration: response.duration,
-			},
-			options,
-		),
-	);
+export function debugRequest(
+	options: BalenaRequestOptions,
+	response: BalenaRequestResponse,
+) {
+	return console.error({
+		statusCode: response.statusCode,
+		duration: response.duration,
+		...options,
+	});
 }
 
 // fetch adapter
@@ -240,11 +243,18 @@ const UNSUPPORTED_REQUEST_PARAMS = [
 	'callback',
 ];
 
-const processRequestOptions = function (options) {
-	if (options == null) {
-		options = {};
-	}
+interface ProcessedRequestOptions extends RequestInit {
+	headers: Headers;
+	timeout?: number;
+	retries: number;
+	compress?: boolean;
+}
+
+const processRequestOptions = function (options: BalenaRequestOptions) {
 	let url = options.url || options.uri;
+	if (url == null) {
+		throw new Error('url option not provided');
+	}
 	if (options.baseUrl) {
 		url = urlLib.resolve(options.baseUrl, url);
 	}
@@ -253,24 +263,14 @@ const processRequestOptions = function (options) {
 		url += (url.indexOf('?') >= 0 ? '&' : '?') + params;
 	}
 
-	const opts = {};
-
-	opts.timeout = options.timeout;
-	opts.retries = options.retries;
-	opts.method = options.method;
-	opts.compress = options.gzip;
-	opts.signal = options.signal;
-
 	let { body, headers } = options;
 	if (headers == null) {
-		headers = {};
+		headers = {} as Record<string, string>;
 	}
 	if (options.json && body) {
 		body = JSON.stringify(body);
 		headers['Content-Type'] = 'application/json';
 	}
-
-	opts.body = body;
 
 	if (!IS_BROWSER) {
 		if (!headers['Accept-Encoding']) {
@@ -278,17 +278,11 @@ const processRequestOptions = function (options) {
 		}
 	}
 
-	if (options.followRedirect) {
-		opts.redirect = 'follow';
-	}
-
-	opts.headers = new HeadersPonyfill(headers);
-
 	if (options.strictSSL === false) {
 		throw new Error('`strictSSL` must be true or absent');
 	}
 
-	for (let key of UNSUPPORTED_REQUEST_PARAMS) {
+	for (const key of UNSUPPORTED_REQUEST_PARAMS) {
 		if (options[key] != null) {
 			throw new Error(
 				`The ${key} param is not supported. Value: ${options[key]}`,
@@ -296,9 +290,19 @@ const processRequestOptions = function (options) {
 		}
 	}
 
-	opts.mode = 'cors';
+	const opts: ProcessedRequestOptions = {
+		timeout: options.timeout,
+		retries: options.retries!,
+		method: options.method,
+		compress: options.gzip,
+		signal: options.signal,
+		body,
+		headers: new HeadersPonyfill(headers),
+		mode: 'cors',
+		...(options.followRedirect && { redirect: 'follow' }),
+	};
 
-	return [url, opts];
+	return [url, opts] as const;
 };
 
 /**
@@ -314,7 +318,7 @@ const processRequestOptions = function (options) {
  * utils.getBody(response).then (body) ->
  * 	console.log(body)
  */
-export async function getBody(response, responseFormat) {
+export async function getBody(response: BalenaRequestResponse, responseFormat) {
 	if (responseFormat === 'none') {
 		return null;
 	}
@@ -359,7 +363,11 @@ export async function getBody(response, responseFormat) {
 
 // This is the actual implementation that hides the internal `retriesRemaining` parameter
 
-var requestAsync = async function (fetch, options, retriesRemaining) {
+async function requestAsync(
+	fetch: typeof normalFetch,
+	options: BalenaRequestOptions,
+	retriesRemaining?: number,
+): Promise<BalenaRequestResponse> {
 	const [url, opts] = processRequestOptions(options);
 	if (retriesRemaining == null) {
 		retriesRemaining = opts.retries;
@@ -388,7 +396,7 @@ var requestAsync = async function (fetch, options, retriesRemaining) {
 			});
 		}
 
-		const response = await p;
+		const response = (await p) as BalenaRequestResponse;
 
 		if (opts.signal) {
 			handleAbortIfNotSupported(opts.signal, response);
@@ -408,9 +416,9 @@ var requestAsync = async function (fetch, options, retriesRemaining) {
 		}
 		throw err;
 	}
-};
+}
 
-var handleAbortIfNotSupported = function (signal, response) {
+function handleAbortIfNotSupported(signal, response) {
 	const emulateAbort = (() => {
 		if (response.body?.cancel) {
 			// We have an XHR-emulated stream - cancel kills the underlying XHR
@@ -437,7 +445,7 @@ var handleAbortIfNotSupported = function (signal, response) {
 			});
 		}
 	}
-};
+}
 
 /**
  * @summary The factory that returns the `requestAsync` function.
@@ -454,9 +462,6 @@ var handleAbortIfNotSupported = function (signal, response) {
  * utils.getRequestAsync()({ url: 'http://example.com' }).then (response) ->
  * 	console.log(response)
  */
-export function getRequestAsync(fetch) {
-	if (fetch == null) {
-		fetch = normalFetch;
-	}
-	return (options) => requestAsync(fetch, options);
+export function getRequestAsync(fetch: PonyfilledFetch = normalFetch) {
+	return (options: BalenaRequestOptions) => requestAsync(fetch, options);
 }
