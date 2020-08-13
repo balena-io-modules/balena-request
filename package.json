@@ -3,6 +3,7 @@
   "version": "11.1.1",
   "description": "Balena HTTP client",
   "main": "build/request.js",
+  "main": "build/request.d.ts",
   "homepage": "https://github.com/balena-io-modules/balena-request",
   "repository": {
     "type": "git",
@@ -17,8 +18,8 @@
     "test": "tests"
   },
   "scripts": {
-    "lint": "balena-lint -e js --typescript lib",
-    "lint-fix": "balena-lint -e js --typescript --fix lib",
+    "lint": "balena-lint -e js -e ts --typescript lib",
+    "lint-fix": "balena-lint -e js -e ts --typescript --fix lib",
     "pretest": "npm run build",
     "test": "npm run test-node && npm run test-browser",
     "posttest": "npm run lint",
