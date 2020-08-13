@@ -1,8 +1,7 @@
 {
   "name": "balena-request",
-  "version": "11.1.1",
+  "version": "11.2.0",
   "description": "Balena HTTP client",
-  "main": "build/request.js",
   "main": "build/request.d.ts",
   "homepage": "https://github.com/balena-io-modules/balena-request",
   "repository": {
