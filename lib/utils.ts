@@ -261,11 +261,9 @@ const processRequestOptions = function (options: BalenaRequestOptions) {
 		url += (url.indexOf('?') >= 0 ? '&' : '?') + params;
 	}
 
-	let { body, headers } = options;
-	if (headers == null) {
-		headers = {} as Record<string, string>;
-	}
-	if (options.json && body) {
+	let { body } = options;
+	const { headers = {}, json } = options;
+	if (json && body) {
 		body = JSON.stringify(body);
 		headers['Content-Type'] = 'application/json';
 	}
