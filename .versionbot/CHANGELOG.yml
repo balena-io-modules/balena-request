@@ -1,4 +1,15 @@
 - commits:
+    - subject: Update balena-auth from 4.0.0 to 4.1.0
+      hash: a0c18a805b2a492705255b6dbcc8748fbd4f2c5a
+      body: |
+        Update balena-errors from 4.4.0 to 4.7.1
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: josecoelho
+  version: 11.2.0
+  date: 2020-11-12T08:29:09.564Z
+- commits:
     - subject: Stop refreshing the token on absolute urls
       hash: a61c8bb2a7c144748048e41b201f1ee2f7d6e7c7
       body: |
