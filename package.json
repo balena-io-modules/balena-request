@@ -35,7 +35,7 @@
     "@balena/lint": "^5.1.0",
     "@types/progress-stream": "^2.0.0",
     "@types/qs": "^6.9.3",
-    "balena-auth": "^4.0.0",
+    "balena-auth": "^4.1.0",
     "balena-config-karma": "^3.0.0",
     "bluebird": "^3.7.2",
     "coffeescript": "~1.12.7",
@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "@balena/node-web-streams": "^0.2.3",
-    "balena-errors": "^4.4.0",
+    "balena-errors": "^4.7.1",
     "fetch-ponyfill": "^6.1.1",
     "fetch-readablestream": "^0.2.0",
     "progress-stream": "^2.0.0",
