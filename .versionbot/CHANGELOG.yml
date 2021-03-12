@@ -1,4 +1,20 @@
 - commits:
+    - subject: Update fetch-ponyfill to v7
+      hash: 4a560e48b303e842dfb4aee7b681a25d1268451e
+      body: |
+        The only breaking change is dropping support
+        for node v8 but we have already done that in v11.
+      footer:
+        Change-type: minor
+        change-type: minor
+        See: 'https://github.com/qubyte/fetch-ponyfill/blob/main/HISTORY.md#700'
+        see: 'https://github.com/qubyte/fetch-ponyfill/blob/main/HISTORY.md#700'
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+  version: 11.4.0
+  date: 2021-03-12T16:50:40.750Z
+- commits:
     - subject: Switch to the versioned token refresh endpoint
       hash: 1f062bf1833b470a7b02a5299101ad1ffa1a89c2
       body: ''
