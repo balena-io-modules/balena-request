@@ -88,10 +88,10 @@ describe 'Request (token):', ->
 					@utilsShouldUpdateToken.restore()
 					@authIsExpired.restore()
 
-				describe 'given a working /whoami endpoint', ->
+				describe 'given a working /user/v1/refresh-token endpoint', ->
 
 					beforeEach ->
-						mockServer.get('/whoami').thenReply(200, janeDoeFixture.token)
+						mockServer.get('/user/v1/refresh-token').thenReply(200, janeDoeFixture.token)
 
 					describe 'given no base url', ->
 
@@ -133,10 +133,10 @@ describe 'Request (token):', ->
 							authorizationHeader = response.request.headers.Authorization
 							m.chai.expect(authorizationHeader).to.equal("Bearer #{janeDoeFixture.token}")
 
-				describe 'given /whoami returns 401', ->
+				describe 'given /user/v1/refresh-token returns 401', ->
 
 					beforeEach ->
-						mockServer.get('/whoami').thenReply(401, 'Unauthorized')
+						mockServer.get('/user/v1/refresh-token').thenReply(401, 'Unauthorized')
 
 					describe 'given an absolute url', ->
 
@@ -174,10 +174,10 @@ describe 'Request (token):', ->
 							auth.hasKey().then (hasKey) ->
 								m.chai.expect(hasKey).to.be.false
 
-				describe 'given /whoami returns a non 401 status code', ->
+				describe 'given /user/v1/refresh-token returns a non 401 status code', ->
 
 					beforeEach ->
-						mockServer.get('/whoami').thenReply(500)
+						mockServer.get('/user/v1/refresh-token').thenReply(500)
 
 					it 'should be rejected with a request error', ->
 						promise = request.send
@@ -233,11 +233,11 @@ describe 'Request (token):', ->
 
 	describe '.refreshToken()', ->
 
-		describe 'given a working /whoami endpoint', ->
+		describe 'given a working /user/v1/refresh-token endpoint', ->
 
 			beforeEach ->
 				auth.setKey(johnDoeFixture.token)
-				mockServer.get('/whoami').thenReply(200, janeDoeFixture.token)
+				mockServer.get('/user/v1/refresh-token').thenReply(200, janeDoeFixture.token)
 
 			it 'should refresh the token', ->
 				auth.getKey().then (savedToken) ->
