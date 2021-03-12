@@ -1,4 +1,16 @@
 - commits:
+    - subject: Switch to the versioned token refresh endpoint
+      hash: 1f062bf1833b470a7b02a5299101ad1ffa1a89c2
+      body: ''
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+  version: 11.3.0
+  date: 2021-03-12T16:41:20.902Z
+- commits:
     - subject: Prevent token refresh when no base url is provided
       hash: c3b694821ccdfabd36ca27bc689b55295128aea8
       body: |
