@@ -1,4 +1,21 @@
 - commits:
+    - subject: Prevent token refresh when no base url is provided
+      hash: c3b694821ccdfabd36ca27bc689b55295128aea8
+      body: |
+        Otherwise request from the browser could end up
+        on the domain of the current url. For the dashboard
+        this would mean the UI nginx would respond with
+        the page not found page, and that content would
+        have ended up being saved as the token.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+  version: 11.2.1
+  date: 2021-03-12T16:13:27.652Z
+- commits:
     - subject: Update balena-auth from 4.0.0 to 4.1.0
       hash: a0c18a805b2a492705255b6dbcc8748fbd4f2c5a
       body: |
