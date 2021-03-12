@@ -93,6 +93,19 @@ describe 'Request (token):', ->
 					beforeEach ->
 						mockServer.get('/whoami').thenReply(200, janeDoeFixture.token)
 
+					describe 'given no base url', ->
+
+						it 'should not refresh the token', ->
+							auth.getKey().then (savedToken) ->
+								m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
+								return request.send
+									url: mockServer.url + '/foo'
+							.then (response) ->
+								m.chai.expect(response.body).to.equal('bar')
+								return auth.getKey()
+							.then (savedToken) ->
+								m.chai.expect(savedToken).to.equal(johnDoeFixture.token)
+
 					describe 'given a base url', ->
 
 						it 'should refresh the token', ->
