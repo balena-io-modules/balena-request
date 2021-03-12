@@ -449,6 +449,9 @@ export function getRequest({
 		if (auth == null) {
 			throw new Error('Auth module not provided in initializer');
 		}
+		if (!baseUrl) {
+			throw new Error('The baseUrl parameter is required');
+		}
 
 		let response: BalenaRequestResponse<string>;
 		try {

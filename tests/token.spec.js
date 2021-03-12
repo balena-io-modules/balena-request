@@ -297,6 +297,15 @@ describe('Request (token):', function () {
 					.thenReply(200, janeDoeFixture.token);
 			});
 
+			it('should error when the baseUrl is not provided', () =>
+				auth.getKey().then(function (savedToken) {
+					expect(savedToken).to.equal(johnDoeFixture.token);
+					promise = request.refreshToken({});
+					return expect(promise).to.be.rejectedWith(
+						'The baseUrl parameter is required',
+					);
+				}));
+
 			it('should refresh the token', () =>
 				auth.getKey().then(function (savedToken) {
 					expect(savedToken).to.equal(johnDoeFixture.token);
