@@ -1,4 +1,21 @@
 - commits:
+    - subject: Allow more lenient gzip decompression
+      hash: 9c7bc3051b279c9d09ec501a78dbe9f506d65650
+      body: |
+        Be more lenient with decoding compressed responses, since (very rarely)
+        servers send slightly invalid gzip responses that are still accepted
+        by common browsers.
+
+        Always using Z_SYNC_FLUSH is what cURL does.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Kyle Harding <kyle@balena.io>
+        signed-off-by: Kyle Harding <kyle@balena.io>
+      author: Kyle Harding
+  version: 11.4.1
+  date: 2021-08-27T19:10:59.811Z
+- commits:
     - subject: Update fetch-ponyfill to v7
       hash: 4a560e48b303e842dfb4aee7b681a25d1268451e
       body: |

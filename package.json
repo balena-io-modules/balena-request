@@ -1,6 +1,6 @@
 {
   "name": "balena-request",
-  "version": "11.4.0",
+  "version": "11.4.1",
   "description": "Balena HTTP client",
   "main": "build/request.js",
   "homepage": "https://github.com/balena-io-modules/balena-request",
@@ -62,5 +62,8 @@
   },
   "peerDependencies": {
     "balena-auth": "^4.0.0"
+  },
+  "versionist": {
+    "publishedAt": "2021-08-27T19:10:59.876Z"
   }
 }
