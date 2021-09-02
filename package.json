@@ -52,7 +52,7 @@
     "zlib-browserify": "0.0.3"
   },
   "dependencies": {
-    "@balena/node-web-streams": "^0.2.3",
+    "@balena/node-web-streams": "^0.2.4",
     "balena-errors": "^4.7.1",
     "fetch-ponyfill": "^7.1.0",
     "fetch-readablestream": "^0.2.0",
