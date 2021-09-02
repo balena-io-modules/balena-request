@@ -1,4 +1,14 @@
 - commits:
+    - subject: increase node fetch buffer size
+      hash: 8a33bc2be826c087916788f34198153a27240ec5
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Zane Hitchcox
+  version: 11.4.2
+  date: 2021-09-02T22:38:15.274Z
+- commits:
     - subject: Allow more lenient gzip decompression
       hash: 9c7bc3051b279c9d09ec501a78dbe9f506d65650
       body: |
