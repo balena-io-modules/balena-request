@@ -1,4 +1,16 @@
 - commits:
+    - subject: Allow overriding the default zlib flush setting
+      hash: e3bab85ca37f37aac5e3d84caf91c7884655717d
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Kyle Harding <kyle@balena.io>
+        signed-off-by: Kyle Harding <kyle@balena.io>
+      author: Kyle Harding
+  version: 11.4.2
+  date: 2021-09-20T16:46:49.698Z
+- commits:
     - subject: Allow more lenient gzip decompression
       hash: 9c7bc3051b279c9d09ec501a78dbe9f506d65650
       body: |
