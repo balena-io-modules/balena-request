@@ -72,11 +72,19 @@ export interface BalenaRequestPassThroughStream extends Stream.PassThrough {
 }
 
 /**
+ * This callback is displayed as a global member.
+ * @callback estimateStreamCallback
+ * @param {BalenaRequestOptions} options
+ *
+ * @returns {Promise<NodeJS.ReadableStream>} request stream
+ */
+
+/**
  * @summary Make a node request with progress
  * @function
  * @protected
  *
- * @returns {(options) => Promise<NodeJS.ReadableStream>} request stream
+ * @returns {estimateStreamCallback} request stream callback
  *
  * @example
  * progress.estimate(options).then (stream) ->

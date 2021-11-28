@@ -28,7 +28,7 @@
     "build": "npx tsc",
     "prepublish": "require-npm4-to-publish",
     "prepare": "npm run build",
-    "readme": "jsdoc2md --template doc/README.hbs lib/request.js lib/progress.js lib/utils.js > README.md"
+    "readme": "jsdoc2md --template doc/README.hbs build/request.js build/progress.js build/utils.js > README.md"
   },
   "author": "Juan Cruz Viotti <juanchiviotti@gmail.com>",
   "license": "Apache-2.0",

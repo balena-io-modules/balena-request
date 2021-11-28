@@ -43,7 +43,7 @@ export const TOKEN_REFRESH_INTERVAL = 1 * 60 * 60 * 1000; // 1 hour in milliseco
  * This function makes use of a soft user-configurable setting called `tokenRefreshInterval`.
  * That setting doesn't express that the token is "invalid", but represents that it is a good time for the token to be updated *before* it get's outdated.
  *
- * @param {import('balena-auth').default} auth - an instance of `balena-auth`
+ * @param {object} auth - an instance of `balena-auth`
  * @returns {Promise<Boolean>} the token should be updated
  *
  * @example
@@ -73,7 +73,7 @@ export async function shouldRefreshKey(auth: BalenaAuth) {
  * @description
  * This promise becomes undefined if no saved token.
  *
- * @param {import('balena-auth').default} auth - an instance of `balena-auth`
+ * @param {object} auth - an instance of `balena-auth`
  * @returns {Promise<string | undefined>} authorization header
  *
  * @example

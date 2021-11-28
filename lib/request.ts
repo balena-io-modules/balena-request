@@ -14,10 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/**
- * @module request
- */
-
 import type BalenaAuth from 'balena-auth';
 import type * as Stream from 'stream';
 
@@ -83,8 +79,14 @@ export interface RequestFactoryOptions {
 export type BalenaRequest = ReturnType<typeof getRequest>;
 
 /**
+ * @module request
+ */
+
+/**
+ * @summary Creates a new balena-request instance.
+ *
  * @param {object} options
- * @param {import('balena-auth').default} options.auth
+ * @param {object} options.auth
  * @param {boolean} options.debug
  * @param {number} options.retries
  * @param {boolean} options.isBrowser
@@ -95,7 +97,7 @@ export function getRequest({
 	debug = false,
 	retries = 0,
 	isBrowser = false,
-	interceptors = [],
+	interceptors: $interceptors = [],
 }: RequestFactoryOptions) {
 	const requestAsync = utils.getRequestAsync();
 	const requestStream = isBrowser
@@ -378,25 +380,6 @@ export function getRequest({
 	}
 
 	/**
-	 * @summary Array of interceptors
-	 * @type {Interceptor[]}
-	 * @public
-	 *
-	 * @description
-	 * The current array of interceptors to use. Interceptors intercept requests made
-	 * by calls to `.stream()` and `.send()` (some of which are made internally) and
-	 * are executed in the order they appear in this array for requests, and in the
-	 * reverse order for responses.
-	 *
-	 * @example
-	 * request.interceptors.push(
-	 * 	requestError: (error) ->
-	 * 		console.log(error)
-	 * 		throw error
-	 * )
-	 */
-
-	/**
 	 * @typedef Interceptor
 	 * @type {object}
 	 *
@@ -426,6 +409,27 @@ export function getRequest({
 	 */
 
 	/**
+	 * @summary Array of interceptor
+	 * @type {Interceptor[]}
+	 * @public
+	 *
+	 * @description
+	 * The current array of interceptors to use. Interceptors intercept requests made
+	 * by calls to `.stream()` and `.send()` (some of which are made internally) and
+	 * are executed in the order they appear in this array for requests, and in the
+	 * reverse order for responses.
+	 *
+	 * @example
+	 * request.interceptors.push(
+	 * 	requestError: (error) ->
+	 * 		console.log(error)
+	 * 		throw error
+	 * )
+	 */
+	// Shortcut to get the correct jsdoc readme generated
+	const interceptors = $interceptors;
+
+	/**
 	 * @summary Refresh token on user request
 	 * @function
 	 * @public
@@ -442,7 +446,6 @@ export function getRequest({
 	 * request.refreshToken
 	 * 	baseUrl: 'https://api.balena-cloud.com'
 	 */
-
 	async function refreshToken({
 		baseUrl,
 	}: Pick<BalenaRequestOptions, 'baseUrl'>): Promise<string> {

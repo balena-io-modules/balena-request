@@ -53,24 +53,45 @@ var request = require('balena-request')({
 
 
 * [request](#module_request)
-    * _static_
-        * [.interceptors](#module_request.interceptors) : <code>Array.&lt;Interceptor&gt;</code>
-        * [.send(options)](#module_request.send) ⇒ <code>Promise.&lt;Object&gt;</code>
-        * [.stream(options)](#module_request.stream) ⇒ <code>Promise.&lt;Stream&gt;</code>
-        * [.refreshToken()](#module_request.refreshToken) ⇒ <code>String</code>
-    * _inner_
-        * [~Interceptor](#module_request..Interceptor) : <code>object</code>
+    * [~getRequest(options)](#module_request..getRequest)
+        * [~interceptors](#module_request..getRequest..interceptors) : <code>Array.&lt;Interceptor&gt;</code>
+        * [~send(options)](#module_request..getRequest..send) ⇒ <code>Promise.&lt;Object&gt;</code>
+        * [~stream(options)](#module_request..getRequest..stream) ⇒ <code>Promise.&lt;NodeJS.ReadableStream&gt;</code>
+        * [~refreshToken(options)](#module_request..getRequest..refreshToken) ⇒ <code>Promise.&lt;String&gt;</code>
+    * [~Interceptor](#module_request..Interceptor) : <code>object</code>
 
-<a name="module_request.interceptors"></a>
+<a name="module_request..getRequest"></a>
 
-### request.interceptors : <code>Array.&lt;Interceptor&gt;</code>
+### request~getRequest(options)
+**Kind**: inner method of [<code>request</code>](#module_request)  
+**Summary**: Creates a new balena-request instance.  
+
+| Param | Type |
+| --- | --- |
+| options | <code>object</code> | 
+| options.auth | <code>object</code> | 
+| options.debug | <code>boolean</code> | 
+| options.retries | <code>number</code> | 
+| options.isBrowser | <code>boolean</code> | 
+| options.interceptors | <code>array</code> | 
+
+
+* [~getRequest(options)](#module_request..getRequest)
+    * [~interceptors](#module_request..getRequest..interceptors) : <code>Array.&lt;Interceptor&gt;</code>
+    * [~send(options)](#module_request..getRequest..send) ⇒ <code>Promise.&lt;Object&gt;</code>
+    * [~stream(options)](#module_request..getRequest..stream) ⇒ <code>Promise.&lt;NodeJS.ReadableStream&gt;</code>
+    * [~refreshToken(options)](#module_request..getRequest..refreshToken) ⇒ <code>Promise.&lt;String&gt;</code>
+
+<a name="module_request..getRequest..interceptors"></a>
+
+#### getRequest~interceptors : <code>Array.&lt;Interceptor&gt;</code>
 The current array of interceptors to use. Interceptors intercept requests made
 by calls to `.stream()` and `.send()` (some of which are made internally) and
 are executed in the order they appear in this array for requests, and in the
 reverse order for responses.
 
-**Kind**: static property of [<code>request</code>](#module_request)  
-**Summary**: Array of interceptors  
+**Kind**: inner constant of [<code>getRequest</code>](#module_request..getRequest)  
+**Summary**: Array of interceptor  
 **Access**: public  
 **Example**  
 ```js
@@ -80,9 +101,9 @@ request.interceptors.push(
 		throw error
 )
 ```
-<a name="module_request.send"></a>
+<a name="module_request..getRequest..send"></a>
 
-### request.send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
+#### getRequest~send(options) ⇒ <code>Promise.&lt;Object&gt;</code>
 This function automatically handles authorization with balena.
 
 The module scans your environment for a saved session token. Alternatively, you may pass the `apiKey` option. Otherwise, the request is made anonymously.
@@ -90,7 +111,7 @@ The module scans your environment for a saved session token. Alternatively, you 
 Requests can be aborted using an AbortController (with a polyfill like https://www.npmjs.com/package/abortcontroller-polyfill
 if necessary). This is not well supported everywhere yet, is on a best-efforts basis, and should not be relied upon.
 
-**Kind**: static method of [<code>request</code>](#module_request)  
+**Kind**: inner method of [<code>getRequest</code>](#module_request..getRequest)  
 **Summary**: Perform an HTTP request to balena  
 **Returns**: <code>Promise.&lt;Object&gt;</code> - response  
 **Access**: public  
@@ -104,6 +125,7 @@ if necessary). This is not well supported everywhere yet, is on a best-efforts b
 | [options.responseFormat] | <code>String</code> |  | explicit expected response format, can be one of 'blob', 'json', 'text', 'none'. Defaults to sniffing the content-type |
 | [options.signal] | <code>AbortSignal</code> |  | a signal from an AbortController |
 | [options.body] | <code>\*</code> |  | body |
+| [options.timeout] | <code>number</code> |  | body |
 
 **Example**  
 ```js
@@ -123,9 +145,9 @@ request.send
 		hello: 'world'
 .get('body')
 ```
-<a name="module_request.stream"></a>
+<a name="module_request..getRequest..stream"></a>
 
-### request.stream(options) ⇒ <code>Promise.&lt;Stream&gt;</code>
+#### getRequest~stream(options) ⇒ <code>Promise.&lt;NodeJS.ReadableStream&gt;</code>
 This function emits a `progress` event, passing an object with the following properties:
 
 - `Number percent`: from 0 to 100.
@@ -140,9 +162,9 @@ The stream may also contain the following custom properties:
 See `request.send()` for an explanation on how this function handles authentication, and details
 on how to abort requests.
 
-**Kind**: static method of [<code>request</code>](#module_request)  
+**Kind**: inner method of [<code>getRequest</code>](#module_request..getRequest)  
 **Summary**: Stream an HTTP response from balena.  
-**Returns**: <code>Promise.&lt;Stream&gt;</code> - response  
+**Returns**: <code>Promise.&lt;NodeJS.ReadableStream&gt;</code> - response  
 **Access**: public  
 
 | Param | Type | Default | Description |
@@ -164,19 +186,20 @@ request.stream
 
 	stream.pipe(fs.createWriteStream('/opt/download'))
 ```
-<a name="module_request.refreshToken"></a>
+<a name="module_request..getRequest..refreshToken"></a>
 
-### request.refreshToken() ⇒ <code>String</code>
+#### getRequest~refreshToken(options) ⇒ <code>Promise.&lt;String&gt;</code>
 This function automatically refreshes the authentication token.
 
-**Kind**: static method of [<code>request</code>](#module_request)  
+**Kind**: inner method of [<code>getRequest</code>](#module_request..getRequest)  
 **Summary**: Refresh token on user request  
-**Returns**: <code>String</code> - token - new token  
+**Returns**: <code>Promise.&lt;String&gt;</code> - token - new token  
 **Access**: public  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| options.url | <code>String</code> | relative url |
+| options | <code>object</code> |  |
+| options.baseUrl | <code>String</code> | relative url |
 
 **Example**  
 ```js
