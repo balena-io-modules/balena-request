@@ -1,4 +1,32 @@
 - commits:
+    - subject: Convert tests to JavaScript and drop coffeescript
+      hash: 0098dcd5be16c1eebbe722fd29d4a7597a8411bb
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+    - subject: Fix the jsdoc generation
+      hash: a8779e0bf665f29493afa16aea41a140b02e133d
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+    - subject: Convert to typescript and publish typings
+      hash: 44106facfa8b770e786c04bdb01b1071fa737b45
+      body: ''
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+  version: 11.5.0
+  date: 2021-11-28T13:07:15.557Z
+- commits:
     - subject: Allow overriding the default zlib flush setting
       hash: e3bab85ca37f37aac5e3d84caf91c7884655717d
       body: ''
