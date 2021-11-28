@@ -181,7 +181,7 @@ export function getRequest({
 		interceptRequestOrError(Promise.reject(requestError));
 
 	const interceptResponse = <
-		T extends BalenaRequestResponse | BalenaRequestPassThroughStream
+		T extends BalenaRequestResponse | BalenaRequestPassThroughStream,
 	>(
 		response: T,
 	): Promise<T> => interceptResponseOrError(Promise.resolve(response));

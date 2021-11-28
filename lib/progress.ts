@@ -42,7 +42,8 @@ const getProgressStream = function (
 	total: number | undefined,
 	onState?: (chunk: any) => void,
 ) {
-	const progress = require('progress-stream') as typeof import('progress-stream');
+	const progress =
+		require('progress-stream') as typeof import('progress-stream');
 	const progressStream = progress({
 		time: 500,
 		length: total,
@@ -158,7 +159,7 @@ export function estimate(
 			// servers send slightly invalid gzip responses that are still accepted
 			// by common browsers.
 			// Always using Z_SYNC_FLUSH is what cURL does.
-			var zlibOptions = {
+			let zlibOptions = {
 				flush: zlib.constants.Z_SYNC_FLUSH,
 				finishFlush: zlib.constants.Z_SYNC_FLUSH,
 			};
@@ -168,8 +169,14 @@ export function estimate(
 			// https://github.com/nodejs/node/blob/master/doc/api/zlib.md#zlib-constants
 			if (process.env.ZLIB_FLUSH && process.env.ZLIB_FLUSH in zlib.constants) {
 				zlibOptions = {
-					flush: zlib.constants[process.env.ZLIB_FLUSH as keyof typeof zlib.constants],
-					finishFlush: zlib.constants[process.env.ZLIB_FLUSH as keyof typeof zlib.constants],
+					flush:
+						zlib.constants[
+							process.env.ZLIB_FLUSH as keyof typeof zlib.constants
+						],
+					finishFlush:
+						zlib.constants[
+							process.env.ZLIB_FLUSH as keyof typeof zlib.constants
+						],
 				};
 			}
 

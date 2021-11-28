@@ -1,168 +1,200 @@
-Bluebird = require('bluebird')
-m = require('mochainon')
-zlib = require('zlib-browserify')
-PassThrough = require('stream').PassThrough
-rindle = require('rindle')
+const Bluebird = require('bluebird');
+const m = require('mochainon');
+const zlib = require('zlib-browserify');
+const { PassThrough } = require('stream');
+const rindle = require('rindle');
 
-gzip = Bluebird.promisify(zlib.gzip)
+const gzip = Bluebird.promisify(zlib.gzip);
 
-mockServer = require('mockttp').getLocal()
+const mockServer = require('mockttp').getLocal();
 
-{ auth, request, IS_BROWSER } = require('./setup')()
+const { auth, request, IS_BROWSER } = require('./setup')();
 
-describe 'Request (stream):', ->
+const { expect } = m.chai;
 
-	beforeEach ->
-		Promise.all [
-			auth.removeKey()
-			mockServer.start()
-		]
+describe('Request (stream):', function () {
+	beforeEach(() => Promise.all([auth.removeKey(), mockServer.start()]));
 
-	afterEach ->
-		mockServer.stop()
+	afterEach(() => mockServer.stop());
 
-	describe 'given a simple endpoint that responds with an error', ->
+	describe('given a simple endpoint that responds with an error', function () {
+		beforeEach(() =>
+			mockServer.get('/foo').thenReply(400, 'Something happened'),
+		);
 
-		beforeEach ->
-			mockServer.get('/foo').thenReply(400, 'Something happened')
+		it('should reject with the error message', function () {
+			const promise = request.stream({
+				method: 'GET',
+				baseUrl: mockServer.url,
+				url: '/foo',
+			});
 
-		it 'should reject with the error message', ->
-			promise = request.stream
-				method: 'GET'
-				baseUrl: mockServer.url
-				url: '/foo'
+			return expect(promise).to.be.rejectedWith('Something happened');
+		});
 
-			m.chai.expect(promise).to.be.rejectedWith('Something happened')
+		it('should have the status code in the error object', () =>
+			expect(
+				request.stream({
+					method: 'GET',
+					baseUrl: mockServer.url,
+					url: '/foo',
+				}),
+			).to.be.rejected.then((error) => expect(error.statusCode).to.equal(400)));
+	});
 
-		it 'should have the status code in the error object', ->
-			m.chai.expect request.stream
-				method: 'GET'
-				baseUrl: mockServer.url
-				url: '/foo'
-			.to.be.rejected
-			.then (error) ->
-				m.chai.expect(error.statusCode).to.equal(400)
+	describe('given a simple endpoint that responds with a string', function () {
+		beforeEach(() =>
+			mockServer.get('/foo').thenReply(200, 'Lorem ipsum dolor sit amet'),
+		);
 
-	describe 'given a simple endpoint that responds with a string', ->
+		it('should be able to pipe the response', () =>
+			request
+				.stream({
+					method: 'GET',
+					baseUrl: mockServer.url,
+					url: '/foo',
+				})
+				.then(rindle.extract)
+				.then((data) => expect(data).to.equal('Lorem ipsum dolor sit amet')));
 
-		beforeEach ->
-			mockServer.get('/foo').thenReply(200, 'Lorem ipsum dolor sit amet')
+		it('should be able to pipe the response after a delay', () =>
+			request
+				.stream({
+					method: 'GET',
+					baseUrl: mockServer.url,
+					url: '/foo',
+				})
+				.then((stream) => Bluebird.delay(200).return(stream))
+				.then(function (stream) {
+					const pass = new PassThrough();
+					stream.pipe(pass);
 
-		it 'should be able to pipe the response', ->
-			request.stream
-				method: 'GET'
-				baseUrl: mockServer.url
-				url: '/foo'
-			.then(rindle.extract).then (data) ->
-				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
+					return rindle
+						.extract(pass)
+						.then((data) =>
+							expect(data).to.equal('Lorem ipsum dolor sit amet'),
+						);
+				}));
+	});
 
-		it 'should be able to pipe the response after a delay', ->
-			request.stream
-				method: 'GET'
-				baseUrl: mockServer.url
-				url: '/foo'
-			.then (stream) ->
-				return Bluebird.delay(200).return(stream)
-			.then (stream) ->
-				pass = new PassThrough()
-				stream.pipe(pass)
+	describe('given multiple endpoints', function () {
+		beforeEach(() =>
+			['get', 'post', 'put', 'patch', 'delete'].forEach((method) =>
+				mockServer[method]('/foo').thenReply(200, method.toUpperCase()),
+			),
+		);
 
-				rindle.extract(pass).then (data) ->
-					m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
+		describe('given no method option', () =>
+			it('should default to GET', () =>
+				request
+					.stream({
+						baseUrl: mockServer.url,
+						url: '/foo',
+					})
+					.then(rindle.extract)
+					.then((data) => expect(data).to.equal('GET'))));
+	});
 
-	describe 'given multiple endpoints', ->
+	describe('given a gzip endpoint with an x-transfer-length header', function () {
+		beforeEach(function () {
+			const message = 'Lorem ipsum dolor sit amet';
+			return gzip(message).then((compressedMessage) =>
+				mockServer.get('/foo').thenReply(200, compressedMessage, {
+					'Content-Type': 'text/plain',
+					'X-Transfer-Length': '' + compressedMessage.length,
+					'Content-Encoding': 'gzip',
+				}),
+			);
+		});
 
-		beforeEach ->
-			['get', 'post', 'put', 'patch', 'delete'].forEach (method) ->
-				mockServer[method]('/foo').thenReply(200, method.toUpperCase())
+		it('should correctly uncompress the body', () =>
+			request
+				.stream({
+					baseUrl: mockServer.url,
+					url: '/foo',
+				})
+				.then((stream) => rindle.extract(stream))
+				.then(function (data) {
+					expect(data).to.equal('Lorem ipsum dolor sit amet');
+					return expect(data.length).to.equal(26);
+				}));
 
-		describe 'given no method option', ->
+		it('should set no .length property', () =>
+			request
+				.stream({
+					baseUrl: mockServer.url,
+					url: '/foo',
+				})
+				.then((stream) => expect(stream.length).to.be.undefined));
+	});
 
-			it 'should default to GET', ->
-				request.stream
-					baseUrl: mockServer.url
-					url: '/foo'
-				.then(rindle.extract).then (data) ->
-					m.chai.expect(data).to.equal('GET')
+	describe('given an gzip endpoint with a content-length header', function () {
+		beforeEach(function () {
+			const message = 'Lorem ipsum dolor sit amet';
+			return gzip(message).then((compressedMessage) =>
+				mockServer.get('/foo').thenReply(200, compressedMessage, {
+					'Content-Type': 'text/plain',
+					'Content-Length': '' + compressedMessage.length,
+					'Content-Encoding': 'gzip',
+				}),
+			);
+		});
 
-	describe 'given a gzip endpoint with an x-transfer-length header', ->
+		it('should correctly uncompress the body', () =>
+			request
+				.stream({
+					baseUrl: mockServer.url,
+					url: '/foo',
+				})
+				.then((stream) => rindle.extract(stream))
+				.then(function (data) {
+					expect(data).to.equal('Lorem ipsum dolor sit amet');
+					return expect(data.length).to.equal(26);
+				}));
+	});
 
-		beforeEach ->
-			message = 'Lorem ipsum dolor sit amet'
-			gzip(message).then (compressedMessage) ->
-				mockServer.get('/foo').thenReply 200, compressedMessage,
-					'Content-Type': 'text/plain'
-					'X-Transfer-Length': '' + compressedMessage.length
-					'Content-Encoding': 'gzip'
+	describe('given an gzip endpoint with a content-length and x-transfer-length headers', function () {
+		beforeEach(function () {
+			const message = 'Lorem ipsum dolor sit amet';
+			return gzip(message).then((compressedMessage) =>
+				mockServer.get('/foo').thenReply(200, compressedMessage, {
+					'Content-Type': 'text/plain',
+					'X-Transfer-Length': '' + compressedMessage.length,
+					'Content-Length': '' + compressedMessage.length,
+					'Content-Encoding': 'gzip',
+				}),
+			);
+		});
 
-		it 'should correctly uncompress the body', ->
-			request.stream
-				baseUrl: mockServer.url
-				url: '/foo'
-			.then (stream) ->
-				return rindle.extract(stream)
-			.then (data) ->
-				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
-				m.chai.expect(data.length).to.equal(26)
+		it('should correctly uncompress the body', () =>
+			request
+				.stream({
+					baseUrl: mockServer.url,
+					url: '/foo',
+				})
+				.then((stream) => rindle.extract(stream))
+				.then(function (data) {
+					expect(data).to.equal('Lorem ipsum dolor sit amet');
+					return expect(data.length).to.equal(26);
+				}));
+	});
 
-		it 'should set no .length property', ->
-			request.stream
-				baseUrl: mockServer.url
-				url: '/foo'
-			.then (stream) ->
-				m.chai.expect(stream.length).to.be.undefined
+	describe('given an endpoint with a content-type header', function () {
+		beforeEach(function () {
+			const message = 'Lorem ipsum dolor sit amet';
+			return mockServer.get('/foo').thenReply(200, message, {
+				'Content-Type': 'application/octet-stream',
+			});
+		});
 
-	describe 'given an gzip endpoint with a content-length header', ->
-
-		beforeEach ->
-			message = 'Lorem ipsum dolor sit amet'
-			gzip(message).then (compressedMessage) ->
-				mockServer.get('/foo').thenReply 200, compressedMessage,
-					'Content-Type': 'text/plain'
-					'Content-Length': '' + compressedMessage.length
-					'Content-Encoding': 'gzip'
-
-		it 'should correctly uncompress the body', ->
-			request.stream
-				baseUrl: mockServer.url
-				url: '/foo'
-			.then (stream) ->
-				return rindle.extract(stream)
-			.then (data) ->
-				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
-				m.chai.expect(data.length).to.equal(26)
-
-	describe 'given an gzip endpoint with a content-length and x-transfer-length headers', ->
-
-		beforeEach ->
-			message = 'Lorem ipsum dolor sit amet'
-			gzip(message).then (compressedMessage) ->
-				mockServer.get('/foo').thenReply 200, compressedMessage,
-					'Content-Type': 'text/plain'
-					'X-Transfer-Length': '' + compressedMessage.length
-					'Content-Length': '' + compressedMessage.length
-					'Content-Encoding': 'gzip'
-
-		it 'should correctly uncompress the body', ->
-			request.stream
-				baseUrl: mockServer.url
-				url: '/foo'
-			.then (stream) ->
-				return rindle.extract(stream)
-			.then (data) ->
-				m.chai.expect(data).to.equal('Lorem ipsum dolor sit amet')
-				m.chai.expect(data.length).to.equal(26)
-
-	describe 'given an endpoint with a content-type header', ->
-
-		beforeEach ->
-			message = 'Lorem ipsum dolor sit amet'
-			mockServer.get('/foo').thenReply 200, message,
-				'Content-Type': 'application/octet-stream'
-
-		it 'should become a stream with a mime property', ->
-			request.stream
-				baseUrl: mockServer.url
-				url: '/foo'
-			.then (stream) ->
-				m.chai.expect(stream.mime).to.equal('application/octet-stream')
+		it('should become a stream with a mime property', () =>
+			request
+				.stream({
+					baseUrl: mockServer.url,
+					url: '/foo',
+				})
+				.then((stream) =>
+					expect(stream.mime).to.equal('application/octet-stream'),
+				));
+	});
+});

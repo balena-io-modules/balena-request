@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const {
-	fetch: normalFetch,
-	Headers: HeadersPonyfill,
-} = (require('fetch-ponyfill') as typeof import('fetch-ponyfill'))({ Promise });
+const { fetch: normalFetch, Headers: HeadersPonyfill } = (
+	require('fetch-ponyfill') as typeof import('fetch-ponyfill')
+)({ Promise });
 
 import * as urlLib from 'url';
 import * as qs from 'qs';

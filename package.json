@@ -18,12 +18,12 @@
     "test": "tests"
   },
   "scripts": {
-    "lint": "balena-lint -e ts --typescript lib",
-    "lint-fix": "balena-lint -e ts --typescript --fix lib",
+    "lint": "balena-lint -e ts --typescript -e js lib tests",
+    "lint-fix": "balena-lint -e ts --typescript -e js --fix lib tests",
     "pretest": "npm run build",
     "test": "npm run test-node && npm run test-browser",
     "posttest": "npm run lint",
-    "test-node": "mocha -r coffeescript/register tests/**/*.spec.coffee",
+    "test-node": "mocha --reporter spec tests/**/*.spec.js",
     "test-browser": "mockttp -c karma start",
     "build": "npx tsc",
     "prepublish": "require-npm4-to-publish",
@@ -39,7 +39,6 @@
     "balena-auth": "^4.1.0",
     "balena-config-karma": "^3.0.0",
     "bluebird": "^3.7.2",
-    "coffeescript": "~1.12.7",
     "jsdoc-to-markdown": "^6.0.1",
     "karma": "^3.1.4",
     "mocha": "^3.5.3",
