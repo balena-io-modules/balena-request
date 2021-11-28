@@ -3,6 +3,7 @@
   "version": "11.4.2",
   "description": "Balena HTTP client",
   "main": "build/request.js",
+  "types": "build/request.d.ts",
   "homepage": "https://github.com/balena-io-modules/balena-request",
   "repository": {
     "type": "git",
@@ -17,17 +18,17 @@
     "test": "tests"
   },
   "scripts": {
-    "lint": "balena-lint -e js --typescript lib",
-    "lint-fix": "balena-lint -e js --typescript --fix lib",
+    "lint": "balena-lint -e ts --typescript -e js lib tests",
+    "lint-fix": "balena-lint -e ts --typescript -e js --fix lib tests",
     "pretest": "npm run build",
     "test": "npm run test-node && npm run test-browser",
     "posttest": "npm run lint",
-    "test-node": "mocha -r coffeescript/register tests/**/*.spec.coffee",
+    "test-node": "mocha --reporter spec tests/**/*.spec.js",
     "test-browser": "mockttp -c karma start",
     "build": "npx tsc",
     "prepublish": "require-npm4-to-publish",
     "prepare": "npm run build",
-    "readme": "jsdoc2md --template doc/README.hbs lib/request.js lib/progress.js lib/utils.js > README.md"
+    "readme": "jsdoc2md --template doc/README.hbs build/request.js build/progress.js build/utils.js > README.md"
   },
   "author": "Juan Cruz Viotti <juanchiviotti@gmail.com>",
   "license": "Apache-2.0",
@@ -38,7 +39,6 @@
     "balena-auth": "^4.1.0",
     "balena-config-karma": "^3.0.0",
     "bluebird": "^3.7.2",
-    "coffeescript": "~1.12.7",
     "jsdoc-to-markdown": "^6.0.1",
     "karma": "^3.1.4",
     "mocha": "^3.5.3",
