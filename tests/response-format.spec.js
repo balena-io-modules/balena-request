@@ -1,12 +1,11 @@
 const Bluebird = require('bluebird');
-const m = require('mochainon');
+const { expect } = require('chai');
+const sinon = require('sinon');
 const errors = require('balena-errors');
 
 const mockServer = require('mockttp').getLocal();
 
 const { auth, request, IS_BROWSER } = require('./setup')();
-
-const { expect } = m.chai;
 
 const RESPONSE_BODY = { from: 'foobar' };
 

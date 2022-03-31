@@ -17,6 +17,9 @@ const auth = new BalenaAuth({
 auth.removeKey();
 
 const { getRequest } = require('../build/request');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
 
 const getCustomRequest = function (opts) {
 	opts = Object.assign({}, { auth, debug: false, isBrowser: IS_BROWSER }, opts);

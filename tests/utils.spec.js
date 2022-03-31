@@ -1,6 +1,7 @@
 const ReadableStream = require('stream').Readable;
 const { Headers } = require('fetch-ponyfill')({ Promise });
-const m = require('mochainon');
+const { expect } = require('chai');
+const sinon = require('sinon');
 const johnDoeFixture = require('./tokens.json').johndoe;
 const utils = require('../build/utils');
 
@@ -8,15 +9,13 @@ const { TokenType } = require('balena-auth/build/token');
 
 const { auth } = require('./setup')();
 
-const { expect } = m.chai;
-
 describe('Utils:', function () {
 	describe('.shouldRefreshKey()', function () {
 		describe('given an API key ', function () {
 			beforeEach(function () {
-				this.tokenHasKeyStub = m.sinon.stub(auth, 'hasKey');
+				this.tokenHasKeyStub = sinon.stub(auth, 'hasKey');
 				this.tokenHasKeyStub.returns(Promise.resolve(true));
-				this.tokenGetTypeStub = m.sinon.stub(auth, 'getType');
+				this.tokenGetTypeStub = sinon.stub(auth, 'getType');
 				return this.tokenGetTypeStub.returns(Promise.resolve('APIKey'));
 			});
 
@@ -31,13 +30,13 @@ describe('Utils:', function () {
 
 		describe('given the token is older than the specified validity time', function () {
 			beforeEach(function () {
-				this.tokenGetAgeStub = m.sinon.stub(auth, 'getAge');
+				this.tokenGetAgeStub = sinon.stub(auth, 'getAge');
 				this.tokenGetAgeStub.returns(
 					Promise.resolve(utils.TOKEN_REFRESH_INTERVAL + 1),
 				);
-				this.tokenHasKeyStub = m.sinon.stub(auth, 'hasKey');
+				this.tokenHasKeyStub = sinon.stub(auth, 'hasKey');
 				this.tokenHasKeyStub.returns(Promise.resolve(true));
-				this.tokenGetTypeStub = m.sinon.stub(auth, 'getType');
+				this.tokenGetTypeStub = sinon.stub(auth, 'getType');
 				return this.tokenGetTypeStub.returns(Promise.resolve(TokenType.JWT));
 			});
 
@@ -53,13 +52,13 @@ describe('Utils:', function () {
 
 		describe('given the token is newer than the specified validity time', function () {
 			beforeEach(function () {
-				this.tokenGetAgeStub = m.sinon.stub(auth, 'getAge');
+				this.tokenGetAgeStub = sinon.stub(auth, 'getAge');
 				this.tokenGetAgeStub.returns(
 					Promise.resolve(utils.TOKEN_REFRESH_INTERVAL - 1),
 				);
-				this.tokenHasKeyStub = m.sinon.stub(auth, 'hasKey');
+				this.tokenHasKeyStub = sinon.stub(auth, 'hasKey');
 				this.tokenHasKeyStub.returns(Promise.resolve(true));
-				this.tokenGetTypeStub = m.sinon.stub(auth, 'getType');
+				this.tokenGetTypeStub = sinon.stub(auth, 'getType');
 				return this.tokenGetTypeStub.returns(Promise.resolve(TokenType.JWT));
 			});
 
@@ -75,13 +74,13 @@ describe('Utils:', function () {
 
 		describe('given the token is equal to the specified validity time', function () {
 			beforeEach(function () {
-				this.tokenGetAgeStub = m.sinon.stub(auth, 'getAge');
+				this.tokenGetAgeStub = sinon.stub(auth, 'getAge');
 				this.tokenGetAgeStub.returns(
 					Promise.resolve(utils.TOKEN_REFRESH_INTERVAL),
 				);
-				this.tokenHasKeyStub = m.sinon.stub(auth, 'hasKey');
+				this.tokenHasKeyStub = sinon.stub(auth, 'hasKey');
 				this.tokenHasKeyStub.returns(Promise.resolve(true));
-				this.tokenGetTypeStub = m.sinon.stub(auth, 'getType');
+				this.tokenGetTypeStub = sinon.stub(auth, 'getType');
 				return this.tokenGetTypeStub.returns(Promise.resolve(TokenType.JWT));
 			});
 
@@ -97,7 +96,7 @@ describe('Utils:', function () {
 
 		describe('given no token', function () {
 			beforeEach(function () {
-				this.tokenHasKeyStub = m.sinon.stub(auth, 'hasKey');
+				this.tokenHasKeyStub = sinon.stub(auth, 'hasKey');
 				return this.tokenHasKeyStub.returns(Promise.resolve(false));
 			});
 

@@ -1,13 +1,12 @@
-const m = require('mochainon');
+const { expect } = require('chai');
 const rindle = require('rindle');
+const sinon = require('sinon');
 const johnDoeFixture = require('./tokens.json').johndoe;
 const utils = require('../build/utils');
 
 const mockServer = require('mockttp').getLocal();
 
 const { auth, request } = require('./setup')();
-
-const { expect } = m.chai;
 
 describe('Request (api key):', function () {
 	this.timeout(10000);
@@ -18,7 +17,7 @@ describe('Request (api key):', function () {
 
 	describe('given the token is always fresh', function () {
 		beforeEach(function () {
-			this.utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldRefreshKey');
+			this.utilsShouldUpdateToken = sinon.stub(utils, 'shouldRefreshKey');
 			return this.utilsShouldUpdateToken.returns(Promise.resolve(false));
 		});
 

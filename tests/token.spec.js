@@ -1,4 +1,5 @@
-const m = require('mochainon');
+const { expect } = require('chai');
+const sinon = require('sinon');
 const errors = require('balena-errors');
 const rindle = require('rindle');
 const tokens = require('./tokens.json');
@@ -10,8 +11,6 @@ const utils = require('../build/utils');
 const mockServer = require('mockttp').getLocal();
 
 const { auth, request } = require('./setup')();
-
-const { expect } = m.chai;
 
 describe('Request (token):', function () {
 	this.timeout(10000);
@@ -26,7 +25,7 @@ describe('Request (token):', function () {
 
 			describe('given the token is always fresh', function () {
 				beforeEach(function () {
-					this.utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldRefreshKey');
+					this.utilsShouldUpdateToken = sinon.stub(utils, 'shouldRefreshKey');
 					return this.utilsShouldUpdateToken.returns(Promise.resolve(false));
 				});
 
@@ -81,10 +80,10 @@ describe('Request (token):', function () {
 
 			describe('given the token needs to be updated', function () {
 				beforeEach(function () {
-					this.utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldRefreshKey');
+					this.utilsShouldUpdateToken = sinon.stub(utils, 'shouldRefreshKey');
 					this.utilsShouldUpdateToken.returns(Promise.resolve(true));
 
-					this.authIsExpired = m.sinon.stub(auth, 'isExpired');
+					this.authIsExpired = sinon.stub(auth, 'isExpired');
 					this.authIsExpired.returns(Promise.resolve(false));
 
 					return auth.setKey(johnDoeFixture.token);
@@ -242,7 +241,7 @@ describe('Request (token):', function () {
 
 			describe('given the token is always fresh', function () {
 				beforeEach(function () {
-					this.utilsShouldUpdateToken = m.sinon.stub(utils, 'shouldRefreshKey');
+					this.utilsShouldUpdateToken = sinon.stub(utils, 'shouldRefreshKey');
 					return this.utilsShouldUpdateToken.returns(Promise.resolve(false));
 				});
 

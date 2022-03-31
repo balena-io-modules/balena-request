@@ -1,11 +1,10 @@
 const Bluebird = require('bluebird');
-const m = require('mochainon');
+const { expect } = require('chai');
+const sinon = require('sinon');
 
 const mockServer = require('mockttp').getLocal();
 
 const { auth, request, getCustomRequest, IS_BROWSER } = require('./setup')();
-
-const { expect } = m.chai;
 
 // Grab setTimeout before we replace it with a fake later, so
 // we can still do real waiting in the tests themselves
@@ -272,7 +271,7 @@ describe('Request:', function () {
 
 		describe('given an endpoint that will time out', function () {
 			beforeEach(function () {
-				this.clock = m.sinon.useFakeTimers();
+				this.clock = sinon.useFakeTimers();
 				return mockServer.get('/infinite-wait').thenTimeout();
 			});
 
