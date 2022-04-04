@@ -1,14 +1,12 @@
+const { expect } = require('chai');
 const rindle = require('rindle');
+const sinon = require('sinon');
 const Bluebird = require('bluebird');
-const m = require('mochainon');
-
 const mockServer = require('mockttp').getLocal();
 
 const utils = require('../build/utils');
 
 const { auth, request } = require('./setup')();
-
-const { expect } = m.chai;
 
 describe('An interceptor', function () {
 	this.timeout(10000);
@@ -116,9 +114,9 @@ describe('An interceptor', function () {
 						url: mockServer.urlFor('/changed'),
 					});
 				},
-				requestError: m.sinon.mock(),
+				requestError: sinon.mock(),
 			};
-			request.interceptors[1] = { requestError: m.sinon.mock() };
+			request.interceptors[1] = { requestError: sinon.mock() };
 
 			return request
 				.send({
@@ -137,11 +135,11 @@ describe('An interceptor', function () {
 
 		it('should call requestError only in the subsequent hook, if a previous hook fails', function () {
 			request.interceptors[0] = {
-				request: m.sinon.mock().throws(new Error('blocked')),
-				requestError: m.sinon.mock(),
+				request: sinon.mock().throws(new Error('blocked')),
+				requestError: sinon.mock(),
 			};
 			request.interceptors[1] = {
-				requestError: m.sinon.mock().throws(new Error('error overridden')),
+				requestError: sinon.mock().throws(new Error('error overridden')),
 			};
 
 			return expect(request.send({ url: mockServer.url })).to.be.rejected.then(
@@ -161,7 +159,7 @@ describe('An interceptor', function () {
 
 		describe('with an expired token', function () {
 			beforeEach(function () {
-				return (this.utilsShouldUpdateToken = m.sinon
+				return (this.utilsShouldUpdateToken = sinon
 					.stub(utils, 'shouldRefreshKey')
 					.returns(true));
 			});
@@ -173,7 +171,7 @@ describe('An interceptor', function () {
 			describe('when using a baseUrl', function () {
 				it('should call requestError if the token is expired', function () {
 					request.interceptors[0] = {
-						requestError: m.sinon
+						requestError: sinon
 							.mock()
 							.throws(new Error('intercepted auth failure')),
 					};
@@ -188,7 +186,7 @@ describe('An interceptor', function () {
 
 				it('should call requestError if the token is expired for stream()', function () {
 					request.interceptors[0] = {
-						requestError: m.sinon
+						requestError: sinon
 							.mock()
 							.throws(new Error('intercepted auth failure')),
 					};
@@ -205,7 +203,7 @@ describe('An interceptor', function () {
 			describe('when using an absolute url', function () {
 				it('should call requestError if the token is expired', function () {
 					request.interceptors[0] = {
-						requestError: m.sinon
+						requestError: sinon
 							.mock()
 							.throws(new Error('intercepted auth failure')),
 					};
@@ -219,7 +217,7 @@ describe('An interceptor', function () {
 
 				it('should call requestError if the token is expired for stream()', function () {
 					request.interceptors[0] = {
-						requestError: m.sinon
+						requestError: sinon
 							.mock()
 							.throws(new Error('intercepted auth failure')),
 					};
@@ -308,7 +306,7 @@ describe('An interceptor', function () {
 
 	describe('with a responseError hook', function () {
 		it('should not call responseError if there are no errors', function () {
-			request.interceptors[0] = { responseError: m.sinon.mock() };
+			request.interceptors[0] = { responseError: sinon.mock() };
 
 			return request
 				.send({
@@ -329,7 +327,7 @@ describe('An interceptor', function () {
 				.thenReply(500)
 				.then(function () {
 					request.interceptors[0] = {
-						responseError: m.sinon.mock().throws(new Error('caught error')),
+						responseError: sinon.mock().throws(new Error('caught error')),
 					};
 
 					const promise = request.send({
@@ -345,9 +343,7 @@ describe('An interceptor', function () {
 				.thenReply(401)
 				.then(function () {
 					request.interceptors[0] = {
-						responseError: m.sinon
-							.mock()
-							.throws(new Error('caught auth error')),
+						responseError: sinon.mock().throws(new Error('caught auth error')),
 					};
 
 					const promise = request.send({
@@ -433,7 +429,7 @@ describe('An interceptor', function () {
 				.thenReply(500)
 				.then(function () {
 					request.interceptors[0] = {
-						responseError: m.sinon.mock().throws(new Error('caught error')),
+						responseError: sinon.mock().throws(new Error('caught error')),
 					};
 
 					const promise = request.stream({

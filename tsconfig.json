@@ -11,10 +11,6 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "moduleResolution": "node",
-        "typeRoots": [
-            "node_modules/@types",
-            "node_modules/@resin.io"
-        ],
         "allowJs": true,
         "checkJs": true,
         "importHelpers": true

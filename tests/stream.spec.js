@@ -1,5 +1,6 @@
 const Bluebird = require('bluebird');
-const m = require('mochainon');
+const { expect } = require('chai');
+const sinon = require('sinon');
 const zlib = require('zlib-browserify');
 const { PassThrough } = require('stream');
 const rindle = require('rindle');
@@ -9,8 +10,6 @@ const gzip = Bluebird.promisify(zlib.gzip);
 const mockServer = require('mockttp').getLocal();
 
 const { auth, request, IS_BROWSER } = require('./setup')();
-
-const { expect } = m.chai;
 
 describe('Request (stream):', function () {
 	beforeEach(() => Promise.all([auth.removeKey(), mockServer.start()]));
