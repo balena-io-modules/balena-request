@@ -1,4 +1,17 @@
 - commits:
+    - subject: Drop circle.yml
+      hash: d4fdd033595829116f90813ee2b65b5a3dd38df1
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+  version: 11.5.2
+  title: "'Drop circle.yml'"
+  date: 2022-04-04T13:14:27.546Z
+- commits:
     - subject: Drop mochainon & bump karma
       hash: c26d97fcb58971b2139c726306b92fd7593e1726
       body: ""
