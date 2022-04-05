@@ -118,6 +118,15 @@ export function getErrorMessageFromResponse(response: BalenaRequestResponse) {
 		return errorText;
 	}
 
+	if (response.body != null && typeof response.body === 'object') {
+		const bodyMessageProp = ['message', 'error'].find(
+			(prop) => typeof response.body[prop] === 'string',
+		);
+		if (bodyMessageProp != null) {
+			response.body.message = response.body[bodyMessageProp];
+		}
+	}
+
 	return response.body;
 }
 
