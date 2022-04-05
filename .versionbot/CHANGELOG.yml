@@ -1,4 +1,17 @@
 - commits:
+    - subject: Use response error as response message if there is one
+      hash: 909a8c6d89cebf7cc0f3a1ee90c70fd34e29e693
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Matthew Yarmolinsky <matthew-timothy@balena.io>
+        signed-off-by: Matthew Yarmolinsky <matthew-timothy@balena.io>
+      author: Matthew Yarmolinsky
+  version: 11.5.3
+  title: "'Use response error as response message if there is one'"
+  date: 2022-04-05T13:15:16.453Z
+- commits:
     - subject: Drop circle.yml
       hash: d4fdd033595829116f90813ee2b65b5a3dd38df1
       body: ""
