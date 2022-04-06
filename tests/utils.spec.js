@@ -156,7 +156,7 @@ describe('Utils:', function () {
 			});
 		});
 
-		describe('given a response with a string error property', function () {
+		describe('given a response with a string message property', function () {
 			beforeEach(function () {
 				return (this.response = {
 					body: {
@@ -166,9 +166,41 @@ describe('Utils:', function () {
 				});
 			});
 
-			it('should print the error.text property', function () {
+			it('should print the body.message property', function () {
 				const error = utils.getErrorMessageFromResponse(this.response);
-				return expect(error).to.deep.equal(this.response.body);
+				expect(error).to.deep.equal(this.response.body.message);
+			});
+		});
+
+		describe('given a response with a string error property', function () {
+			beforeEach(function () {
+				return (this.response = {
+					body: {
+						error: 'errorTypeSlug',
+					},
+				});
+			});
+
+			it('should print the body.error property', function () {
+				const error = utils.getErrorMessageFromResponse(this.response);
+				expect(error).to.deep.equal(this.response.body.error);
+			});
+		});
+
+		// TODO: Improve this so that we can drop this test case
+		describe('given a response with an object response w/o any known message property', function () {
+			beforeEach(function () {
+				return (this.response = {
+					body: {
+						error2: 'errorTypeSlug',
+						message2: 'More details about the error',
+					},
+				});
+			});
+
+			it('should return the whole body', function () {
+				const error = utils.getErrorMessageFromResponse(this.response);
+				expect(error).to.deep.equal(this.response.body);
 			});
 		});
 
