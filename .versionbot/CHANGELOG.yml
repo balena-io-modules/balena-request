@@ -1,4 +1,15 @@
 - commits:
+    - subject: Fix extracting the response error from object response bodies
+      hash: 78dff444e207df7d6838f0e8bdf25b8673c065d6
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+  version: 11.5.5
+  title: "'Fix extracting the response error from object response bodies'"
+  date: 2022-04-06T15:35:57.195Z
+- commits:
     - subject: Drop explicit karma-chrome-launcher devDependency
       hash: db032a369a48b9707665189e2a42497105f1c596
       body: ""
