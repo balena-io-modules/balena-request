@@ -1,4 +1,15 @@
 - commits:
+    - subject: Drop explicit karma-chrome-launcher devDependency
+      hash: db032a369a48b9707665189e2a42497105f1c596
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+  version: 11.5.4
+  title: "'Drop explicit karma-chrome-launcher devDependency'"
+  date: 2022-04-06T12:08:34.148Z
+- commits:
     - subject: Use response error as response message if there is one
       hash: 909a8c6d89cebf7cc0f3a1ee90c70fd34e29e693
       body: ""
