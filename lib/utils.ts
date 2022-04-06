@@ -123,7 +123,7 @@ export function getErrorMessageFromResponse(response: BalenaRequestResponse) {
 			(prop) => typeof response.body[prop] === 'string',
 		);
 		if (bodyMessageProp != null) {
-			response.body.message = response.body[bodyMessageProp];
+			return response.body[bodyMessageProp];
 		}
 	}
 
