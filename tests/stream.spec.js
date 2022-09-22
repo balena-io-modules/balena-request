@@ -1,7 +1,7 @@
 const Bluebird = require('bluebird');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const zlib = require('zlib-browserify');
+const zlib = require('browserify-zlib');
 const { PassThrough } = require('stream');
 const rindle = require('rindle');
 
