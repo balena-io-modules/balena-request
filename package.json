@@ -17,6 +17,9 @@
   "directories": {
     "test": "tests"
   },
+   "engines": {
+    "node": ">=10.0.0"
+  },
   "scripts": {
     "lint": "balena-lint -e ts --typescript -e js lib tests",
     "lint-fix": "balena-lint -e ts --typescript -e js --fix lib tests",
