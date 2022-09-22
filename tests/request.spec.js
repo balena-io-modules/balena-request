@@ -272,7 +272,7 @@ describe('Request:', function () {
 		describe('given an endpoint that will time out', function () {
 			beforeEach(function () {
 				this.clock = sinon.useFakeTimers();
-				return mockServer.get('/infinite-wait').thenTimeout();
+				mockServer.get('/infinite-wait').thenTimeout();
 			});
 
 			afterEach(function () {

@@ -1,13 +1,35 @@
-var getKarmaConfig = require('balena-config-karma');
+const getKarmaConfig = require('balena-config-karma');
+const packageJSON = require('./package.json');
 
-var packageJSON = require('./package.json');
+module.exports = (config) => {
+	const karmaConfig = getKarmaConfig(packageJSON);
+	karmaConfig.logLevel = config.LOG_INFO;
+	// polyfill required for mockttp & balena-request
+	// the next major might not require them any more
+	karmaConfig.webpack.resolve = {
+		fallback: {
+			assert: require.resolve('assert'),
+			constants: false,
+			crypto: false,
+			fs: false,
+			os: false,
+			path: false,
+			stream: require.resolve('stream-browserify'),
+			url: false,
+			util: false,
+			zlib: require.resolve('browserify-zlib'),
+		},
+	};
+	karmaConfig.webpack.plugins = [
+		new getKarmaConfig.webpack.ProvidePlugin({
+			// Polyfills or mocks for various node stuff
+			process: 'process/browser',
+			Buffer: ['buffer', 'Buffer'],
+		}),
+	];
+	karmaConfig.webpack.experiments = {
+		asyncWebAssembly: true,
+	};
 
-getKarmaConfig.DEFAULT_WEBPACK_CONFIG.externals = {
-  fs: true
-};
-
-module.exports = function(config) {
-  var karmaConfig = getKarmaConfig(packageJSON);
-  karmaConfig.logLevel = config.LOG_INFO
-  return config.set(karmaConfig);
+	config.set(karmaConfig);
 };
