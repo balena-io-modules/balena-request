@@ -80,7 +80,7 @@ export async function shouldRefreshKey(auth: BalenaAuth) {
  * 		headers =
  * 			Authorization: authorizationHeader
  */
-export async function getAuthorizationHeader(auth: BalenaAuth) {
+export async function getAuthorizationHeader(auth: BalenaAuth | undefined) {
 	if (auth == null) {
 		return;
 	}

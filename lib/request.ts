@@ -69,7 +69,7 @@ export interface Interceptor {
 }
 
 export interface RequestFactoryOptions {
-	auth: BalenaAuth;
+	auth?: BalenaAuth;
 	debug?: boolean;
 	retries?: number;
 	isBrowser?: boolean;
@@ -270,7 +270,7 @@ export function getRequest({
 				let response: BalenaRequestResponse | undefined;
 				try {
 					response = await requestAsync(opts);
-				} catch (err) {
+				} catch (err: any) {
 					err.requestOptions = opts;
 					throw err;
 				}
@@ -461,7 +461,7 @@ export function getRequest({
 				baseUrl,
 				refreshToken: false,
 			});
-		} catch (err) {
+		} catch (err: any) {
 			if (err.code === 'BalenaRequestError' && err.statusCode === 401) {
 				const expiredKey = await auth.getKey();
 				await auth.removeKey();
