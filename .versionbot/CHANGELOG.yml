@@ -1,4 +1,28 @@
 - commits:
+    - subject: Fix the typings to properly mark the auth parameter as optional
+      hash: e809a9b4dcf3deb5f693e2f734fb7e056498372e
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+    - subject: Update TypeScript to 4.8.3
+      hash: 31ba03f9dd49750ad323c68a3ef1bc2232ee032e
+      body: |
+        Was necessary since the typing tests were
+        failing in master.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+  version: 11.5.6
+  title: "'Fix the typings to proprly mark the auth parameter as optional'"
+  date: 2022-09-22T09:49:16.631Z
+- commits:
     - subject: Fix extracting the response error from object response bodies
       hash: 78dff444e207df7d6838f0e8bdf25b8673c065d6
       body: ""
