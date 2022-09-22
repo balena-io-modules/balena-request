@@ -1,4 +1,18 @@
 - commits:
+    - subject: Fix overriding the whole webpack resolve section of karma tests
+      hash: c5823879e00d5089c5fda7be05253be804b41574
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+      nested: []
+  version: 11.5.8
+  title: ""
+  date: 2022-09-22T22:04:38.880Z
+- commits:
     - subject: Replace balenaCI with flowzone
       hash: 357d06a0ecbc122edca6c235afbff86dfafbade1
       body: ""
