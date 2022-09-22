@@ -1,4 +1,36 @@
 - commits:
+    - subject: Replace balenaCI with flowzone
+      hash: 357d06a0ecbc122edca6c235afbff86dfafbade1
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Fix tests in node 18
+      hash: 770fcfd45f6230a5cd4df83bd7a57a90dff9c958
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+        signed-off-by: Thodoris Greasidis <thodoris@balena.io>
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Specify the supported node engines in the package.json
+      hash: f15985475b73a911010db51ccbceb88b32138cf6
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Thodoris Greasidis
+        signed-off-by: Thodoris Greasidis
+      author: Thodoris Greasidis
+      nested: []
+  version: 11.5.7
+  title: ""
+  date: 2022-09-22T11:56:28.774Z
+- commits:
     - subject: Fix the typings to properly mark the auth parameter as optional
       hash: e809a9b4dcf3deb5f693e2f734fb7e056498372e
       body: ""
