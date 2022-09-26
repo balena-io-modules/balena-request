@@ -1,4 +1,16 @@
 - commits:
+    - subject: Delete redundant .resinci.yml
+      hash: c39a7cda2a1847d2f0751ced983b264a4b987187
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 11.5.9
+  title: ""
+  date: 2022-09-26T12:41:16.411Z
+- commits:
     - subject: Fix overriding the whole webpack resolve section of karma tests
       hash: c5823879e00d5089c5fda7be05253be804b41574
       body: ""
