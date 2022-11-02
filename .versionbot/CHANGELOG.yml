@@ -1,4 +1,16 @@
 - commits:
+    - subject: Update balena-errors to v4.7.3
+      hash: 204577a91d0fee6e0add575fbcc5f847217d024c
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: JSReds
+      nested: []
+  version: 11.5.10
+  title: ""
+  date: 2022-11-02T12:16:20.101Z
+- commits:
     - subject: Delete redundant .resinci.yml
       hash: c39a7cda2a1847d2f0751ced983b264a4b987187
       body: ""
