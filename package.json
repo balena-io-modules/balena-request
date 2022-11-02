@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "@balena/node-web-streams": "^0.2.3",
-    "balena-errors": "^4.7.1",
+    "balena-errors": "^4.7.3",
     "fetch-ponyfill": "^7.1.0",
     "fetch-readablestream": "^0.2.0",
     "progress-stream": "^2.0.0",
