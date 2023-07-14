@@ -18,7 +18,7 @@ describe('Request (stream):', function () {
 
 	describe('given a simple endpoint that responds with an error', function () {
 		beforeEach(() =>
-			mockServer.get('/foo').thenReply(400, 'Something happened'),
+			mockServer.forGet('/foo').thenReply(400, 'Something happened'),
 		);
 
 		it('should reject with the error message', function () {
@@ -43,7 +43,7 @@ describe('Request (stream):', function () {
 
 	describe('given a simple endpoint that responds with a string', function () {
 		beforeEach(() =>
-			mockServer.get('/foo').thenReply(200, 'Lorem ipsum dolor sit amet'),
+			mockServer.forGet('/foo').thenReply(200, 'Lorem ipsum dolor sit amet'),
 		);
 
 		it('should be able to pipe the response', () =>
@@ -79,7 +79,9 @@ describe('Request (stream):', function () {
 	describe('given multiple endpoints', function () {
 		beforeEach(() =>
 			['get', 'post', 'put', 'patch', 'delete'].forEach((method) =>
-				mockServer[method]('/foo').thenReply(200, method.toUpperCase()),
+				mockServer[`for${method[0].toUpperCase() + method.slice(1)}`](
+					'/foo',
+				).thenReply(200, method.toUpperCase()),
 			),
 		);
 
@@ -98,7 +100,7 @@ describe('Request (stream):', function () {
 		beforeEach(function () {
 			const message = 'Lorem ipsum dolor sit amet';
 			return gzip(message).then((compressedMessage) =>
-				mockServer.get('/foo').thenReply(200, compressedMessage, {
+				mockServer.forGet('/foo').thenReply(200, compressedMessage, {
 					'Content-Type': 'text/plain',
 					'X-Transfer-Length': '' + compressedMessage.length,
 					'Content-Encoding': 'gzip',
@@ -131,7 +133,7 @@ describe('Request (stream):', function () {
 		beforeEach(function () {
 			const message = 'Lorem ipsum dolor sit amet';
 			return gzip(message).then((compressedMessage) =>
-				mockServer.get('/foo').thenReply(200, compressedMessage, {
+				mockServer.forGet('/foo').thenReply(200, compressedMessage, {
 					'Content-Type': 'text/plain',
 					'Content-Length': '' + compressedMessage.length,
 					'Content-Encoding': 'gzip',
@@ -156,7 +158,7 @@ describe('Request (stream):', function () {
 		beforeEach(function () {
 			const message = 'Lorem ipsum dolor sit amet';
 			return gzip(message).then((compressedMessage) =>
-				mockServer.get('/foo').thenReply(200, compressedMessage, {
+				mockServer.forGet('/foo').thenReply(200, compressedMessage, {
 					'Content-Type': 'text/plain',
 					'X-Transfer-Length': '' + compressedMessage.length,
 					'Content-Length': '' + compressedMessage.length,
@@ -181,7 +183,7 @@ describe('Request (stream):', function () {
 	describe('given an endpoint with a content-type header', function () {
 		beforeEach(function () {
 			const message = 'Lorem ipsum dolor sit amet';
-			return mockServer.get('/foo').thenReply(200, message, {
+			return mockServer.forGet('/foo').thenReply(200, message, {
 				'Content-Type': 'application/octet-stream',
 			});
 		});

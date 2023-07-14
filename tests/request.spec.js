@@ -22,7 +22,7 @@ describe('Request:', function () {
 	describe('.send()', function () {
 		describe('given a simple absolute GET endpoint', function () {
 			beforeEach(() =>
-				mockServer.get('/foo').thenJSON(200, { from: 'foobar' }),
+				mockServer.forGet('/foo').thenJson(200, { from: 'foobar' }),
 			);
 
 			it('should preserve the absolute url', function () {
@@ -51,7 +51,9 @@ describe('Request:', function () {
 			beforeEach(() =>
 				Promise.all(
 					['get', 'post', 'put', 'patch', 'delete'].map((method) =>
-						mockServer[method]('/foo').thenJSON(200, {
+						mockServer[`for${method[0].toUpperCase() + method.slice(1)}`](
+							'/foo',
+						).thenJson(200, {
 							method: method.toUpperCase(),
 						}),
 					),
@@ -71,7 +73,7 @@ describe('Request:', function () {
 
 		describe('given an endpoint that returns a non json response', function () {
 			beforeEach(() =>
-				mockServer.get('/non-json').thenReply(200, 'Hello World'),
+				mockServer.forGet('/non-json').thenReply(200, 'Hello World'),
 			);
 
 			it('should resolve with the plain body', function () {
@@ -89,9 +91,9 @@ describe('Request:', function () {
 		describe('given an endpoint that accepts a non-json body', function () {
 			beforeEach(() =>
 				mockServer
-					.post('/foo')
+					.forPost('/foo')
 					.withBody('Test body')
-					.thenJSON(200, { matched: true }),
+					.thenJson(200, { matched: true }),
 			);
 
 			it('should send the plain body successfully', function () {
@@ -112,7 +114,7 @@ describe('Request:', function () {
 			describe('given a GET endpoint', function () {
 				describe('given no response error', function () {
 					beforeEach(() =>
-						mockServer.get('/hello').thenJSON(200, { hello: 'world' }),
+						mockServer.forGet('/hello').thenJson(200, { hello: 'world' }),
 					);
 
 					it('should correctly make the request', function () {
@@ -130,8 +132,8 @@ describe('Request:', function () {
 				describe('given a response error', function () {
 					beforeEach(() =>
 						mockServer
-							.get('/500')
-							.thenJSON(500, { error: { text: 'Server Error' } }),
+							.forGet('/500')
+							.thenJson(500, { error: { text: 'Server Error' } }),
 					);
 
 					it('should be rejected with the error message', function () {
@@ -158,7 +160,7 @@ describe('Request:', function () {
 
 			describe('given a HEAD endpoint', function () {
 				describe('given no response error', function () {
-					beforeEach(() => mockServer.head('/foo').thenReply(200));
+					beforeEach(() => mockServer.forHead('/foo').thenReply(200));
 
 					it('should correctly make the request', function () {
 						const promise = request
@@ -173,7 +175,7 @@ describe('Request:', function () {
 				});
 
 				describe('given a response error', function () {
-					beforeEach(() => mockServer.head('/foo').thenReply(500));
+					beforeEach(() => mockServer.forHead('/foo').thenReply(500));
 
 					it('should be rejected with a generic error message', function () {
 						const promise = request
@@ -195,9 +197,9 @@ describe('Request:', function () {
 			['delete', 'patch', 'put', 'post'].forEach((method) =>
 				describe(`given a ${method.toUpperCase()} endpoint that matches the request body`, function () {
 					beforeEach(() =>
-						mockServer[method]('/')
+						mockServer[`for${method[0].toUpperCase() + method.slice(1)}`]('/')
 							.withBody(JSON.stringify({ foo: 'bar' }))
-							.thenJSON(200, { matched: true }),
+							.thenJson(200, { matched: true }),
 					);
 
 					it('should eventually return the body', function () {
@@ -219,13 +221,13 @@ describe('Request:', function () {
 		describe('given an endpoint that fails the first two times', function () {
 			beforeEach(() =>
 				mockServer
-					.get('/initially-failing')
+					.forGet('/initially-failing')
 					.twice()
 					.thenCloseConnection()
 					.then(() =>
 						mockServer
-							.get('/initially-failing')
-							.thenJSON(200, { result: 'success' }),
+							.forGet('/initially-failing')
+							.thenJson(200, { result: 'success' }),
 					),
 			);
 
@@ -272,7 +274,7 @@ describe('Request:', function () {
 		describe('given an endpoint that will time out', function () {
 			beforeEach(function () {
 				this.clock = sinon.useFakeTimers();
-				mockServer.get('/infinite-wait').thenTimeout();
+				mockServer.forGet('/infinite-wait').thenTimeout();
 			});
 
 			afterEach(function () {

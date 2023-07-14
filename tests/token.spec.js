@@ -21,7 +21,7 @@ describe('Request (token):', function () {
 
 	describe('.send()', () =>
 		describe('given a simple GET endpoint', function () {
-			beforeEach(() => mockServer.get(/^\/foo/).thenReply(200, 'bar'));
+			beforeEach(() => mockServer.forGet(/^\/foo/).thenReply(200, 'bar'));
 
 			describe('given the token is always fresh', function () {
 				beforeEach(function () {
@@ -97,7 +97,7 @@ describe('Request (token):', function () {
 				describe('given a working /user/v1/refresh-token endpoint', function () {
 					beforeEach(() =>
 						mockServer
-							.get('/user/v1/refresh-token')
+							.forGet('/user/v1/refresh-token')
 							.thenReply(200, janeDoeFixture.token),
 					);
 
@@ -162,7 +162,7 @@ describe('Request (token):', function () {
 				describe('given /user/v1/refresh-token returns 401', function () {
 					beforeEach(() =>
 						mockServer
-							.get('/user/v1/refresh-token')
+							.forGet('/user/v1/refresh-token')
 							.thenReply(401, 'Unauthorized'),
 					);
 
@@ -217,7 +217,7 @@ describe('Request (token):', function () {
 
 				describe('given /user/v1/refresh-token returns a non 401 status code', function () {
 					beforeEach(() =>
-						mockServer.get('/user/v1/refresh-token').thenReply(500),
+						mockServer.forGet('/user/v1/refresh-token').thenReply(500),
 					);
 
 					it('should be rejected with a request error', function () {
@@ -236,7 +236,7 @@ describe('Request (token):', function () {
 	describe('.stream()', () =>
 		describe('given a simple endpoint that responds with a string', function () {
 			beforeEach(() =>
-				mockServer.get('/foo').thenReply(200, 'Lorem ipsum dolor sit amet'),
+				mockServer.forGet('/foo').thenReply(200, 'Lorem ipsum dolor sit amet'),
 			);
 
 			describe('given the token is always fresh', function () {
@@ -292,7 +292,7 @@ describe('Request (token):', function () {
 			beforeEach(function () {
 				auth.setKey(johnDoeFixture.token);
 				return mockServer
-					.get('/user/v1/refresh-token')
+					.forGet('/user/v1/refresh-token')
 					.thenReply(200, janeDoeFixture.token);
 			});
 

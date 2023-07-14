@@ -26,7 +26,7 @@ describe('Request (api key):', function () {
 		});
 
 		describe('given a simple GET endpoint containing special characters in query strings', function () {
-			beforeEach(() => mockServer.get(/^\/foo/).thenReply(200));
+			beforeEach(() => mockServer.forGet(/^\/foo/).thenReply(200));
 
 			describe('given no api key', () =>
 				it('should not encode special characters automatically', function () {
@@ -58,7 +58,7 @@ describe('Request (api key):', function () {
 		});
 
 		describe('given a simple GET endpoint', function () {
-			beforeEach(() => mockServer.get(/^\/foo/).thenReply(200, 'Foo Bar'));
+			beforeEach(() => mockServer.forGet(/^\/foo/).thenReply(200, 'Foo Bar'));
 
 			describe('given an api key', function () {
 				describe('given no token', function () {
