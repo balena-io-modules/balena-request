@@ -18,7 +18,7 @@ describe('responseFormat:', function () {
 
 	describe('given a JSON response with custom content-type', function () {
 		beforeEach(() =>
-			mockServer.get('/').thenReply(200, JSON.stringify(RESPONSE_BODY), {
+			mockServer.forGet('/').thenReply(200, JSON.stringify(RESPONSE_BODY), {
 				'Content-Type': 'application/x-my-json',
 			}),
 		);

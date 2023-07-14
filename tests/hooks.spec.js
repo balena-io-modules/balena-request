@@ -20,11 +20,13 @@ describe('An interceptor', function () {
 				.start()
 				.then(() =>
 					Promise.all([
-						mockServer.get('/').thenJSON(200, { requested: '/' }),
+						mockServer.forGet('/').thenJson(200, { requested: '/' }),
 						mockServer
-							.get('/original')
-							.thenJSON(200, { requested: 'original' }),
-						mockServer.get('/changed').thenJSON(200, { requested: 'changed' }),
+							.forGet('/original')
+							.thenJson(200, { requested: 'original' }),
+						mockServer
+							.forGet('/changed')
+							.thenJson(200, { requested: 'changed' }),
 					]),
 				),
 		]);
@@ -269,7 +271,7 @@ describe('An interceptor', function () {
 
 		it('should call the response hook for non-200 successful responses', () =>
 			mockServer
-				.get('/201')
+				.forGet('/201')
 				.thenReply(201)
 				.then(function () {
 					request.interceptors[0] = {
@@ -323,7 +325,7 @@ describe('An interceptor', function () {
 
 		it('should call responseError if the server returns a server error', () =>
 			mockServer
-				.get('/500')
+				.forGet('/500')
 				.thenReply(500)
 				.then(function () {
 					request.interceptors[0] = {
@@ -339,7 +341,7 @@ describe('An interceptor', function () {
 
 		it('should call responseError if the server returns an authentication error', () =>
 			mockServer
-				.get('/401')
+				.forGet('/401')
 				.thenReply(401)
 				.then(function () {
 					request.interceptors[0] = {
@@ -355,8 +357,8 @@ describe('An interceptor', function () {
 
 		it('should let responseError retry a different request', () =>
 			Promise.all([
-				mockServer.get('/ok').thenReply(200),
-				mockServer.get('/fail').thenReply(500),
+				mockServer.forGet('/ok').thenReply(200),
+				mockServer.forGet('/fail').thenReply(500),
 			]).then(function () {
 				request.interceptors[0] = {
 					responseError(response) {
@@ -377,7 +379,7 @@ describe('An interceptor', function () {
 
 		it('should give responseError the request options for server errors', () =>
 			mockServer
-				.get('/500')
+				.forGet('/500')
 				.thenReply(500)
 				.then(function () {
 					request.interceptors[0] = {
@@ -401,7 +403,7 @@ describe('An interceptor', function () {
 
 		it('should give responseError the request options for network errors', () =>
 			mockServer
-				.get('/no-response')
+				.forGet('/no-response')
 				.thenCloseConnection()
 				.then(function () {
 					request.interceptors[0] = {
@@ -425,7 +427,7 @@ describe('An interceptor', function () {
 
 		it('should call responseError if the server returns an error for a stream', () =>
 			mockServer
-				.get('/500')
+				.forGet('/500')
 				.thenReply(500)
 				.then(function () {
 					request.interceptors[0] = {
