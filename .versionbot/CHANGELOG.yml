@@ -1,4 +1,62 @@
 - commits:
+    - subject: Update TypeScript to 5.1.6
+      hash: 59a1fccdc229e8bd82012e8220cddb4db642d9b0
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Update mockttp to v3.8.0
+      hash: 46506098976ae25e9ac34247c1bf419a68ddf132
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Drop support for node < 14
+      hash: 05563b3d00f0c3b86f08d3baff504ae1f10cbacb
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Add querystring-es3 polyfill to fix browser tests
+      hash: f77da5d61cbb7d38445d04db5372a1d2722e03ea
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: "tsconfig: Enable skipLibCheck to avoid mockttp nested dependency errors"
+      hash: 5bf7323fccf5d12675df2c4ad12a0d9bd7779093
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Update TypeScript to 4.9.5
+      hash: 6c5d05a90cc0adef07abe6bf1e4d13b6f223752a
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: "patch: Update flowzone.yml"
+      hash: 39545c94e94c9c4603ab9179dcf77716db11da9f
+      body: ""
+      footer: {}
+      author: Kyle Harding
+      nested: []
+  version: 12.0.0
+  title: ""
+  date: 2023-07-14T08:49:12.073Z
+- commits:
     - subject: Update balena-errors to v4.7.3
       hash: 204577a91d0fee6e0add575fbcc5f847217d024c
       body: ""
