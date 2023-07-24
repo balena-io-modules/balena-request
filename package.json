@@ -44,7 +44,7 @@
     "@types/qs": "^6.9.3",
     "@types/sinon": "^10.0.11",
     "assert": "^2.0.0",
-    "balena-auth": "^4.1.0",
+    "balena-auth": "^5.0.0",
     "balena-config-karma": "4.0.0",
     "bluebird": "^3.7.2",
     "browserify-zlib": "^0.2.0",
@@ -77,7 +77,7 @@
     "tslib": "^2.0.0"
   },
   "peerDependencies": {
-    "balena-auth": "^4.0.0"
+    "balena-auth": "^5.0.0"
   },
   "versionist": {
     "publishedAt": "2023-07-14T08:49:12.289Z"
