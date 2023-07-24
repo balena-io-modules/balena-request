@@ -1,4 +1,16 @@
 - commits:
+    - subject: Update balena-auth to 5.0.0
+      hash: 4b103ca558e38e86bf3563be028d70e676b01fd0
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 12.0.1
+  title: ""
+  date: 2023-07-24T14:51:27.716Z
+- commits:
     - subject: Update TypeScript to 5.1.6
       hash: 59a1fccdc229e8bd82012e8220cddb4db642d9b0
       body: ""
