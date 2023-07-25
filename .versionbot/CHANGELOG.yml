@@ -1,4 +1,16 @@
 - commits:
+    - subject: Make `url` a normal dependency
+      hash: 1598cca9808180f2df2455bd8514b2647ea88f47
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 12.0.2
+  title: ""
+  date: 2023-07-25T15:56:21.136Z
+- commits:
     - subject: Update balena-auth to 5.0.0
       hash: 4b103ca558e38e86bf3563be028d70e676b01fd0
       body: ""
