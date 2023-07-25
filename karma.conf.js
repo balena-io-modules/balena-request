@@ -15,7 +15,6 @@ module.exports = (config) => {
 		path: false,
 		querystring: require.resolve('querystring-es3'),
 		stream: require.resolve('stream-browserify'),
-		url: false,
 		util: false,
 		zlib: require.resolve('browserify-zlib'),
 	};
