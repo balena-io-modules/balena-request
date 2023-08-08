@@ -1,5 +1,4 @@
 const IS_BROWSER = typeof window !== 'undefined' && window !== null;
-import * as temp from 'temp';
 
 let dataDirectoryPath = null;
 if (!IS_BROWSER) {

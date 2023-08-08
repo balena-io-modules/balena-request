@@ -5,13 +5,20 @@ import * as mockhttp from 'mockttp';
 
 const mockServer = mockhttp.getLocal();
 
-const { auth, request, getCustomRequest } = setup();
+const { auth, request, getCustomRequest, IS_BROWSER } = setup();
 
 // Grab setTimeout before we replace it with a fake later, so
 // we can still do real waiting in the tests themselves
 const unstubbedSetTimeout = setTimeout;
 const delay = (delayMs) =>
 	new Promise((resolve) => unstubbedSetTimeout(resolve, delayMs));
+
+class TestFile extends Blob {
+	constructor(blobParts, name, type) {
+		super(blobParts, { type });
+		this.name = name;
+	}
+}
 
 describe('Request:', function () {
 	this.timeout(10000);
@@ -218,6 +225,39 @@ describe('Request:', function () {
 					});
 				}),
 			));
+
+		describe('given a body with a Blob data', function () {
+			beforeEach(async () => {
+				await mockServer
+					.forPost('/multipart-endpoint')
+					.thenCallback(async (req) => {
+						return { statusCode: 200, body: req.headers['content-type'] };
+					});
+			});
+			it('should send the request as multipart/form-data with boundary', async function () {
+				const fileName = 'testfile.txt';
+				let body;
+				if (IS_BROWSER) {
+					body = {
+						content: new File(['a', 'test', 'blob'], fileName),
+					};
+				} else {
+					body = {
+						content: new TestFile(['a', 'test', 'blob'], fileName),
+					};
+				}
+
+				const res = await request.send({
+					method: 'POST',
+					baseUrl: mockServer.url,
+					url: '/multipart-endpoint',
+					body: body,
+				});
+
+				expect(res.body.startsWith('multipart/form-data; boundary=')).to.be
+					.true;
+			});
+		});
 
 		describe('given an endpoint that fails the first two times', function () {
 			beforeEach(() =>

@@ -22,8 +22,14 @@ import * as urlLib from 'url';
 import * as qs from 'qs';
 import * as errors from 'balena-errors';
 import type BalenaAuth from 'balena-auth';
+import { FormData as FormDataNodeType } from 'formdata-node';
 import { TokenType } from 'balena-auth';
-import type { BalenaRequestOptions, BalenaRequestResponse } from './request';
+import type {
+	BalenaRequestOptions,
+	BalenaRequestResponse,
+	WebResourceFile,
+} from './request';
+import { Readable } from 'stream';
 
 const IS_BROWSER = typeof window !== 'undefined' && window !== null;
 
@@ -372,8 +378,26 @@ export async function getBody(
 	);
 }
 
-// This is the actual implementation that hides the internal `retriesRemaining` parameter
+const isFile = (value: string | WebResourceFile): value is WebResourceFile => {
+	return (
+		value instanceof Blob &&
+		value.name != null &&
+		typeof value.name === 'string'
+	);
+};
 
+const getForm = (): FormDataNodeType | FormData => {
+	if (!IS_BROWSER) {
+		const { FormData: NodeFormData } =
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
+			require('formdata-node') as typeof import('formdata-node');
+
+		return new NodeFormData();
+	}
+	return new FormData();
+};
+
+// This is the actual implementation that hides the internal `retriesRemaining` parameter
 async function requestAsync(
 	fetch: typeof normalFetch,
 	options: BalenaRequestOptions,
@@ -393,6 +417,47 @@ async function requestAsync(
 		const nativeHeaders = new Headers();
 		opts.headers.forEach((value, name) => nativeHeaders.append(name, value));
 		opts.headers = nativeHeaders;
+	}
+
+	const bodyEntries = Object.entries<string | WebResourceFile>(
+		options.body ?? {},
+	);
+	const fileKeys = new Set<string>();
+	for (const [k, v] of bodyEntries) {
+		if (isFile(v)) {
+			fileKeys.add(k);
+		}
+	}
+	if (fileKeys.size > 0) {
+		const form = getForm();
+		for (const [k, v] of bodyEntries) {
+			if (fileKeys.has(k)) {
+				const file = v as WebResourceFile;
+				form.append(k, file, file.name);
+			} else {
+				form.append(k, v);
+			}
+		}
+
+		if (IS_BROWSER) {
+			// Browsers will handle set form data header and boundaries
+			// Given the correct body format
+			opts.headers.delete('Content-Type');
+			opts.body = form as FormData;
+		} else {
+			const { FormDataEncoder } =
+				// eslint-disable-next-line @typescript-eslint/no-var-requires
+				require('form-data-encoder') as typeof import('form-data-encoder');
+
+			const encoder = new FormDataEncoder(form as FormDataNodeType);
+			opts.headers.set('Content-Type', encoder.headers['Content-Type']);
+			const length = encoder.headers['Content-Length'];
+			if (length != null) {
+				opts.headers.set('Content-Length', length);
+			}
+			// @ts-expect-error https://www.npmjs.com/package/form-data-encoder#usage
+			opts.body = Readable.from(encoder);
+		}
 	}
 
 	try {
