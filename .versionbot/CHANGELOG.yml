@@ -1,4 +1,24 @@
 - commits:
+    - subject: Avoid deep imports from balena-auth
+      hash: c11642a930772b968ff736583358d04a0b9321f4
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Update balena-auth to 5.1.0
+      hash: d86de07cb9386cc5fe79c01e9ed03d9af664fe4b
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 12.0.3
+  title: ""
+  date: 2023-08-09T12:18:22.918Z
+- commits:
     - subject: Make `url` a normal dependency
       hash: 1598cca9808180f2df2455bd8514b2647ea88f47
       body: ""
