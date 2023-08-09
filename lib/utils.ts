@@ -22,7 +22,7 @@ import * as urlLib from 'url';
 import * as qs from 'qs';
 import * as errors from 'balena-errors';
 import type BalenaAuth from 'balena-auth';
-import { TokenType } from 'balena-auth/build/token';
+import { TokenType } from 'balena-auth';
 import type { BalenaRequestOptions, BalenaRequestResponse } from './request';
 
 const IS_BROWSER = typeof window !== 'undefined' && window !== null;
