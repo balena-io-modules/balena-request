@@ -189,28 +189,28 @@ export function getRequest({
 	const interceptResponseError = (responseError: errors.BalenaRequestError) =>
 		interceptResponseOrError(Promise.reject(responseError));
 
-	const interceptRequestOrError = async (initialPromise: Promise<any>) =>
-		exports.interceptors.reduce(function (promise, { request, requestError }) {
+	const interceptRequestOrError = async (initialPromise: Promise<any>) => {
+		let promise = initialPromise;
+		for (const { request, requestError } of exports.interceptors) {
 			if (request != null || requestError != null) {
-				return promise.then(request, requestError);
-			} else {
-				return promise;
+				promise = promise.then(request, requestError);
 			}
-		}, initialPromise);
+		}
+		return promise;
+	};
 
 	const interceptResponseOrError = async function (
 		initialPromise: Promise<any>,
 	) {
-		return exports.interceptors
+		let promise = initialPromise;
+		for (const { response, responseError } of exports.interceptors
 			.slice()
-			.reverse()
-			.reduce(function (promise, { response, responseError }) {
-				if (response != null || responseError != null) {
-					return promise.then(response, responseError);
-				} else {
-					return promise;
-				}
-			}, initialPromise);
+			.reverse()) {
+			if (response != null || responseError != null) {
+				promise = promise.then(response, responseError);
+			}
+		}
+		return promise;
 	};
 
 	/**
