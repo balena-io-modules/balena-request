@@ -1,4 +1,16 @@
 - commits:
+    - subject: Drop support for node 14 & 16
+      hash: c7bdf11c4ce4ea3b885a608d5ce76eeab758d32d
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Otávio Jacobi
+      nested: []
+  version: 13.0.0
+  title: ""
+  date: 2023-10-11T17:43:03.483Z
+- commits:
     - subject: Refactor the interceptors to stop using .reduce()
       hash: bb3ebd421cff85803bc80ead121b83e8ed103499
       body: ""
