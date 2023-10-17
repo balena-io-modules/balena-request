@@ -1,13 +1,15 @@
-const ReadableStream = require('stream').Readable;
-const { Headers } = require('fetch-ponyfill')({ Promise });
-const { expect } = require('chai');
-const sinon = require('sinon');
-const johnDoeFixture = require('./tokens.json').johndoe;
-const utils = require('../build/utils');
+import { expect } from 'chai';
+import sinon from 'sinon';
+import { TokenType } from 'balena-auth/build/token';
+import fetchponyfill from 'fetch-ponyfill';
+import * as utils from '../build/utils';
+import * as fixtures from './tokens.json';
+import * as setup from './setup';
+import type { BalenaRequestResponse } from '../lib/request';
 
-const { TokenType } = require('balena-auth/build/token');
-
-const { auth } = require('./setup')();
+const { auth } = setup.default();
+const { Headers } = fetchponyfill({ Promise });
+const johnDoeFixture = fixtures.johndoe;
 
 describe('Utils:', function () {
 	describe('.shouldRefreshKey()', function () {
@@ -238,13 +240,17 @@ describe('Utils:', function () {
 				}),
 			};
 
-			return expect(utils.isResponseCompressed(response)).to.be.true;
+			return expect(
+				utils.isResponseCompressed(response as BalenaRequestResponse),
+			).to.be.true;
 		});
 
 		it('should return false if Content-Encoding is not set', function () {
 			const response = { headers: new Headers({}) };
 
-			return expect(utils.isResponseCompressed(response)).to.be.false;
+			return expect(
+				utils.isResponseCompressed(response as BalenaRequestResponse),
+			).to.be.false;
 		});
 	});
 

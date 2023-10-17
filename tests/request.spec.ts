@@ -1,10 +1,11 @@
-const Bluebird = require('bluebird');
-const { expect } = require('chai');
-const sinon = require('sinon');
+import { expect } from 'chai';
+import sinon from 'sinon';
+import mockhttp from 'mockttp';
+import * as setup from './setup';
+import { BalenaRequestOptions } from '../lib/request';
 
-const mockServer = require('mockttp').getLocal();
-
-const { auth, request, getCustomRequest, IS_BROWSER } = require('./setup')();
+const mockServer = mockhttp.getLocal();
+const { auth, request, getCustomRequest } = setup.default();
 
 // Grab setTimeout before we replace it with a fake later, so
 // we can still do real waiting in the tests themselves
@@ -205,7 +206,7 @@ describe('Request:', function () {
 					it('should eventually return the body', function () {
 						const promise = request
 							.send({
-								method: method.toUpperCase(),
+								method: method.toUpperCase() as BalenaRequestOptions['method'],
 								baseUrl: mockServer.url,
 								url: '/',
 								body: {
@@ -274,7 +275,7 @@ describe('Request:', function () {
 		describe('given an endpoint that will time out', function () {
 			beforeEach(function () {
 				this.clock = sinon.useFakeTimers();
-				mockServer.forGet('/infinite-wait').thenTimeout();
+				void mockServer.forGet('/infinite-wait').thenTimeout();
 			});
 
 			afterEach(function () {

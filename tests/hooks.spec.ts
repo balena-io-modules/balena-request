@@ -1,12 +1,13 @@
-const { expect } = require('chai');
-const rindle = require('rindle');
-const sinon = require('sinon');
-const Bluebird = require('bluebird');
-const mockServer = require('mockttp').getLocal();
+import { expect } from 'chai';
+import rindle from 'rindle';
+import sinon from 'sinon';
+import Bluebird from 'bluebird';
+import mockhttp from 'mockttp';
+import * as setup from './setup';
+import * as utils from '../build/utils';
 
-const utils = require('../build/utils');
-
-const { auth, request } = require('./setup')();
+const mockServer = mockhttp.getLocal();
+const { auth, request } = setup.default();
 
 describe('An interceptor', function () {
 	this.timeout(10000);
@@ -102,6 +103,7 @@ describe('An interceptor', function () {
 				})
 				.then(rindle.extract)
 				.then(function (data) {
+					// @ts-expect-error data is mocked as string
 					const body = JSON.parse(data);
 					expect(body).to.deep.equal({ requested: 'changed' });
 				});
@@ -127,7 +129,8 @@ describe('An interceptor', function () {
 				.then(function ({ body }) {
 					expect(body).to.deep.equal({ requested: 'changed' });
 					request.interceptors.forEach((interceptor) =>
-						expect(interceptor.requestError.called).to.equal(
+						// @ts-expect-error injected sinon called property
+						expect(interceptor.requestError?.called).to.equal(
 							false,
 							'requestError should not have been called',
 						),
@@ -147,11 +150,13 @@ describe('An interceptor', function () {
 			return expect(request.send({ url: mockServer.url })).to.be.rejected.then(
 				function (err) {
 					expect(err.message).to.deep.equal('error overridden');
-					expect(request.interceptors[0].requestError.called).to.equal(
+					// @ts-expect-error injected sinon called property
+					expect(request.interceptors[0].requestError?.called).to.equal(
 						false,
 						'Preceeding requestError hooks should not be called',
 					);
-					expect(request.interceptors[1].requestError.called).to.equal(
+					// @ts-expect-error injected sinon called property
+					expect(request.interceptors[1].requestError?.called).to.equal(
 						true,
 						'Subsequent requestError hook should be called',
 					);
@@ -163,7 +168,7 @@ describe('An interceptor', function () {
 			beforeEach(function () {
 				return (this.utilsShouldUpdateToken = sinon
 					.stub(utils, 'shouldRefreshKey')
-					.returns(true));
+					.returns(Promise.resolve(true)));
 			});
 
 			afterEach(function () {
@@ -292,7 +297,7 @@ describe('An interceptor', function () {
 
 		it('should be able to change a stream response before it is returned', function () {
 			request.interceptors[0] = {
-				response(response) {
+				response() {
 					return rindle.getStreamFromString('replacement stream');
 				},
 			};
@@ -316,7 +321,8 @@ describe('An interceptor', function () {
 				})
 				.then(function ({ body }) {
 					expect(body).to.deep.equal({ requested: '/' });
-					return expect(request.interceptors[0].responseError.called).to.equal(
+					// @ts-expect-error injected sinon called property
+					return expect(request.interceptors[0].responseError?.called).to.equal(
 						false,
 						'responseError should not have been called',
 					);
@@ -361,7 +367,7 @@ describe('An interceptor', function () {
 				mockServer.forGet('/fail').thenReply(500),
 			]).then(function () {
 				request.interceptors[0] = {
-					responseError(response) {
+					responseError() {
 						return request.send({
 							url: mockServer.urlFor('/ok'),
 						});
@@ -393,6 +399,7 @@ describe('An interceptor', function () {
 					return expect(
 						request.send({
 							url: targetUrl,
+							// @ts-expect-error testing for wrong typing
 							anotherExtraOption: true,
 						}),
 					).to.be.rejected.then(function (err) {
@@ -417,6 +424,7 @@ describe('An interceptor', function () {
 					return expect(
 						request.send({
 							url: targetUrl,
+							// @ts-expect-error testing for wrong typing
 							anotherExtraOption: true,
 						}),
 					).to.be.rejected.then(function (err) {

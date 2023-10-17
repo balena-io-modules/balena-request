@@ -101,7 +101,8 @@ export function getRequest({
 }: RequestFactoryOptions) {
 	const requestAsync = utils.getRequestAsync();
 	const requestStream = isBrowser
-		? utils.getRequestAsync(require('fetch-readablestream') as typeof fetch)
+		? // eslint-disable-next-line @typescript-eslint/no-var-requires
+		  utils.getRequestAsync(require('fetch-readablestream') as typeof fetch)
 		: requestAsync;
 
 	const debugRequest = !debug
@@ -340,6 +341,7 @@ export function getRequest({
 	function stream(
 		options: BalenaRequestOptions,
 	): Promise<BalenaRequestStreamResult> {
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const progress = require('./progress') as typeof import('./progress');
 		return prepareOptions(options)
 			.then(interceptRequestOptions, interceptRequestError)
@@ -370,7 +372,7 @@ export function getRequest({
 				const responseError = chunks.join() || 'The request was unsuccessful';
 
 				debugRequest(options, download.response);
-				// @ts-expect-error
+				// @ts-expect-error balena request error without final parameter
 				throw new errors.BalenaRequestError(
 					responseError,
 					download.response.statusCode,

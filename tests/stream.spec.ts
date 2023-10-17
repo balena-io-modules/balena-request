@@ -1,15 +1,14 @@
-const Bluebird = require('bluebird');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const zlib = require('browserify-zlib');
-const { PassThrough } = require('stream');
-const rindle = require('rindle');
+import Bluebird from 'bluebird';
+import { expect } from 'chai';
+import zlib from 'browserify-zlib';
+import { PassThrough } from 'stream';
+import rindle from 'rindle';
+import mockhttp from 'mockttp';
+import * as setup from './setup';
 
 const gzip = Bluebird.promisify(zlib.gzip);
-
-const mockServer = require('mockttp').getLocal();
-
-const { auth, request, IS_BROWSER } = require('./setup')();
+const mockServer = mockhttp.getLocal();
+const { auth, request } = setup.default();
 
 describe('Request (stream):', function () {
 	beforeEach(() => Promise.all([auth.removeKey(), mockServer.start()]));
@@ -126,6 +125,7 @@ describe('Request (stream):', function () {
 					baseUrl: mockServer.url,
 					url: '/foo',
 				})
+				// @ts-expect-error testing for wrong typing
 				.then((stream) => expect(stream.length).to.be.undefined));
 	});
 

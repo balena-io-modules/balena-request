@@ -1,12 +1,15 @@
-const { expect } = require('chai');
-const rindle = require('rindle');
-const sinon = require('sinon');
-const johnDoeFixture = require('./tokens.json').johndoe;
-const utils = require('../build/utils');
+import { expect } from 'chai';
+import rindle from 'rindle';
+import sinon from 'sinon';
+import mockhttp from 'mockttp';
+import * as fixtures from './tokens.json';
+import * as utils from '../build/utils';
+import * as setup from './setup';
+import type { BalenaRequestPassThroughStream } from '../lib/request';
 
-const mockServer = require('mockttp').getLocal();
-
-const { auth, request } = require('./setup')();
+const mockServer = mockhttp.getLocal();
+const { auth, request } = setup.default();
+const johnDoeFixture = fixtures.johndoe;
 
 describe('Request (api key):', function () {
 	this.timeout(10000);
@@ -87,9 +90,10 @@ describe('Request (api key):', function () {
 									apiKey: '123456789',
 								})
 								.then(function (stream) {
-									expect(stream.response.request.uri.query).to.equal(
-										'apikey=123456789',
-									);
+									expect(
+										(stream as BalenaRequestPassThroughStream).response.request
+											.uri.query,
+									).to.equal('apikey=123456789');
 									return rindle.extract(stream);
 								})));
 				});
@@ -118,7 +122,7 @@ describe('Request (api key):', function () {
 									url: '/foo',
 									apiKey: '123456789',
 								})
-								.then((v) => v.request.headers.Authorization);
+								.then((v) => v.request.headers?.Authorization);
 							return expect(promise).to.eventually.equal(
 								`Bearer ${johnDoeFixture.token}`,
 							);
@@ -135,9 +139,10 @@ describe('Request (api key):', function () {
 									apiKey: '123456789',
 								})
 								.then(function (stream) {
-									expect(stream.response.request.uri.query).to.equal(
-										'apikey=123456789',
-									);
+									expect(
+										(stream as BalenaRequestPassThroughStream).response.request
+											.uri.query,
+									).to.equal('apikey=123456789');
 									return rindle.extract(stream);
 								}));
 
@@ -150,8 +155,9 @@ describe('Request (api key):', function () {
 									apiKey: '123456789',
 								})
 								.then(function (stream) {
-									const { headers } = stream.response.request;
-									expect(headers.Authorization).to.equal(
+									const { headers } = (stream as BalenaRequestPassThroughStream)
+										.response.request;
+									expect(headers?.Authorization).to.equal(
 										`Bearer ${johnDoeFixture.token}`,
 									);
 									return rindle.extract(stream);
@@ -187,7 +193,10 @@ describe('Request (api key):', function () {
 									apiKey: '',
 								})
 								.then(function (stream) {
-									expect(stream.response.request.uri.query).to.not.exist;
+									expect(
+										(stream as BalenaRequestPassThroughStream).response.request
+											.uri.query,
+									).to.not.exist;
 									return rindle.extract(stream);
 								})));
 				}));

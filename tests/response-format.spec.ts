@@ -1,11 +1,10 @@
-const Bluebird = require('bluebird');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const errors = require('balena-errors');
+import { expect } from 'chai';
+import errors from 'balena-errors';
+import mockhttp from 'mockttp';
+import * as setup from './setup';
 
-const mockServer = require('mockttp').getLocal();
-
-const { auth, request, IS_BROWSER } = require('./setup')();
+const mockServer = mockhttp.getLocal();
+const { auth, request, IS_BROWSER } = setup.default();
 
 const RESPONSE_BODY = { from: 'foobar' };
 
@@ -97,6 +96,7 @@ describe('responseFormat:', function () {
 				method: 'GET',
 				baseUrl: mockServer.url,
 				url: '/',
+				// @ts-expect-error testing for wrong typing
 				responseFormat: 'uzabzabza',
 			});
 			return expect(promise).to.be.rejectedWith(

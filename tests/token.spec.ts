@@ -1,16 +1,18 @@
-const { expect } = require('chai');
-const sinon = require('sinon');
-const errors = require('balena-errors');
-const rindle = require('rindle');
-const tokens = require('./tokens.json');
+import { expect } from 'chai';
+import sinon from 'sinon';
+import errors from 'balena-errors';
+import rindle from 'rindle';
+import mockhttp from 'mockttp';
+import * as tokens from './tokens.json';
+import * as utils from '../build/utils';
+import * as setup from './setup';
+import type { BalenaRequestPassThroughStream } from '../lib/request';
+
+const mockServer = mockhttp.getLocal();
+const { auth, request } = setup.default();
 
 const johnDoeFixture = tokens.johndoe;
 const janeDoeFixture = tokens.janedoe;
-const utils = require('../build/utils');
-
-const mockServer = require('mockttp').getLocal();
-
-const { auth, request } = require('./setup')();
 
 describe('Request (token):', function () {
 	this.timeout(10000);
@@ -43,7 +45,7 @@ describe('Request (token):', function () {
 								baseUrl: mockServer.url,
 								url: '/foo',
 							})
-							.then((v) => v.request.headers.Authorization);
+							.then((v) => v.request.headers?.Authorization);
 						return expect(promise).to.eventually.equal(
 							`Bearer ${johnDoeFixture.token}`,
 						);
@@ -57,7 +59,7 @@ describe('Request (token):', function () {
 								url: '/foo',
 								sendToken: false,
 							})
-							.then((v) => v.request.headers.Authorization);
+							.then((v) => v.request.headers?.Authorization);
 						return expect(promise).to.eventually.equal(undefined);
 					});
 				});
@@ -72,7 +74,7 @@ describe('Request (token):', function () {
 								baseUrl: mockServer.url,
 								url: '/foo',
 							})
-							.then((v) => v.request.headers.Authorization);
+							.then((v) => v.request.headers?.Authorization);
 						return expect(promise).to.eventually.not.exist;
 					});
 				});
@@ -142,8 +144,10 @@ describe('Request (token):', function () {
 					// having to wait for it to make the actual request.
 					// Given the impact is minimal, the implementation aims
 					// to simplicity.
-					it('should use the new token in the same request', function () {
-						expect(auth.getKey()).to.eventually.equal(johnDoeFixture.token);
+					it('should use the new token in the same request', async function () {
+						await expect(auth.getKey()).to.eventually.equal(
+							johnDoeFixture.token,
+						);
 						return request
 							.send({
 								baseUrl: mockServer.url,
@@ -151,7 +155,7 @@ describe('Request (token):', function () {
 							})
 							.then(function (response) {
 								const authorizationHeader =
-									response.request.headers.Authorization;
+									response.request.headers?.Authorization;
 								return expect(authorizationHeader).to.equal(
 									`Bearer ${janeDoeFixture.token}`,
 								);
@@ -260,8 +264,9 @@ describe('Request (token):', function () {
 								url: '/foo',
 							})
 							.then(function (stream) {
-								const { headers } = stream.response.request;
-								expect(headers.Authorization).to.equal(
+								const { headers } = (stream as BalenaRequestPassThroughStream)
+									.response.request;
+								expect(headers?.Authorization).to.equal(
 									`Bearer ${johnDoeFixture.token}`,
 								);
 								return rindle.extract(stream);
@@ -279,8 +284,9 @@ describe('Request (token):', function () {
 								url: '/foo',
 							})
 							.then(function (stream) {
-								const { headers } = stream.response.request;
-								expect(headers.Authorization).to.not.exist;
+								const { headers } = (stream as BalenaRequestPassThroughStream)
+									.response.request;
+								expect(headers?.Authorization).to.not.exist;
 								return rindle.extract(stream);
 							}));
 				});
@@ -289,8 +295,8 @@ describe('Request (token):', function () {
 
 	describe('.refreshToken()', () =>
 		describe('given a working /user/v1/refresh-token endpoint', function () {
-			beforeEach(function () {
-				auth.setKey(johnDoeFixture.token);
+			beforeEach(async function () {
+				await auth.setKey(johnDoeFixture.token);
 				return mockServer
 					.forGet('/user/v1/refresh-token')
 					.thenReply(200, janeDoeFixture.token);

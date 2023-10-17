@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const { fetch: normalFetch, Headers: HeadersPonyfill } = (
-	require('fetch-ponyfill') as typeof import('fetch-ponyfill')
-)({ Promise });
+const { fetch: normalFetch, Headers: HeadersPonyfill } =
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	(require('fetch-ponyfill') as typeof import('fetch-ponyfill'))({ Promise });
 
 import * as urlLib from 'url';
 import * as qs from 'qs';
@@ -345,9 +345,9 @@ export async function getBody(
 			return response.blob();
 		}
 		// https://github.com/bitinn/node-fetch/blob/master/lib/body.js#L66
-		// @ts-expect-error
+		// @ts-expect-error in case buffer exists and is a function
 		if (typeof response.buffer === 'function') {
-			// @ts-expect-error
+			// @ts-expect-error call the buffer function
 			return response.buffer();
 		}
 		throw new Error(
