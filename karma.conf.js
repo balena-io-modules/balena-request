@@ -18,6 +18,12 @@ module.exports = (config) => {
 		util: false,
 		zlib: require.resolve('browserify-zlib'),
 	};
+	karmaConfig.webpack.module.rules.push({
+		test: /\.js/,
+		resolve: {
+			fullySpecified: false,
+		},
+	});
 	karmaConfig.webpack.plugins = [
 		new getKarmaConfig.webpack.ProvidePlugin({
 			// Polyfills or mocks for various node stuff

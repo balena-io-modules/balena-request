@@ -1,12 +1,15 @@
-const { expect } = require('chai');
-const rindle = require('rindle');
-const sinon = require('sinon');
-const johnDoeFixture = require('./tokens.json').johndoe;
-const utils = require('../build/utils');
+import { expect } from 'chai';
+import setup from './setup';
+import * as rindle from 'rindle';
+import * as sinon from 'sinon';
+import * as mockhttp from 'mockttp';
+import * as tokens from './tokens.json';
+import * as utils from '../build/utils';
 
-const mockServer = require('mockttp').getLocal();
+const johnDoeFixture = tokens.johndoe;
+const mockServer = mockhttp.getLocal();
 
-const { auth, request } = require('./setup')();
+const { auth, request } = setup();
 
 describe('Request (api key):', function () {
 	this.timeout(10000);

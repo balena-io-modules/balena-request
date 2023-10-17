@@ -1,16 +1,18 @@
-const { expect } = require('chai');
-const sinon = require('sinon');
-const errors = require('balena-errors');
-const rindle = require('rindle');
-const tokens = require('./tokens.json');
+import { expect } from 'chai';
+import setup from './setup';
+import * as rindle from 'rindle';
+import * as sinon from 'sinon';
+import * as errors from 'balena-errors';
+import * as mockhttp from 'mockttp';
+import * as tokens from './tokens.json';
+import * as utils from '../build/utils';
 
 const johnDoeFixture = tokens.johndoe;
 const janeDoeFixture = tokens.janedoe;
-const utils = require('../build/utils');
 
-const mockServer = require('mockttp').getLocal();
+const mockServer = mockhttp.getLocal();
 
-const { auth, request } = require('./setup')();
+const { auth, request } = setup();
 
 describe('Request (token):', function () {
 	this.timeout(10000);
@@ -142,8 +144,10 @@ describe('Request (token):', function () {
 					// having to wait for it to make the actual request.
 					// Given the impact is minimal, the implementation aims
 					// to simplicity.
-					it('should use the new token in the same request', function () {
-						expect(auth.getKey()).to.eventually.equal(johnDoeFixture.token);
+					it('should use the new token in the same request', async function () {
+						await expect(auth.getKey()).to.eventually.equal(
+							johnDoeFixture.token,
+						);
 						return request
 							.send({
 								baseUrl: mockServer.url,
@@ -289,8 +293,8 @@ describe('Request (token):', function () {
 
 	describe('.refreshToken()', () =>
 		describe('given a working /user/v1/refresh-token endpoint', function () {
-			beforeEach(function () {
-				auth.setKey(johnDoeFixture.token);
+			beforeEach(async function () {
+				await auth.setKey(johnDoeFixture.token);
 				return mockServer
 					.forGet('/user/v1/refresh-token')
 					.thenReply(200, janeDoeFixture.token);

@@ -1,10 +1,11 @@
-const Bluebird = require('bluebird');
-const { expect } = require('chai');
-const sinon = require('sinon');
+import { expect } from 'chai';
+import setup from './setup';
+import * as sinon from 'sinon';
+import * as mockhttp from 'mockttp';
 
-const mockServer = require('mockttp').getLocal();
+const mockServer = mockhttp.getLocal();
 
-const { auth, request, getCustomRequest, IS_BROWSER } = require('./setup')();
+const { auth, request, getCustomRequest } = setup();
 
 // Grab setTimeout before we replace it with a fake later, so
 // we can still do real waiting in the tests themselves
@@ -272,9 +273,9 @@ describe('Request:', function () {
 		});
 
 		describe('given an endpoint that will time out', function () {
-			beforeEach(function () {
+			beforeEach(async function () {
 				this.clock = sinon.useFakeTimers();
-				mockServer.forGet('/infinite-wait').thenTimeout();
+				await mockServer.forGet('/infinite-wait').thenTimeout();
 			});
 
 			afterEach(function () {

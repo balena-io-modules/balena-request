@@ -2,11 +2,12 @@ const IS_BROWSER = typeof window !== 'undefined' && window !== null;
 
 let dataDirectoryPath = null;
 if (!IS_BROWSER) {
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
 	const temp = require('temp').track();
 	dataDirectoryPath = temp.mkdirSync();
 }
 
-const BalenaAuth = require('balena-auth')['default'];
+import BalenaAuth from 'balena-auth';
 
 const auth = new BalenaAuth({
 	dataDirectory: dataDirectoryPath,
@@ -14,11 +15,11 @@ const auth = new BalenaAuth({
 });
 
 // Make sure any existing tokens are removed before the tests start
-auth.removeKey();
+void auth.removeKey();
 
-const { getRequest } = require('../build/request');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+import { getRequest } from '../build/request';
+import * as chai from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 
 const getCustomRequest = function (opts) {
@@ -26,7 +27,7 @@ const getCustomRequest = function (opts) {
 	return getRequest(opts);
 };
 
-module.exports = () => ({
+export default () => ({
 	IS_BROWSER,
 	auth,
 	request: getCustomRequest(),

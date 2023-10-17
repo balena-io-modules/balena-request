@@ -1,12 +1,14 @@
-const { expect } = require('chai');
-const rindle = require('rindle');
-const sinon = require('sinon');
-const Bluebird = require('bluebird');
-const mockServer = require('mockttp').getLocal();
+import { expect } from 'chai';
+import setup from './setup';
+import * as Bluebird from 'bluebird';
+import * as rindle from 'rindle';
+import * as sinon from 'sinon';
+import * as mockhttp from 'mockttp';
+import * as utils from '../build/utils';
 
-const utils = require('../build/utils');
+const mockServer = mockhttp.getLocal();
 
-const { auth, request } = require('./setup')();
+const { auth, request } = setup();
 
 describe('An interceptor', function () {
 	this.timeout(10000);
@@ -292,7 +294,7 @@ describe('An interceptor', function () {
 
 		it('should be able to change a stream response before it is returned', function () {
 			request.interceptors[0] = {
-				response(response) {
+				response() {
 					return rindle.getStreamFromString('replacement stream');
 				},
 			};
@@ -361,7 +363,7 @@ describe('An interceptor', function () {
 				mockServer.forGet('/fail').thenReply(500),
 			]).then(function () {
 				request.interceptors[0] = {
-					responseError(response) {
+					responseError() {
 						return request.send({
 							url: mockServer.urlFor('/ok'),
 						});

@@ -1,13 +1,14 @@
-const ReadableStream = require('stream').Readable;
-const { Headers } = require('fetch-ponyfill')({ Promise });
-const { expect } = require('chai');
-const sinon = require('sinon');
-const johnDoeFixture = require('./tokens.json').johndoe;
-const utils = require('../build/utils');
+import { expect } from 'chai';
+import { TokenType } from 'balena-auth/build/token';
+import setup from './setup';
+import * as fetchPonyfill from 'fetch-ponyfill';
+import * as sinon from 'sinon';
+import * as tokens from './tokens.json';
+import * as utils from '../build/utils';
 
-const { TokenType } = require('balena-auth/build/token');
-
-const { auth } = require('./setup')();
+const { Headers } = fetchPonyfill({ Promise });
+const { auth } = setup();
+const johnDoeFixture = tokens.johndoe;
 
 describe('Utils:', function () {
 	describe('.shouldRefreshKey()', function () {
