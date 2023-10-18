@@ -1,6 +1,6 @@
 {
   "name": "balena-request",
-  "version": "13.0.0",
+  "version": "13.0.1",
   "description": "Balena HTTP client",
   "main": "build/request.js",
   "types": "build/request.d.ts",
@@ -81,6 +81,6 @@
     "balena-auth": "^5.1.0"
   },
   "versionist": {
-    "publishedAt": "2023-10-11T17:43:03.690Z"
+    "publishedAt": "2023-10-18T16:48:34.582Z"
   }
 }

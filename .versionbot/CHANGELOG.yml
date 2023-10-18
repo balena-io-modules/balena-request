@@ -1,4 +1,16 @@
 - commits:
+    - subject: Update @balena/lint to 7.2.0 Update @balena/lint from 5.4.1 to 7.2.0
+      hash: 72f85ffa2f79b4b7d45b08678023409a633d2a17
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+      nested: []
+  version: 13.0.1
+  title: ""
+  date: 2023-10-18T16:48:34.377Z
+- commits:
     - subject: Drop support for node 14 & 16
       hash: c7bdf11c4ce4ea3b885a608d5ce76eeab758d32d
       body: ""
