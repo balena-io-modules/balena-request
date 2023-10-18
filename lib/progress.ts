@@ -43,6 +43,7 @@ const getProgressStream = function (
 	onState?: (chunk: any) => void,
 ) {
 	const progress =
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		require('progress-stream') as typeof import('progress-stream');
 	const progressStream = progress({
 		time: 500,
@@ -128,6 +129,7 @@ export function estimate(
 
 		const response = await requestAsync(options);
 
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const stream = require('stream') as typeof Stream;
 		const output = new stream.PassThrough() as BalenaRequestPassThroughStream;
 
@@ -138,6 +140,7 @@ export function estimate(
 
 		let responseStream: any;
 		if (response.body.getReader) {
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
 			const webStreams = require('@balena/node-web-streams') as {
 				toNodeReadable(body: any): any;
 			};
@@ -153,6 +156,7 @@ export function estimate(
 		);
 
 		if (!isBrowser && utils.isResponseCompressed(response)) {
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
 			const zlib = require('zlib') as typeof import('zlib');
 
 			// Be more lenient with decoding compressed responses, since (very rarely)

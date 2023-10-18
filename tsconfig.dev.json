@@ -1,0 +1,15 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"resolveJsonModule": true,
+		"noImplicitThis": false,
+		"skipLibCheck": true,
+	},
+	"include": [
+		"tests/**/*",
+		"lib/**/*",
+		".eslintrc.js",
+		"*.ts",
+		"*.js"
+	]
+}
