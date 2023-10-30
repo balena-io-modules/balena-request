@@ -61,6 +61,10 @@ export interface BalenaRequestStreamResult extends Stream.Readable {
 	mime: string;
 }
 
+export interface WebResourceFile extends Blob {
+	name: string;
+}
+
 export interface Interceptor {
 	request?(response: any): Promise<any>;
 	response?(response: any): Promise<any>;
