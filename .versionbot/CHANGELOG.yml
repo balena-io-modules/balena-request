@@ -1,4 +1,24 @@
 - commits:
+    - subject: Add multi part request support when File-like is present
+      hash: 6c62ff8b183f0f12fb901700f42792d3a334ebef
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+      nested: []
+    - subject: Update @balena/lint to 7.2.0 Update @balena/lint from 5.4.1 to 7.2.0
+      hash: 8c7db82bd3f808904ac68f998ee816acc1da8f47
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+      nested: []
+  version: 13.1.0
+  title: ""
+  date: 2023-10-30T16:30:21.489Z
+- commits:
     - subject: Update @balena/lint to 7.2.0 Update @balena/lint from 5.4.1 to 7.2.0
       hash: 72f85ffa2f79b4b7d45b08678023409a633d2a17
       body: ""
