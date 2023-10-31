@@ -1,3 +1,4 @@
+import * as errors from 'balena-errors';
 import { expect } from 'chai';
 import setup from './setup';
 import * as sinon from 'sinon';
@@ -163,6 +164,165 @@ describe('Request:', function () {
 						).to.be.rejected.then((error) =>
 							expect(error.statusCode).to.equal(500),
 						));
+				});
+
+				describe('given a ratelimiting response error without a Retry-After header', function () {
+					beforeEach(() =>
+						mockServer.forGet('/429').thenReply(429, '"Too Many Requests"', {
+							'Content-Length': '19',
+							'Content-Type': 'application/json',
+							Date: 'Tue, 31 Oct 2023 14:28:22 GMT',
+						}),
+					);
+
+					it('should not include Retry-After in the headers', async function () {
+						await expect(
+							request.send({
+								method: 'GET',
+								baseUrl: mockServer.url,
+								url: '/429',
+							}),
+						).to.be.rejected.then((error) => {
+							expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+							expect(error).to.have.property('statusCode', 429);
+							expect(error).to.have.property('name', 'BalenaRequestError');
+							expect(error).to.have.property('body', 'Too Many Requests');
+							expect(error).to.have.property('responseHeaders');
+							expect(error.responseHeaders.get('Retry-After')).to.equal(null);
+						});
+					});
+				});
+
+				describe('given a ratelimiting response error with a Retry-After header', function () {
+					const responseHeadersWithRetryAfter = {
+						'Retry-After': '60',
+						'Content-Length': '19',
+						'Content-Type': 'application/json',
+						Date: 'Tue, 31 Oct 2023 14:28:22 GMT',
+					};
+
+					describe('when the http server does not specify the Retry-After in the Access-Control-Expose-Headers', function () {
+						beforeEach(async () => {
+							await mockServer
+								.forGet('/429')
+								.thenReply(
+									429,
+									'"Too Many Requests"',
+									responseHeadersWithRetryAfter,
+								);
+						});
+
+						if (IS_BROWSER) {
+							it('should not include Retry-After in the headers', async function () {
+								await expect(
+									request.send({
+										method: 'GET',
+										baseUrl: mockServer.url,
+										url: '/429',
+									}),
+								).to.be.rejected.then((error) => {
+									expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+									expect(error).to.have.property('statusCode', 429);
+									expect(error).to.have.property('name', 'BalenaRequestError');
+									expect(error).to.have.property('body', 'Too Many Requests');
+									expect(error).to.have.property('responseHeaders');
+									expect(error.responseHeaders.get('Retry-After')).to.equal(
+										null,
+									);
+								});
+							});
+						} else {
+							it('should include Retry-After in the headers', async function () {
+								await expect(
+									request.send({
+										method: 'GET',
+										baseUrl: mockServer.url,
+										url: '/429',
+									}),
+								).to.be.rejected.then((error) => {
+									expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+									expect(error).to.have.property('statusCode', 429);
+									expect(error).to.have.property('name', 'BalenaRequestError');
+									expect(error).to.have.property('body', 'Too Many Requests');
+									expect(error).to.have.property('responseHeaders');
+									expect(error.responseHeaders.get('Retry-After')).to.equal(
+										'60',
+									);
+								});
+							});
+						}
+					});
+
+					describe('when the http server specifies the Access-Control-Expose-Headers=Retry-After in the GET response headers', function () {
+						beforeEach(async () => {
+							await mockServer
+								.forGet('/429')
+								.thenReply(429, '"Too Many Requests"', {
+									...responseHeadersWithRetryAfter,
+									'Access-Control-Expose-Headers': 'Retry-After',
+								});
+						});
+
+						it('should include Retry-After in the headers', async function () {
+							await expect(
+								request.send({
+									method: 'GET',
+									baseUrl: mockServer.url,
+									url: '/429',
+								}),
+							).to.be.rejected.then((error) => {
+								expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+								expect(error).to.have.property('statusCode', 429);
+								expect(error).to.have.property('name', 'BalenaRequestError');
+								expect(error).to.have.property('body', 'Too Many Requests');
+								expect(error).to.have.property('responseHeaders');
+								expect(error.responseHeaders.get('Retry-After')).to.equal('60');
+							});
+						});
+					});
+
+					describe('when the http server specifies the Access-Control-Expose-Headers=Retry-After in the OPTIONS response headers', function () {
+						let mockServer2;
+
+						beforeEach(async () => {
+							await mockServer.stop();
+							mockServer2 = mockhttp.getLocal({
+								cors: {
+									exposedHeaders: 'Retry-After',
+								},
+							});
+							await mockServer2.start();
+							await mockServer2
+								.forGet('/429')
+								.thenReply(
+									429,
+									'"Too Many Requests"',
+									responseHeadersWithRetryAfter,
+								);
+						});
+
+						afterEach(async function () {
+							await mockServer2.stop();
+							await mockServer.start();
+						});
+
+						it('should include Retry-After in the headers', async function () {
+							await expect(
+								request.send({
+									method: 'GET',
+									baseUrl: mockServer2.url,
+									url: '/429',
+								}),
+							).to.be.rejected.then((error) => {
+								expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+								expect(error).to.have.property('statusCode', 429);
+								expect(error).to.have.property('name', 'BalenaRequestError');
+								expect(error).to.have.property('body', 'Too Many Requests');
+								expect(error).to.have.property('responseHeaders');
+								expect(error.responseHeaders.get('Retry-After')).to.equal('60');
+							});
+						});
+					});
 				});
 			});
 
