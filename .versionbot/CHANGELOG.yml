@@ -1,4 +1,24 @@
 - commits:
+    - subject: Include the response headers in BalenaRequestErrors
+      hash: 9bce8edb035392b57dcb075ad832bb4ffa865f72
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Stop using require-npm4-to-publish
+      hash: 747bbef0c0a5bd54dde4e93245890957cc1c8052
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 13.2.0
+  title: ""
+  date: 2023-11-01T14:24:17.988Z
+- commits:
     - subject: Add multi part request support when File-like is present
       hash: 6c62ff8b183f0f12fb901700f42792d3a334ebef
       body: ""
