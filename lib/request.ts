@@ -296,6 +296,7 @@ export function getRequest({
 						responseError,
 						response.statusCode,
 						options,
+						response.headers,
 					);
 				}
 
