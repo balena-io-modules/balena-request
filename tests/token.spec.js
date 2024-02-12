@@ -84,24 +84,26 @@ describe('Request (token):', function () {
 				beforeEach(function () {
 					this.utilsShouldUpdateToken = sinon.stub(utils, 'shouldRefreshKey');
 					this.utilsShouldUpdateToken.returns(Promise.resolve(true));
-
-					this.authIsExpired = sinon.stub(auth, 'isExpired');
-					this.authIsExpired.returns(Promise.resolve(false));
-
 					return auth.setKey(johnDoeFixture.token);
 				});
 
 				afterEach(function () {
 					this.utilsShouldUpdateToken.restore();
-					return this.authIsExpired.restore();
 				});
 
 				describe('given a working /user/v1/refresh-token endpoint', function () {
-					beforeEach(() =>
-						mockServer
+					beforeEach(async function () {
+						await mockServer
 							.forGet('/user/v1/refresh-token')
-							.thenReply(200, janeDoeFixture.token),
-					);
+							.thenReply(200, janeDoeFixture.token);
+
+						this.authIsExpired = sinon.stub(auth, 'isExpired');
+						this.authIsExpired.returns(Promise.resolve(false));
+					});
+
+					afterEach(function () {
+						return this.authIsExpired.restore();
+					});
 
 					describe('given no base url', () =>
 						it('should not refresh the token', () =>
@@ -163,30 +165,35 @@ describe('Request (token):', function () {
 					});
 				});
 
-				describe('given /user/v1/refresh-token returns 401', function () {
-					beforeEach(() =>
-						mockServer
+				describe('given /user/v1/refresh-token returns 401 & token is expired', function () {
+					beforeEach(async function () {
+						await mockServer
 							.forGet('/user/v1/refresh-token')
-							.thenReply(401, 'Unauthorized'),
-					);
+							.thenReply(401, 'Unauthorized');
+						this.authIsExpired = sinon.stub(auth, 'isExpired');
+						this.authIsExpired.returns(Promise.resolve(true));
+					});
+
+					afterEach(function () {
+						return this.authIsExpired.restore();
+					});
 
 					describe('given an absolute url', () =>
-						it('should not attempt to refresh the token', () =>
-							auth
-								.getKey()
-								.then((savedToken) => {
-									expect(savedToken).to.equal(johnDoeFixture.token);
-									return request.send({
-										url: mockServer.url + '/foo',
-									});
-								})
-								.then(function (response) {
-									expect(response.body).to.equal('bar');
-									return auth.getKey();
-								})
-								.then((savedToken) =>
-									expect(savedToken).to.equal(johnDoeFixture.token),
-								)));
+						it('should not attempt to refresh the token', () => {
+							const requestRefreshToken = sinon.stub(request, 'refreshToken');
+							const promise = auth.getKey().then((savedToken) => {
+								expect(savedToken).to.equal(johnDoeFixture.token);
+								return request.send({
+									url: mockServer.url + '/foo',
+								});
+							});
+
+							expect(requestRefreshToken.called).to.equal(false);
+							requestRefreshToken.restore();
+							return expect(promise).to.be.rejectedWith(
+								errors.BalenaExpiredToken,
+							);
+						}));
 
 					it('should be rejected with an expiration error', function () {
 						const promise = request.send({
@@ -219,10 +226,42 @@ describe('Request (token):', function () {
 						));
 				});
 
+				describe('given /user/v1/refresh-token returns 401 & token is not expired', function () {
+					beforeEach(async function () {
+						await mockServer.forGet('/user/v1/refresh-token').thenReply(401);
+						this.authIsExpired = sinon.stub(auth, 'isExpired');
+						this.authIsExpired.returns(Promise.resolve(false));
+					});
+
+					afterEach(function () {
+						return this.authIsExpired.restore();
+					});
+
+					describe('given an absolute url', () =>
+						it('should not attempt to refresh the token', () =>
+							auth
+								.getKey()
+								.then((savedToken) => {
+									expect(savedToken).to.equal(johnDoeFixture.token);
+									return request.send({
+										url: mockServer.url + '/foo',
+									});
+								})
+								.then(function (response) {
+									expect(response.body).to.equal('bar');
+									return auth.getKey();
+								})
+								.then((savedToken) =>
+									expect(savedToken).to.equal(johnDoeFixture.token),
+								)));
+				});
+
 				describe('given /user/v1/refresh-token returns a non 401 status code', function () {
-					beforeEach(() =>
-						mockServer.forGet('/user/v1/refresh-token').thenReply(500),
-					);
+					beforeEach(async function () {
+						await mockServer.forGet('/user/v1/refresh-token').thenReply(500);
+						this.authIsExpired = sinon.stub(auth, 'isExpired');
+						this.authIsExpired.returns(Promise.resolve(false));
+					});
 
 					it('should be rejected with a request error', function () {
 						const promise = request.send({
