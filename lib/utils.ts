@@ -37,7 +37,7 @@ const IS_BROWSER = typeof window !== 'undefined' && window !== null;
  * @module utils
  */
 
-export const TOKEN_REFRESH_INTERVAL = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
+export const TOKEN_REFRESH_INTERVAL = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
 /**
  * @summary Determine if the token should be updated
