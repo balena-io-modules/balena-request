@@ -1,4 +1,16 @@
 - commits:
+    - subject: Increase TOKEN_REFRESH_INTERVAL from 1 hours to 1 day
+      hash: b841794b35ef310f831a37df9003418e9b90c99a
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Otávio Jacobi
+      nested: []
+  version: 13.3.0
+  title: ""
+  date: 2024-02-13T22:08:49.619Z
+- commits:
     - subject: "fix: throw BalenaExpiredToken only when token is really expired"
       hash: 1de264cc38f3c873afd08b80f678329b61f00dd4
       body: ""
