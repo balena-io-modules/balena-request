@@ -1,4 +1,16 @@
 - commits:
+    - subject: "fix: throw BalenaExpiredToken only when token is really expired"
+      hash: 1de264cc38f3c873afd08b80f678329b61f00dd4
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otávio Jacobi
+      nested: []
+  version: 13.2.1
+  title: ""
+  date: 2024-02-13T17:17:44.014Z
+- commits:
     - subject: Include the response headers in BalenaRequestErrors
       hash: 9bce8edb035392b57dcb075ad832bb4ffa865f72
       body: ""
