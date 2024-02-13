@@ -106,13 +106,13 @@ export function getRequest({
 	const requestAsync = utils.getRequestAsync();
 	const requestStream = isBrowser
 		? // eslint-disable-next-line @typescript-eslint/no-var-requires
-		  utils.getRequestAsync(require('fetch-readablestream') as typeof fetch)
+			utils.getRequestAsync(require('fetch-readablestream') as typeof fetch)
 		: requestAsync;
 
 	const debugRequest = !debug
 		? function () {
 				// noop
-		  }
+			}
 		: utils.debugRequest;
 
 	const prepareOptions = async function (options: BalenaRequestOptions) {
@@ -469,7 +469,11 @@ export function getRequest({
 				refreshToken: false,
 			});
 		} catch (err: any) {
-			if (err.code === 'BalenaRequestError' && err.statusCode === 401) {
+			if (
+				err.code === 'BalenaRequestError' &&
+				err.statusCode === 401 &&
+				(await auth.isExpired())
+			) {
 				const expiredKey = await auth.getKey();
 				await auth.removeKey();
 				throw new errors.BalenaExpiredToken(expiredKey);

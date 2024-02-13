@@ -61,7 +61,7 @@ const getProgressStream = function (
 					received: state.transferred,
 					eta: state.eta,
 					percentage: state.percentage,
-			  })
+				})
 			: undefined;
 	});
 

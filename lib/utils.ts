@@ -22,7 +22,7 @@ import * as urlLib from 'url';
 import * as qs from 'qs';
 import * as errors from 'balena-errors';
 import type BalenaAuth from 'balena-auth';
-import { FormData as FormDataNodeType } from 'formdata-node';
+import type { FormData as FormDataNodeType } from 'formdata-node';
 import { TokenType } from 'balena-auth';
 import type {
 	BalenaRequestOptions,
