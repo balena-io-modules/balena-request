@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update balena-auth to 6.0.1
+      hash: 1d3cd469288f2dd0e1ed70a292778b70bd518528
+      body: |
+        Update balena-auth from 5.1.0 to 6.0.1
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 13.3.1
+  title: ""
+  date: 2024-02-23T10:50:39.931Z
+- commits:
     - subject: Increase TOKEN_REFRESH_INTERVAL from 1 hours to 1 day
       hash: b841794b35ef310f831a37df9003418e9b90c99a
       body: ""
