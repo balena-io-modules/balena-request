@@ -1,4 +1,16 @@
 - commits:
+    - subject: Fix always following redirects when followRedirect = false
+      hash: 34db7e138eabfcfcfd822133b391c738d01de323
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 13.3.2
+  title: ""
+  date: 2024-07-12T09:16:13.529Z
+- commits:
     - subject: Update balena-auth to 6.0.1
       hash: 1d3cd469288f2dd0e1ed70a292778b70bd518528
       body: |
