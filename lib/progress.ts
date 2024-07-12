@@ -95,16 +95,12 @@ export interface BalenaRequestPassThroughStream extends Stream.PassThrough {
  * 			console.log(state)
  */
 export function estimate(
-	requestAsync?: ReturnType<typeof getRequestAsync>,
+	requestAsync: ReturnType<typeof getRequestAsync> = utils.getRequestAsync(),
 	isBrowser?: boolean,
 ) {
 	return async function (
 		options: BalenaRequestOptions,
 	): Promise<BalenaRequestPassThroughStream> {
-		if (requestAsync == null) {
-			requestAsync = utils.getRequestAsync();
-		}
-
 		options.gzip = false;
 		options.headers!['Accept-Encoding'] = 'gzip, deflate';
 
