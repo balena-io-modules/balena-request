@@ -313,7 +313,7 @@ const processRequestOptions = function (options: BalenaRequestOptions) {
 		body,
 		headers: new HeadersPonyfill(headers),
 		mode: 'cors',
-		...(options.followRedirect && { redirect: 'follow' }),
+		redirect: options.followRedirect === false ? 'manual' : 'follow',
 	};
 
 	return [url, opts] as const;
