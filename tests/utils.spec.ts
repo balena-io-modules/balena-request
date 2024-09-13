@@ -1,13 +1,11 @@
 import { expect } from 'chai';
 import { TokenType } from 'balena-auth/build/token';
 import setup from './setup';
-import fetchPonyfill from 'fetch-ponyfill';
 import * as sinon from 'sinon';
 import * as tokens from './tokens.json';
 import * as utils from '../build/utils';
 import type { BalenaRequestResponse } from '../build/request';
 
-const { Headers } = fetchPonyfill({ Promise });
 const { auth } = setup();
 const johnDoeFixture = tokens.johndoe;
 

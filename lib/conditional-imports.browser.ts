@@ -10,6 +10,7 @@ export const getFormDataEncoder = () => {
 	);
 };
 
-export const createGunzip = () => {
-	throw new Error('createGunzip was unexpectedly called in browser build');
+export const getStreamFetchLibrary = () => {
+	// eslint-disable-next-line @typescript-eslint/no-var-requires
+	return require('fetch-readablestream') as typeof fetch;
 };

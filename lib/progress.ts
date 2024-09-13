@@ -19,6 +19,8 @@ import type { BalenaRequestOptions, BalenaRequestResponse } from './request';
 import type { getRequestAsync } from './utils';
 import type * as Stream from 'stream';
 
+const IS_BROWSER = typeof window !== 'undefined' && window !== null;
+
 /**
  * @module progress
  */
@@ -94,17 +96,10 @@ export interface BalenaRequestPassThroughStream extends Stream.PassThrough {
  * 		stream.on 'progress', (state) ->
  * 			console.log(state)
  */
-export function estimate(
-	requestAsync?: ReturnType<typeof getRequestAsync>,
-	isBrowser?: boolean,
-) {
+export function estimate(requestAsync: ReturnType<typeof getRequestAsync>) {
 	return async function (
 		options: BalenaRequestOptions,
 	): Promise<BalenaRequestPassThroughStream> {
-		if (requestAsync == null) {
-			requestAsync = utils.getRequestAsync();
-		}
-
 		options.gzip = false;
 		options.headers!['Accept-Encoding'] = 'gzip, deflate';
 
@@ -167,7 +162,7 @@ export function estimate(
 			output.emit('progress', state),
 		);
 
-		if (!isBrowser && utils.isResponseCompressed(response)) {
+		if (!IS_BROWSER && utils.isResponseCompressed(response)) {
 			const { createGunzip } =
 				// eslint-disable-next-line @typescript-eslint/no-var-requires
 				require('./conditional-imports') as typeof import('./conditional-imports');

@@ -20,6 +20,16 @@ export const getFormDataEncoder = () => {
 	return FormDataEncoder;
 };
 
+export const getStreamFetchLibrary = () => {
+	// On node we still use node-fetch since there doesn't seem to be a way
+	// to avoid auto-decompressing a stream when using native fetch,
+	// which blocks us from giving back a correct download progress.
+	if (IS_BROWSER) {
+		return require('fetch-readablestream');
+	}
+	return require('node-fetch');
+};
+
 export const createGunzip = () => {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires
 	const zlib = require('zlib') as typeof import('zlib');
