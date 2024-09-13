@@ -9,7 +9,3 @@ export const getFormDataEncoder = () => {
 		'form-data-encoder was unexpectedly imported in browser build',
 	);
 };
-
-export const createGunzip = () => {
-	throw new Error('createGunzip was unexpectedly called in browser build');
-};

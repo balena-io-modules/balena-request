@@ -351,10 +351,7 @@ export function getRequest({
 		return prepareOptions(options)
 			.then(interceptRequestOptions, interceptRequestError)
 			.then(async (opts) => {
-				const download = await progress.estimate(
-					requestStream,
-					isBrowser,
-				)(opts);
+				const download = await progress.estimate(requestStream)(opts);
 
 				if (!utils.isErrorCode(download.response.statusCode)) {
 					// TODO: Move this to balena-image-manager

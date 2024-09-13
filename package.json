@@ -74,7 +74,6 @@
   "dependencies": {
     "@balena/node-web-streams": "^0.2.3",
     "balena-errors": "^4.9.0",
-    "fetch-ponyfill": "^7.1.0",
     "fetch-readablestream": "^0.2.0",
     "form-data-encoder": "^4.0.2",
     "formdata-node": "^6.0.3",
