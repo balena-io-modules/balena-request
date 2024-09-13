@@ -94,17 +94,10 @@ export interface BalenaRequestPassThroughStream extends Stream.PassThrough {
  * 		stream.on 'progress', (state) ->
  * 			console.log(state)
  */
-export function estimate(
-	requestAsync?: ReturnType<typeof getRequestAsync>,
-	isBrowser?: boolean,
-) {
+export function estimate(requestAsync: ReturnType<typeof getRequestAsync>) {
 	return async function (
 		options: BalenaRequestOptions,
 	): Promise<BalenaRequestPassThroughStream> {
-		if (requestAsync == null) {
-			requestAsync = utils.getRequestAsync();
-		}
-
 		options.gzip = false;
 		options.headers!['Accept-Encoding'] = 'gzip, deflate';
 
@@ -155,27 +148,7 @@ export function estimate(
 			output.emit('progress', state),
 		);
 
-		if (!isBrowser && utils.isResponseCompressed(response)) {
-			const { createGunzip } =
-				// eslint-disable-next-line @typescript-eslint/no-var-requires
-				require('./conditional-imports') as typeof import('./conditional-imports');
-
-			const gunzip = createGunzip();
-			gunzip.on('error', (e) => output.emit('error', e));
-
-			// Uncompress after or before piping through progress
-			// depending on the response length available to us
-			if (
-				responseLength.compressed != null &&
-				responseLength.uncompressed == null
-			) {
-				responseStream.pipe(progressStream).pipe(gunzip).pipe(output);
-			} else {
-				responseStream.pipe(gunzip).pipe(progressStream).pipe(output);
-			}
-		} else {
-			responseStream.pipe(progressStream).pipe(output);
-		}
+		responseStream.pipe(progressStream).pipe(output);
 
 		// Stream any request errors on downstream
 		responseStream.on('error', (e: Error) => output.emit('error', e));
