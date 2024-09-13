@@ -101,14 +101,9 @@ export function getRequest({
 	auth,
 	debug = false,
 	retries = 0,
-	isBrowser = false,
 	interceptors: $interceptors = [],
 }: RequestFactoryOptions) {
 	const requestAsync = utils.getRequestAsync();
-	const requestStream = isBrowser
-		? // eslint-disable-next-line @typescript-eslint/no-var-requires
-			utils.getRequestAsync(require('fetch-readablestream') as typeof fetch)
-		: requestAsync;
 
 	const debugRequest = !debug
 		? function () {
@@ -347,15 +342,16 @@ export function getRequest({
 	function stream(
 		options: BalenaRequestOptions,
 	): Promise<BalenaRequestStreamResult> {
+		const { getStreamFetchLibrary } =
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
+			require('./conditional-imports') as typeof import('./conditional-imports');
+		const requestStream = utils.getRequestAsync(getStreamFetchLibrary());
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const progress = require('./progress') as typeof import('./progress');
 		return prepareOptions(options)
 			.then(interceptRequestOptions, interceptRequestError)
 			.then(async (opts) => {
-				const download = await progress.estimate(
-					requestStream,
-					isBrowser,
-				)(opts);
+				const download = await progress.estimate(requestStream)(opts);
 
 				if (!utils.isErrorCode(download.response.statusCode)) {
 					// TODO: Move this to balena-image-manager
