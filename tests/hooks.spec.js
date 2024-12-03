@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import setup from './setup';
 import * as Bluebird from 'bluebird';
-import * as rindle from 'rindle';
+import * as stringToStream from 'string-to-stream';
 import * as sinon from 'sinon';
 import * as mockhttp from 'mockttp';
 import * as utils from '../build/utils';
@@ -102,7 +102,7 @@ describe('An interceptor', function () {
 				.stream({
 					url: mockServer.urlFor('/original'),
 				})
-				.then(rindle.extract)
+				.then(utils.getStreamContents)
 				.then(function (data) {
 					const body = JSON.parse(data);
 					expect(body).to.deep.equal({ requested: 'changed' });
@@ -295,7 +295,7 @@ describe('An interceptor', function () {
 		it('should be able to change a stream response before it is returned', function () {
 			request.interceptors[0] = {
 				response() {
-					return rindle.getStreamFromString('replacement stream');
+					return stringToStream('replacement stream');
 				},
 			};
 
@@ -303,7 +303,7 @@ describe('An interceptor', function () {
 				.stream({
 					url: mockServer.urlFor('/original'),
 				})
-				.then(rindle.extract)
+				.then(utils.getStreamContents)
 				.then((data) => expect(data).to.equal('replacement stream'));
 		});
 	});

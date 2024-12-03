@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import setup from './setup';
-import * as rindle from 'rindle';
 import * as sinon from 'sinon';
 import * as errors from 'balena-errors';
 import * as mockhttp from 'mockttp';
@@ -307,7 +306,7 @@ describe('Request (token):', function () {
 								expect(headers.Authorization).to.equal(
 									`Bearer ${johnDoeFixture.token}`,
 								);
-								return rindle.extract(stream);
+								return utils.getStreamContents(stream);
 							}));
 				});
 
@@ -324,7 +323,7 @@ describe('Request (token):', function () {
 							.then(function (stream) {
 								const { headers } = stream.response.request;
 								expect(headers.Authorization).to.not.exist;
-								return rindle.extract(stream);
+								return utils.getStreamContents(stream);
 							}));
 				});
 			});
