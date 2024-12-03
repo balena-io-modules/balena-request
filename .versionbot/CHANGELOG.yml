@@ -1,4 +1,40 @@
 - commits:
+    - subject: "Tests: add missing @types/temp dependency"
+      hash: 2698e0be2a764268831bf2388c82fabeeac542a4
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+    - subject: "Tests: remove bluebird dependency"
+      hash: 461710c7c2e7b76e7141ae920e668bf93620e745
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+    - subject: "Tests: remove rindle dependency"
+      hash: 27fca4510937b79cf796be5985ff251d0cd33ece
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+    - subject: Update `author` in package.json
+      hash: b7d09e73d66a2253b672fabae3b4f1d5c111247d
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 13.3.3
+  title: ""
+  date: 2024-12-03T15:23:02.553Z
+- commits:
     - subject: Fix always following redirects when followRedirect = false
       hash: 34db7e138eabfcfcfd822133b391c738d01de323
       body: ""
