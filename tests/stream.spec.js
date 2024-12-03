@@ -1,15 +1,23 @@
 import { PassThrough } from 'stream';
 import { expect } from 'chai';
 import setup from './setup';
-import * as Bluebird from 'bluebird';
 import * as zlib from 'browserify-zlib';
 import * as mockhttp from 'mockttp';
 import * as utils from '../build/utils';
 
 const mockServer = mockhttp.getLocal();
 
-const { auth, request } = setup();
-const gzip = Bluebird.promisify(zlib.gzip);
+const { auth, request, delay } = setup();
+const gzip = (contents) =>
+	new Promise((resolve, reject) =>
+		zlib.gzip(contents, (err, res) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(res);
+			}
+		}),
+	);
 
 describe('Request (stream):', function () {
 	beforeEach(() => Promise.all([auth.removeKey(), mockServer.start()]));
@@ -63,7 +71,7 @@ describe('Request (stream):', function () {
 					baseUrl: mockServer.url,
 					url: '/foo',
 				})
-				.then((stream) => Bluebird.delay(200).return(stream))
+				.then((stream) => delay(200).then(() => stream))
 				.then(function (stream) {
 					const pass = new PassThrough();
 					stream.pipe(pass);
