@@ -364,17 +364,8 @@ export function getRequest({
 				}
 
 				// If status code is an error code, interpret the body of the request as an error.
-				const chunks: unknown[] = [];
-				download.on('data', function (chunk: unknown) {
-					chunks.push(chunk);
-				});
-				await new Promise((resolve, reject) => {
-					download.on('error', reject);
-					download.on('close', resolve);
-					download.on('end', resolve);
-					download.on('done', resolve);
-				});
-				const responseError = chunks.join() || 'The request was unsuccessful';
+				const data = await utils.getStreamContents(download);
+				const responseError = data || 'The request was unsuccessful';
 
 				debugRequest(options, download.response);
 				// @ts-expect-error error without request options

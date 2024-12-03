@@ -544,3 +544,24 @@ function handleAbortIfNotSupported(
 export function getRequestAsync($fetch: typeof fetch = normalFetch) {
 	return (options: BalenaRequestOptions) => requestAsync($fetch, options);
 }
+
+/**
+ * @summary A function that returns the contents of a stream
+ * @function
+ * @protected
+ *
+ * @param {Readable} [stream] - the stream to get the contents of
+ */
+export async function getStreamContents(stream: Readable) {
+	const chunks: unknown[] = [];
+	stream.on('data', function (chunk) {
+		chunks.push(chunk);
+	});
+	await new Promise((resolve, reject) => {
+		stream.on('error', reject);
+		stream.on('close', resolve);
+		stream.on('end', resolve);
+		stream.on('done', resolve);
+	});
+	return chunks.join();
+}

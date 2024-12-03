@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import setup from './setup';
-import * as rindle from 'rindle';
 import * as sinon from 'sinon';
 import * as mockhttp from 'mockttp';
 import * as tokens from './tokens.json';
@@ -93,7 +92,7 @@ describe('Request (api key):', function () {
 									expect(stream.response.request.uri.query).to.equal(
 										'apikey=123456789',
 									);
-									return rindle.extract(stream);
+									return utils.getStreamContents(stream);
 								})));
 				});
 
@@ -141,7 +140,7 @@ describe('Request (api key):', function () {
 									expect(stream.response.request.uri.query).to.equal(
 										'apikey=123456789',
 									);
-									return rindle.extract(stream);
+									return utils.getStreamContents(stream);
 								}));
 
 						it('should still send an Authorization header', () =>
@@ -157,7 +156,7 @@ describe('Request (api key):', function () {
 									expect(headers.Authorization).to.equal(
 										`Bearer ${johnDoeFixture.token}`,
 									);
-									return rindle.extract(stream);
+									return utils.getStreamContents(stream);
 								}));
 					});
 				});
@@ -191,7 +190,7 @@ describe('Request (api key):', function () {
 								})
 								.then(function (stream) {
 									expect(stream.response.request.uri.query).to.not.exist;
-									return rindle.extract(stream);
+									return utils.getStreamContents(stream);
 								})));
 				}));
 		});

@@ -6,13 +6,7 @@ import * as mockhttp from 'mockttp';
 
 const mockServer = mockhttp.getLocal();
 
-const { auth, request, getCustomRequest, IS_BROWSER } = setup();
-
-// Grab setTimeout before we replace it with a fake later, so
-// we can still do real waiting in the tests themselves
-const unstubbedSetTimeout = setTimeout;
-const delay = (delayMs) =>
-	new Promise((resolve) => unstubbedSetTimeout(resolve, delayMs));
+const { auth, request, getCustomRequest, IS_BROWSER, delay } = setup();
 
 class TestFile extends Blob {
 	constructor(blobParts, name, type) {

@@ -27,9 +27,16 @@ const getCustomRequest = function (opts) {
 	return getRequest(opts);
 };
 
+// Grab setTimeout before we replace it with a fake later, so
+// we can still do real waiting in the tests themselves
+const unstubbedSetTimeout = setTimeout;
+const delay = (delayMs) =>
+	new Promise((resolve) => unstubbedSetTimeout(resolve, delayMs));
+
 export default () => ({
 	IS_BROWSER,
 	auth,
 	request: getCustomRequest(),
 	getCustomRequest,
+	delay,
 });
