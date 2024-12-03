@@ -116,10 +116,6 @@ export function getRequest({
 		: utils.debugRequest;
 
 	const prepareOptions = async function (options: BalenaRequestOptions) {
-		if (options == null) {
-			options = {} as BalenaRequestOptions;
-		}
-
 		const { baseUrl } = options;
 
 		options = {
@@ -450,6 +446,9 @@ export function getRequest({
 		// Only refresh if we have balena-auth
 		if (auth == null) {
 			throw new Error('Auth module not provided in initializer');
+		}
+		if (!baseUrl) {
+			throw new Error('The baseUrl parameter is required');
 		}
 
 		let response: BalenaRequestResponse<string>;
