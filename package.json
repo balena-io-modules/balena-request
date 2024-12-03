@@ -2,6 +2,7 @@
   "name": "balena-request",
   "version": "13.3.4",
   "description": "Balena HTTP client",
+  "type": "commonjs",
   "main": "build/request.js",
   "types": "build/request.d.ts",
   "homepage": "https://github.com/balena-io-modules/balena-request",
