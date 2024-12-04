@@ -5,6 +5,7 @@ import * as errors from 'balena-errors';
 import * as mockhttp from 'mockttp';
 import * as tokens from './tokens.json';
 import * as utils from '../build/utils';
+import type { BalenaRequestPassThroughStream } from '../build/request';
 
 const johnDoeFixture = tokens.johndoe;
 const janeDoeFixture = tokens.janedoe;
@@ -44,7 +45,7 @@ describe('Request (token):', function () {
 								baseUrl: mockServer.url,
 								url: '/foo',
 							})
-							.then((v) => v.request.headers.Authorization);
+							.then((v) => v.request.headers?.Authorization);
 						return expect(promise).to.eventually.equal(
 							`Bearer ${johnDoeFixture.token}`,
 						);
@@ -58,7 +59,7 @@ describe('Request (token):', function () {
 								url: '/foo',
 								sendToken: false,
 							})
-							.then((v) => v.request.headers.Authorization);
+							.then((v) => v.request.headers?.Authorization);
 						return expect(promise).to.eventually.equal(undefined);
 					});
 				});
@@ -73,7 +74,7 @@ describe('Request (token):', function () {
 								baseUrl: mockServer.url,
 								url: '/foo',
 							})
-							.then((v) => v.request.headers.Authorization);
+							.then((v) => v.request.headers?.Authorization);
 						return expect(promise).to.eventually.not.exist;
 					});
 				});
@@ -156,7 +157,7 @@ describe('Request (token):', function () {
 							})
 							.then(function (response) {
 								const authorizationHeader =
-									response.request.headers.Authorization;
+									response.request.headers?.Authorization;
 								return expect(authorizationHeader).to.equal(
 									`Bearer ${janeDoeFixture.token}`,
 								);
@@ -302,8 +303,9 @@ describe('Request (token):', function () {
 								url: '/foo',
 							})
 							.then(function (stream) {
-								const { headers } = stream.response.request;
-								expect(headers.Authorization).to.equal(
+								const { headers } = (stream as BalenaRequestPassThroughStream)
+									.response.request;
+								expect(headers?.Authorization).to.equal(
 									`Bearer ${johnDoeFixture.token}`,
 								);
 								return utils.getStreamContents(stream);
@@ -321,8 +323,9 @@ describe('Request (token):', function () {
 								url: '/foo',
 							})
 							.then(function (stream) {
-								const { headers } = stream.response.request;
-								expect(headers.Authorization).to.not.exist;
+								const { headers } = (stream as BalenaRequestPassThroughStream)
+									.response.request;
+								expect(headers?.Authorization).to.not.exist;
 								return utils.getStreamContents(stream);
 							}));
 				});

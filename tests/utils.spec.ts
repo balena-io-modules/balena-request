@@ -5,6 +5,7 @@ import * as fetchPonyfill from 'fetch-ponyfill';
 import * as sinon from 'sinon';
 import * as tokens from './tokens.json';
 import * as utils from '../build/utils';
+import type { BalenaRequestResponse } from '../build/request';
 
 const { Headers } = fetchPonyfill({ Promise });
 const { auth } = setup();
@@ -237,13 +238,15 @@ describe('Utils:', function () {
 				headers: new Headers({
 					'content-encoding': 'gzip',
 				}),
-			};
+			} as BalenaRequestResponse<any>;
 
 			return expect(utils.isResponseCompressed(response)).to.be.true;
 		});
 
 		it('should return false if Content-Encoding is not set', function () {
-			const response = { headers: new Headers({}) };
+			const response = {
+				headers: new Headers({}),
+			} as BalenaRequestResponse<any>;
 
 			return expect(utils.isResponseCompressed(response)).to.be.false;
 		});

@@ -1,3 +1,5 @@
+import './browserify-zlib';
+
 import { PassThrough } from 'stream';
 import { expect } from 'chai';
 import setup from './setup';
@@ -8,8 +10,8 @@ import * as utils from '../build/utils';
 const mockServer = mockhttp.getLocal();
 
 const { auth, request, delay } = setup();
-const gzip = (contents) =>
-	new Promise((resolve, reject) =>
+const gzip = (contents: string) =>
+	new Promise<Buffer>((resolve, reject) =>
 		zlib.gzip(contents, (err, res) => {
 			if (err) {
 				reject(err);
@@ -18,6 +20,14 @@ const gzip = (contents) =>
 			}
 		}),
 	);
+
+const writeMethods = [
+	['DELETE', 'Delete'],
+	['PATCH', 'Patch'],
+	['PUT', 'Put'],
+	['POST', 'Post'],
+] as const;
+const methods = [['GET', 'Get'], ...writeMethods] as const;
 
 describe('Request (stream):', function () {
 	beforeEach(() => Promise.all([auth.removeKey(), mockServer.start()]));
@@ -86,10 +96,8 @@ describe('Request (stream):', function () {
 
 	describe('given multiple endpoints', function () {
 		beforeEach(() =>
-			['get', 'post', 'put', 'patch', 'delete'].forEach((method) =>
-				mockServer[`for${method[0].toUpperCase() + method.slice(1)}`](
-					'/foo',
-				).thenReply(200, method.toUpperCase()),
+			methods.forEach(([upperMethod, camelMethod]) =>
+				mockServer[`for${camelMethod}`]('/foo').thenReply(200, upperMethod),
 			),
 		);
 
@@ -134,7 +142,10 @@ describe('Request (stream):', function () {
 					baseUrl: mockServer.url,
 					url: '/foo',
 				})
-				.then((stream) => expect(stream.length).to.be.undefined));
+				.then((stream) => {
+					// @ts-expect-error We're intentionally testing invalid property
+					expect(stream.length).to.be.undefined;
+				}));
 	});
 
 	describe('given an gzip endpoint with a content-length header', function () {
