@@ -1,4 +1,16 @@
 - commits:
+    - subject: "Tests: Convert to typescript"
+      hash: 2697961c510380f62735cf0a3e9a2c2224e70545
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 13.3.4
+  title: ""
+  date: 2024-12-04T16:10:07.343Z
+- commits:
     - subject: "Tests: add missing @types/temp dependency"
       hash: 2698e0be2a764268831bf2388c82fabeeac542a4
       body: ""
