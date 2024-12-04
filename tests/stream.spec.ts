@@ -1,5 +1,3 @@
-import './browserify-zlib';
-
 import { PassThrough } from 'stream';
 import { expect } from 'chai';
 import setup from './setup';

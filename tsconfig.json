@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "Node16",
         "declaration": true,
         "outDir": "build",
         "removeComments": false,
@@ -10,7 +10,6 @@
         "target": "es2017",
         "noUnusedParameters": true,
         "noUnusedLocals": true,
-        "moduleResolution": "node",
         "skipLibCheck": true,
         "importHelpers": true
     },

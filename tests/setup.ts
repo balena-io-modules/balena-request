@@ -19,7 +19,7 @@ void auth.removeKey();
 
 import { getRequest } from '../build/request';
 import * as chai from 'chai';
-import * as chaiAsPromised from 'chai-as-promised';
+import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 
 const getCustomRequest = function (opts = {}) {
