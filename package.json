@@ -21,12 +21,12 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "lint": "balena-lint -e js -e ts lib tests",
+    "lint": "balena-lint -e js -e ts lib tests && tsc --noEmit --project tsconfig.dev.json",
     "lint-fix": "balena-lint -e js -e ts --fix lib tests",
     "pretest": "npm run build",
     "test": "npm run test-node && npm run test-browser",
     "posttest": "npm run lint",
-    "test-node": "mocha -r ts-node/register/transpile-only --reporter spec tests/**/*.spec.js",
+    "test-node": "mocha -r ts-node/register/transpile-only --reporter spec tests/**/*.spec.ts",
     "test-browser": "mockttp -c karma start",
     "build": "npx tsc",
     "prepare": "npm run build",

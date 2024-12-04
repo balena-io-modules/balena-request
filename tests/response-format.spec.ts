@@ -80,7 +80,7 @@ describe('responseFormat:', function () {
 						return reader.readAsText(body);
 					});
 				});
-			return expect(promise).to.eventually.satisfy(function (body) {
+			return expect(promise).to.eventually.satisfy(function (body: any) {
 				const s = JSON.stringify(RESPONSE_BODY);
 				if (IS_BROWSER) {
 					return body === s;
@@ -97,6 +97,7 @@ describe('responseFormat:', function () {
 				method: 'GET',
 				baseUrl: mockServer.url,
 				url: '/',
+				// @ts-expect-error We're intentionally testing invalid input
 				responseFormat: 'uzabzabza',
 			});
 			return expect(promise).to.be.rejectedWith(

@@ -9,11 +9,22 @@ const mockServer = mockhttp.getLocal();
 const { auth, request, getCustomRequest, IS_BROWSER, delay } = setup();
 
 class TestFile extends Blob {
-	constructor(blobParts, name, type) {
+	constructor(
+		blobParts: BlobPart[],
+		public name: string,
+		type?: string,
+	) {
 		super(blobParts, { type });
-		this.name = name;
 	}
 }
+
+const writeMethods = [
+	['DELETE', 'Delete'],
+	['PATCH', 'Patch'],
+	['PUT', 'Put'],
+	['POST', 'Post'],
+] as const;
+const methods = [['GET', 'Get'], ...writeMethods] as const;
 
 describe('Request:', function () {
 	this.timeout(10000);
@@ -53,11 +64,9 @@ describe('Request:', function () {
 		describe('given multiple endpoints', function () {
 			beforeEach(() =>
 				Promise.all(
-					['get', 'post', 'put', 'patch', 'delete'].map((method) =>
-						mockServer[`for${method[0].toUpperCase() + method.slice(1)}`](
-							'/foo',
-						).thenJson(200, {
-							method: method.toUpperCase(),
+					methods.map(([upperMethod, camelMethod]) =>
+						mockServer[`for${camelMethod}`]('/foo').thenJson(200, {
+							method: upperMethod,
 						}),
 					),
 				),
@@ -276,7 +285,7 @@ describe('Request:', function () {
 					});
 
 					describe('when the http server specifies the Access-Control-Expose-Headers=Retry-After in the OPTIONS response headers', function () {
-						let mockServer2;
+						let mockServer2: mockhttp.Mockttp;
 
 						beforeEach(async () => {
 							await mockServer.stop();
@@ -356,10 +365,10 @@ describe('Request:', function () {
 		});
 
 		describe('given simple endpoints that handle a request body', () =>
-			['delete', 'patch', 'put', 'post'].forEach((method) =>
-				describe(`given a ${method.toUpperCase()} endpoint that matches the request body`, function () {
+			writeMethods.forEach(([upperMethod, camelMethod]) =>
+				describe(`given a ${upperMethod} endpoint that matches the request body`, function () {
 					beforeEach(() =>
-						mockServer[`for${method[0].toUpperCase() + method.slice(1)}`]('/')
+						mockServer[`for${camelMethod}`]('/')
 							.withBody(JSON.stringify({ foo: 'bar' }))
 							.thenJson(200, { matched: true }),
 					);
@@ -367,7 +376,7 @@ describe('Request:', function () {
 					it('should eventually return the body', function () {
 						const promise = request
 							.send({
-								method: method.toUpperCase(),
+								method: upperMethod,
 								baseUrl: mockServer.url,
 								url: '/',
 								body: {

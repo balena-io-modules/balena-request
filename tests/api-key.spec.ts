@@ -4,6 +4,7 @@ import * as sinon from 'sinon';
 import * as mockhttp from 'mockttp';
 import * as tokens from './tokens.json';
 import * as utils from '../build/utils';
+import type { BalenaRequestPassThroughStream } from '../build/request';
 
 const johnDoeFixture = tokens.johndoe;
 const mockServer = mockhttp.getLocal();
@@ -89,9 +90,10 @@ describe('Request (api key):', function () {
 									apiKey: '123456789',
 								})
 								.then(function (stream) {
-									expect(stream.response.request.uri.query).to.equal(
-										'apikey=123456789',
-									);
+									expect(
+										(stream as BalenaRequestPassThroughStream).response.request
+											.uri.query,
+									).to.equal('apikey=123456789');
 									return utils.getStreamContents(stream);
 								})));
 				});
@@ -120,7 +122,7 @@ describe('Request (api key):', function () {
 									url: '/foo',
 									apiKey: '123456789',
 								})
-								.then((v) => v.request.headers.Authorization);
+								.then((v) => v.request.headers?.Authorization);
 							return expect(promise).to.eventually.equal(
 								`Bearer ${johnDoeFixture.token}`,
 							);
@@ -137,9 +139,10 @@ describe('Request (api key):', function () {
 									apiKey: '123456789',
 								})
 								.then(function (stream) {
-									expect(stream.response.request.uri.query).to.equal(
-										'apikey=123456789',
-									);
+									expect(
+										(stream as BalenaRequestPassThroughStream).response.request
+											.uri.query,
+									).to.equal('apikey=123456789');
 									return utils.getStreamContents(stream);
 								}));
 
@@ -152,8 +155,9 @@ describe('Request (api key):', function () {
 									apiKey: '123456789',
 								})
 								.then(function (stream) {
-									const { headers } = stream.response.request;
-									expect(headers.Authorization).to.equal(
+									const { headers } = (stream as BalenaRequestPassThroughStream)
+										.response.request;
+									expect(headers?.Authorization).to.equal(
 										`Bearer ${johnDoeFixture.token}`,
 									);
 									return utils.getStreamContents(stream);
@@ -189,7 +193,10 @@ describe('Request (api key):', function () {
 									apiKey: '',
 								})
 								.then(function (stream) {
-									expect(stream.response.request.uri.query).to.not.exist;
+									expect(
+										(stream as BalenaRequestPassThroughStream).response.request
+											.uri.query,
+									).to.not.exist;
 									return utils.getStreamContents(stream);
 								})));
 				}));

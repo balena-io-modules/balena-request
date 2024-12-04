@@ -1,6 +1,6 @@
 const IS_BROWSER = typeof window !== 'undefined' && window !== null;
 
-let dataDirectoryPath = null;
+let dataDirectoryPath: string | undefined;
 if (!IS_BROWSER) {
 	// eslint-disable-next-line @typescript-eslint/no-var-requires
 	const temp = require('temp').track();
@@ -22,15 +22,15 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised);
 
-const getCustomRequest = function (opts) {
-	opts = Object.assign({}, { auth, debug: false, isBrowser: IS_BROWSER }, opts);
+const getCustomRequest = function (opts = {}) {
+	opts = { auth, debug: false, isBrowser: IS_BROWSER, ...opts };
 	return getRequest(opts);
 };
 
 // Grab setTimeout before we replace it with a fake later, so
 // we can still do real waiting in the tests themselves
 const unstubbedSetTimeout = setTimeout;
-const delay = (delayMs) =>
+const delay = (delayMs: number) =>
 	new Promise((resolve) => unstubbedSetTimeout(resolve, delayMs));
 
 export default () => ({

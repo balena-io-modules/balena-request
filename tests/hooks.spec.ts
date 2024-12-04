@@ -111,15 +111,16 @@ describe('An interceptor', function () {
 
 	describe('with a requestError hook', function () {
 		it('should not call requestError if there are no errors', function () {
+			const requestErrors = [sinon.mock(), sinon.mock()];
 			request.interceptors[0] = {
 				request(req) {
 					return Object.assign({}, req, {
 						url: mockServer.urlFor('/changed'),
 					});
 				},
-				requestError: sinon.mock(),
+				requestError: requestErrors[0],
 			};
-			request.interceptors[1] = { requestError: sinon.mock() };
+			request.interceptors[1] = { requestError: requestErrors[1] };
 
 			return request
 				.send({
@@ -127,8 +128,8 @@ describe('An interceptor', function () {
 				})
 				.then(function ({ body }) {
 					expect(body).to.deep.equal({ requested: 'changed' });
-					request.interceptors.forEach((interceptor) =>
-						expect(interceptor.requestError.called).to.equal(
+					requestErrors.forEach((requestError) =>
+						expect(requestError.called).to.equal(
 							false,
 							'requestError should not have been called',
 						),
@@ -137,22 +138,23 @@ describe('An interceptor', function () {
 		});
 
 		it('should call requestError only in the subsequent hook, if a previous hook fails', function () {
+			const requestErrors = [sinon.mock(), sinon.mock()];
 			request.interceptors[0] = {
 				request: sinon.mock().throws(new Error('blocked')),
-				requestError: sinon.mock(),
+				requestError: requestErrors[0],
 			};
 			request.interceptors[1] = {
-				requestError: sinon.mock().throws(new Error('error overridden')),
+				requestError: requestErrors[1].throws(new Error('error overridden')),
 			};
 
 			return expect(request.send({ url: mockServer.url })).to.be.rejected.then(
 				function (err) {
 					expect(err.message).to.deep.equal('error overridden');
-					expect(request.interceptors[0].requestError.called).to.equal(
+					expect(requestErrors[0].called).to.equal(
 						false,
 						'Preceeding requestError hooks should not be called',
 					);
-					expect(request.interceptors[1].requestError.called).to.equal(
+					expect(requestErrors[1].called).to.equal(
 						true,
 						'Subsequent requestError hook should be called',
 					);
@@ -164,7 +166,7 @@ describe('An interceptor', function () {
 			beforeEach(function () {
 				return (this.utilsShouldUpdateToken = sinon
 					.stub(utils, 'shouldRefreshKey')
-					.returns(true));
+					.resolves(true));
 			});
 
 			afterEach(function () {
@@ -293,7 +295,7 @@ describe('An interceptor', function () {
 
 		it('should be able to change a stream response before it is returned', function () {
 			request.interceptors[0] = {
-				response() {
+				async response() {
 					return stringToStream('replacement stream');
 				},
 			};
@@ -309,7 +311,8 @@ describe('An interceptor', function () {
 
 	describe('with a responseError hook', function () {
 		it('should not call responseError if there are no errors', function () {
-			request.interceptors[0] = { responseError: sinon.mock() };
+			const responseError = sinon.mock();
+			request.interceptors[0] = { responseError };
 
 			return request
 				.send({
@@ -317,7 +320,7 @@ describe('An interceptor', function () {
 				})
 				.then(function ({ body }) {
 					expect(body).to.deep.equal({ requested: '/' });
-					return expect(request.interceptors[0].responseError.called).to.equal(
+					return expect(responseError.called).to.equal(
 						false,
 						'responseError should not have been called',
 					);
@@ -394,6 +397,7 @@ describe('An interceptor', function () {
 					return expect(
 						request.send({
 							url: targetUrl,
+							// @ts-expect-error We're intentionally testing invalid input
 							anotherExtraOption: true,
 						}),
 					).to.be.rejected.then(function (err) {
@@ -418,6 +422,7 @@ describe('An interceptor', function () {
 					return expect(
 						request.send({
 							url: targetUrl,
+							// @ts-expect-error We're intentionally testing invalid input
 							anotherExtraOption: true,
 						}),
 					).to.be.rejected.then(function (err) {
