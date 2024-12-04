@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import setup from './setup';
-import * as stringToStream from 'string-to-stream';
+import stringToStream from 'string-to-stream';
 import * as sinon from 'sinon';
 import * as mockhttp from 'mockttp';
 import * as utils from '../build/utils';

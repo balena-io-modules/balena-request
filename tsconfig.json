@@ -1,16 +1,15 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "Node16",
         "declaration": true,
         "outDir": "build",
         "removeComments": false,
         "preserveConstEnums": true,
         "strict": true,
         "sourceMap": false,
-        "target": "es2015",
+        "target": "es2017",
         "noUnusedParameters": true,
         "noUnusedLocals": true,
-        "moduleResolution": "node",
         "skipLibCheck": true,
         "importHelpers": true
     },
