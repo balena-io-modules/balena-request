@@ -1,4 +1,17 @@
 - commits:
+    - subject: Avoid requiring some node dependencies using the package.json browser
+        field
+      hash: 739b173c101e5a73c1423dd79e213d4da86117a4
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.0.1
+  title: ""
+  date: 2024-12-05T18:43:12.772Z
+- commits:
     - subject: Switch tsconfig module to Node16
       hash: 87bd6d494fc65c3fbcef83655bc65651c671782f
       body: ""
