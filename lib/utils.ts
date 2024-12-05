@@ -386,17 +386,6 @@ const isFile = (value: string | WebResourceFile): value is WebResourceFile => {
 	);
 };
 
-const getForm = (): FormDataNodeType | FormData => {
-	if (!IS_BROWSER) {
-		const { FormData: NodeFormData } =
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			require('formdata-node') as typeof import('formdata-node');
-
-		return new NodeFormData();
-	}
-	return new FormData();
-};
-
 // This is the actual implementation that hides the internal `retriesRemaining` parameter
 async function requestAsync(
 	fetch: typeof normalFetch,
@@ -429,7 +418,10 @@ async function requestAsync(
 		}
 	}
 	if (fileKeys.size > 0) {
-		const form = getForm();
+		const { getFormDataConstructor, getFormDataEncoder } =
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
+			require('./conditional-imports') as typeof import('./conditional-imports');
+		const form = getFormDataConstructor();
 		for (const [k, v] of bodyEntries) {
 			if (fileKeys.has(k)) {
 				const file = v as WebResourceFile;
@@ -445,10 +437,7 @@ async function requestAsync(
 			opts.headers.delete('Content-Type');
 			opts.body = form as FormData;
 		} else {
-			const { FormDataEncoder } =
-				// eslint-disable-next-line @typescript-eslint/no-var-requires
-				require('form-data-encoder') as typeof import('form-data-encoder');
-
+			const FormDataEncoder = getFormDataEncoder();
 			const encoder = new FormDataEncoder(form as FormDataNodeType);
 			opts.headers.set('Content-Type', encoder.headers['Content-Type']);
 			const length = encoder.headers['Content-Length'];

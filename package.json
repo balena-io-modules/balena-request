@@ -5,6 +5,10 @@
   "type": "commonjs",
   "main": "build/request.js",
   "types": "build/request.d.ts",
+  "browser": {
+    "./build/request.js": "./build/request.js",
+    "./build/conditional-imports.js": "./build/conditional-imports.browser.js"
+  },
   "homepage": "https://github.com/balena-io-modules/balena-request",
   "repository": {
     "type": "git",

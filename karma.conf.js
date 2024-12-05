@@ -16,7 +16,8 @@ module.exports = (config) => {
 		querystring: require.resolve('querystring-es3'),
 		stream: require.resolve('stream-browserify'),
 		util: false,
-		zlib: require.resolve('browserify-zlib'),
+		// required by mockttp -> http-encoding
+		zlib: false,
 	};
 	karmaConfig.webpack.module.rules.push({
 		test: /\.js/,
