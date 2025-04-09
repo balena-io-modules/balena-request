@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update dependency mocha to v11
+      hash: 5d8c3cbe58ed4834d8670edaba3bc6bcc204e0e6
+      body: |
+        Update mocha from 10.8.2 to 11.1.0
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 14.0.3
+  title: ""
+  date: 2025-04-09T11:06:10.275Z
+- commits:
     - subject: Update dependency balena-config-karma to v4.0.2
       hash: b2ccc776cd9676092b5a5b2199bf9e3a0eca64f2
       body: |
