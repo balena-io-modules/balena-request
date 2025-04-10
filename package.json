@@ -62,7 +62,7 @@
     "mockttp": "^3.8.0",
     "process": "^0.11.10",
     "querystring-es3": "^0.2.1",
-    "sinon": "^15.0.1",
+    "sinon": "^16.0.0",
     "stream-browserify": "^3.0.0",
     "string-to-stream": "^3.0.1",
     "temp": "^0.8.4",
