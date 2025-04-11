@@ -13,11 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-const { fetch: normalFetch, Headers: HeadersPonyfill } =
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	(require('fetch-ponyfill') as typeof import('fetch-ponyfill'))({ Promise });
-
 import * as urlLib from 'url';
 import * as qs from 'qs';
 import * as errors from 'balena-errors';
@@ -30,6 +25,8 @@ import type {
 	WebResourceFile,
 } from './request';
 import { Readable } from 'stream';
+
+const nativeFetch = fetch;
 
 const IS_BROWSER = typeof window !== 'undefined' && window !== null;
 
@@ -311,7 +308,7 @@ const processRequestOptions = function (options: BalenaRequestOptions) {
 		compress: options.gzip,
 		signal: options.signal,
 		body,
-		headers: new HeadersPonyfill(headers),
+		headers: new Headers(headers),
 		mode: 'cors',
 		redirect: options.followRedirect === false ? 'manual' : 'follow',
 	};
@@ -388,7 +385,7 @@ const isFile = (value: string | WebResourceFile): value is WebResourceFile => {
 
 // This is the actual implementation that hides the internal `retriesRemaining` parameter
 async function requestAsync(
-	fetch: typeof normalFetch,
+	$fetch: typeof nativeFetch,
 	options: BalenaRequestOptions,
 	retriesRemaining?: number,
 ): Promise<BalenaRequestResponse> {
@@ -398,7 +395,7 @@ async function requestAsync(
 	}
 
 	// When streaming, prefer using the native Headers object if available
-	if (fetch !== normalFetch && typeof Headers === 'function') {
+	if ($fetch !== nativeFetch && typeof Headers === 'function') {
 		// Edge's Headers(args) ctor doesn't work as expected when passed in a headers object
 		// from fetch-ponyfill, treating it as a plain object instead of using the iterator symbol.
 		// As a result when fetch-readablestream uses the native fetch on Edge, the headers sent
@@ -440,6 +437,15 @@ async function requestAsync(
 			const FormDataEncoder = getFormDataEncoder();
 			const encoder = new FormDataEncoder(form as FormDataNodeType);
 			opts.headers.set('Content-Type', encoder.headers['Content-Type']);
+			// future proofing in case the user has already defined this
+			if (!('duplex' in opts)) {
+				// The spec requires setting this when uploading files.
+				// See: https://fetch.spec.whatwg.org/#enumdef-requestduplex
+				// @ts-expect-error The RequestInit type in @types/node/global.d.ts does include
+				// the duplex property, but lib.dom.d.ts does not, so since this lib needs to run
+				// on both node & browsers, the types used need to satisfy both.
+				opts.duplex = 'half';
+			}
 			const length = encoder.headers['Content-Length'];
 			if (length != null) {
 				opts.headers.set('Content-Length', length);
@@ -451,8 +457,8 @@ async function requestAsync(
 
 	try {
 		const requestTime = Date.now();
-		let p = fetch(url, opts);
-		if (opts.timeout && IS_BROWSER) {
+		let p = $fetch(url, opts);
+		if (opts.timeout) {
 			p = new Promise((resolve, reject) => {
 				setTimeout(() => {
 					reject(new Error('network timeout'));
@@ -477,7 +483,7 @@ async function requestAsync(
 		return response;
 	} catch (err) {
 		if (retriesRemaining > 0) {
-			return await requestAsync(fetch, options, retriesRemaining - 1);
+			return await requestAsync($fetch, options, retriesRemaining - 1);
 		}
 		throw err;
 	}
@@ -520,7 +526,7 @@ function handleAbortIfNotSupported(
  * @function
  * @protected
  *
- * @param {Function} [fetch] - the fetch implementation, defaults to that returned by `fetch-ponyfill`.
+ * @param {Function} [$fetch] - the fetch implementation, defaults to native node/browser fetch.
  *
  * @description The returned function keeps partial compatibility with promisified `request`
  * but uses `fetch` behind the scenes.
@@ -530,7 +536,7 @@ function handleAbortIfNotSupported(
  * utils.getRequestAsync()({ url: 'http://example.com' }).then (response) ->
  * 	console.log(response)
  */
-export function getRequestAsync($fetch: typeof fetch = normalFetch) {
+export function getRequestAsync($fetch = nativeFetch) {
 	return (options: BalenaRequestOptions) => requestAsync($fetch, options);
 }
 
