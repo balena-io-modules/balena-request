@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+	 http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,11 +57,11 @@ const getProgressStream = function (
 
 		return typeof onState === 'function'
 			? onState({
-					total: state.length,
-					received: state.transferred,
-					eta: state.eta,
-					percentage: state.percentage,
-				})
+				total: state.length,
+				received: state.transferred,
+				eta: state.eta,
+				percentage: state.percentage,
+			})
 			: undefined;
 	});
 
@@ -120,7 +120,15 @@ export function estimate(requestAsync: ReturnType<typeof getRequestAsync>) {
 			);
 		}
 
-		const response = await requestAsync(options);
+		const [response, identity] = await Promise.all([
+			requestAsync(options),
+			requestAsync({
+				...options, method: 'HEAD', headers: {
+					...options.headers,
+					'Accept-Encoding': 'identity',
+				}
+			}),
+		]);
 
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const stream = require('stream') as typeof Stream;
@@ -128,7 +136,7 @@ export function estimate(requestAsync: ReturnType<typeof getRequestAsync>) {
 
 		output.response = response;
 
-		const responseLength = utils.getResponseLength(response);
+		const responseLength = utils.getResponseLength(response, identity);
 		const total = responseLength.uncompressed || responseLength.compressed;
 
 		let responseStream: any;

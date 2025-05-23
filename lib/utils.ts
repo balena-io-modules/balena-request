@@ -178,10 +178,11 @@ export function isResponseCompressed(response: BalenaRequestResponse) {
  * console.log(responseLength.compressed)
  * console.log(responseLength.uncompressed)
  */
-export function getResponseLength(response: BalenaRequestResponse) {
+export function getResponseLength(response: BalenaRequestResponse, identity?: BalenaRequestResponse) {
+	const uncompressed = identity?.headers.get('X-Transfer-Length');
+	const uncompressedLength = uncompressed ? parseInt(uncompressed, 10) : parseInt(response.headers.get('Content-Length')!, 10) || undefined;
 	return {
-		uncompressed:
-			parseInt(response.headers.get('Content-Length')!, 10) || undefined,
+		uncompressed: uncompressedLength,
 		// X-Transfer-Length equals the compressed size of the body.
 		// This header is sent by Image Maker when downloading OS images.
 		compressed:
