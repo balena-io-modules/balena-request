@@ -133,13 +133,17 @@ export function estimate(requestAsync: ReturnType<typeof getRequestAsync>) {
 
 		let responseStream: any;
 		if (response.body.getReader) {
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const webStreams = require('@balena/node-web-streams') as {
-				toNodeReadable(body: any): any;
-			};
-			// Convert browser (WHATWG) streams to Node streams
-			responseStream = webStreams.toNodeReadable(response.body);
-			reader = responseStream._reader;
+			reader = response.body.getReader();
+			responseStream = new stream.Readable({
+				async read() {
+					const { done, value } = await reader.read();
+					if (done) {
+						this.push(null);
+					} else {
+						this.push(value);
+					}
+				},
+			});
 		} else {
 			responseStream = response.body;
 		}

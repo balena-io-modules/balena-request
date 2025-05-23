@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+	 http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -455,12 +455,13 @@ async function requestAsync(
 		}
 	}
 
+	let timerId: ReturnType<typeof setTimeout> | undefined;
 	try {
 		const requestTime = Date.now();
 		let p = $fetch(url, opts);
 		if (opts.timeout) {
 			p = new Promise((resolve, reject) => {
-				setTimeout(() => {
+				timerId = setTimeout(() => {
 					reject(new Error('network timeout'));
 				}, opts.timeout);
 				p.then(resolve, reject);
@@ -486,6 +487,10 @@ async function requestAsync(
 			return await requestAsync($fetch, options, retriesRemaining - 1);
 		}
 		throw err;
+	} finally {
+		if (timerId != null) {
+			clearTimeout(timerId);
+		}
 	}
 }
 
