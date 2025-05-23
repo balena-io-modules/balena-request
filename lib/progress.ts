@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+	 http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,11 +57,11 @@ const getProgressStream = function (
 
 		return typeof onState === 'function'
 			? onState({
-					total: state.length,
-					received: state.transferred,
-					eta: state.eta,
-					percentage: state.percentage,
-				})
+				total: state.length,
+				received: state.transferred,
+				eta: state.eta,
+				percentage: state.percentage,
+			})
 			: undefined;
 	});
 
@@ -94,17 +94,10 @@ export interface BalenaRequestPassThroughStream extends Stream.PassThrough {
  * 		stream.on 'progress', (state) ->
  * 			console.log(state)
  */
-export function estimate(
-	requestAsync?: ReturnType<typeof getRequestAsync>,
-	isBrowser?: boolean,
-) {
+export function estimate(requestAsync: ReturnType<typeof getRequestAsync>) {
 	return async function (
 		options: BalenaRequestOptions,
 	): Promise<BalenaRequestPassThroughStream> {
-		if (requestAsync == null) {
-			requestAsync = utils.getRequestAsync();
-		}
-
 		options.gzip = false;
 		options.headers!['Accept-Encoding'] = 'gzip, deflate';
 
@@ -127,7 +120,15 @@ export function estimate(
 			);
 		}
 
-		const response = await requestAsync(options);
+		const [response, identity] = await Promise.all([
+			requestAsync(options),
+			requestAsync({
+				...options, method: 'HEAD', headers: {
+					...options.headers,
+					'Accept-Encoding': 'identity',
+				}
+			}),
+		]);
 
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const stream = require('stream') as typeof Stream;
@@ -135,18 +136,22 @@ export function estimate(
 
 		output.response = response;
 
-		const responseLength = utils.getResponseLength(response);
+		const responseLength = utils.getResponseLength(response, identity);
 		const total = responseLength.uncompressed || responseLength.compressed;
 
 		let responseStream: any;
 		if (response.body.getReader) {
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const webStreams = require('@balena/node-web-streams') as {
-				toNodeReadable(body: any): any;
-			};
-			// Convert browser (WHATWG) streams to Node streams
-			responseStream = webStreams.toNodeReadable(response.body);
-			reader = responseStream._reader;
+			reader = response.body.getReader();
+			responseStream = new stream.Readable({
+				async read() {
+					const { done, value } = await reader.read();
+					if (done) {
+						this.push(null);
+					} else {
+						this.push(value);
+					}
+				},
+			});
 		} else {
 			responseStream = response.body;
 		}
@@ -155,27 +160,7 @@ export function estimate(
 			output.emit('progress', state),
 		);
 
-		if (!isBrowser && utils.isResponseCompressed(response)) {
-			const { createGunzip } =
-				// eslint-disable-next-line @typescript-eslint/no-var-requires
-				require('./conditional-imports') as typeof import('./conditional-imports');
-
-			const gunzip = createGunzip();
-			gunzip.on('error', (e) => output.emit('error', e));
-
-			// Uncompress after or before piping through progress
-			// depending on the response length available to us
-			if (
-				responseLength.compressed != null &&
-				responseLength.uncompressed == null
-			) {
-				responseStream.pipe(progressStream).pipe(gunzip).pipe(output);
-			} else {
-				responseStream.pipe(gunzip).pipe(progressStream).pipe(output);
-			}
-		} else {
-			responseStream.pipe(progressStream).pipe(output);
-		}
+		responseStream.pipe(progressStream).pipe(output);
 
 		// Stream any request errors on downstream
 		responseStream.on('error', (e: Error) => output.emit('error', e));
