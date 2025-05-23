@@ -449,12 +449,13 @@ async function requestAsync(
 		}
 	}
 
+	let timerId: ReturnType<typeof setTimeout> | undefined;
 	try {
 		const requestTime = Date.now();
 		let p = fetch(url, opts);
 		if (opts.timeout && IS_BROWSER) {
 			p = new Promise((resolve, reject) => {
-				setTimeout(() => {
+				timerId = setTimeout(() => {
 					reject(new Error('network timeout'));
 				}, opts.timeout);
 				p.then(resolve, reject);
@@ -480,6 +481,10 @@ async function requestAsync(
 			return await requestAsync(fetch, options, retriesRemaining - 1);
 		}
 		throw err;
+	} finally {
+		if (timerId != null) {
+			clearTimeout(timerId);
+		}
 	}
 }
 
