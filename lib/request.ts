@@ -76,6 +76,7 @@ export interface RequestFactoryOptions {
 	auth?: BalenaAuth;
 	debug?: boolean;
 	retries?: number;
+	/** @deprecated */
 	isBrowser?: boolean;
 	interceptors?: Interceptor[];
 }
