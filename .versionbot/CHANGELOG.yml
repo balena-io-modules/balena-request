@@ -1,4 +1,25 @@
 - commits:
+    - subject: Drop fetch-ponyfill in favor of native fetch & node-fetch for streaming
+        downloads
+      hash: 21ff9c1fee6a9c4b367fbca1cb3cca82967b53cd
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Deprecate the isBrowser parameter
+      hash: a76a91a624bd47aa0f75c01681f6ce5f3477e1ef
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.0.8
+  title: ""
+  date: 2025-05-26T14:40:42.661Z
+- commits:
     - subject: Drop @balena/node-web-streams
       hash: e59a9609e7a18f08780cebcc68138f55030ffb93
       body: ""
