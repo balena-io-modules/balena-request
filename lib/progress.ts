@@ -108,7 +108,7 @@ export function estimate(
 		options.gzip = false;
 		options.headers!['Accept-Encoding'] = 'gzip, deflate';
 
-		let reader: any = null;
+		let reader: ReadableStreamDefaultReader;
 
 		if (options.signal != null) {
 			options.signal.addEventListener(
@@ -120,7 +120,8 @@ export function estimate(
 						reader.cancel().catch(function () {
 							// ignore
 						});
-						return reader.releaseLock();
+						reader.releaseLock();
+						return;
 					}
 				},
 				{ once: true },
@@ -140,13 +141,24 @@ export function estimate(
 
 		let responseStream: any;
 		if (response.body.getReader) {
-			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			const webStreams = require('@balena/node-web-streams') as {
-				toNodeReadable(body: any): any;
-			};
+			reader = response.body.getReader();
 			// Convert browser (WHATWG) streams to Node streams
-			responseStream = webStreams.toNodeReadable(response.body);
-			reader = responseStream._reader;
+			responseStream = new stream.Readable({
+				async read() {
+					try {
+						const { done, value } = await reader.read();
+						if (done) {
+							this.push(null);
+							reader.releaseLock();
+						} else {
+							this.push(value);
+						}
+					} catch (e) {
+						this.destroy(e as Error);
+						reader.releaseLock();
+					}
+				},
+			});
 		} else {
 			responseStream = response.body;
 		}
