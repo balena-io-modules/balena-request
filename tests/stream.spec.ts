@@ -4,6 +4,7 @@ import setup from './setup';
 import * as zlib from 'browserify-zlib';
 import * as mockhttp from 'mockttp';
 import * as utils from '../build/utils';
+import type { BalenaRequestStreamProgressEvent } from '../build/request';
 
 const mockServer = mockhttp.getLocal();
 
@@ -110,9 +111,12 @@ describe('Request (stream):', function () {
 	});
 
 	describe('given a gzip endpoint with an x-transfer-length header', function () {
+		const message = 'Lorem ipsum dolor sit amet';
+		let compressedMessageLength: number;
 		beforeEach(async function () {
-			const message = 'Lorem ipsum dolor sit amet';
 			const compressedMessage = await gzip(message);
+			compressedMessageLength = compressedMessage.length;
+			expect(compressedMessageLength).to.equal(46);
 			await mockServer.forGet('/foo').thenReply(200, compressedMessage, {
 				'Content-Type': 'text/plain',
 				'X-Transfer-Length': `${compressedMessage.length}`,
@@ -126,7 +130,35 @@ describe('Request (stream):', function () {
 				url: '/foo',
 			});
 			const data = await utils.getStreamContents(stream);
-			expect(data).to.equal('Lorem ipsum dolor sit amet');
+			expect(data).to.equal(message);
+		});
+
+		it(`should ${IS_BROWSER ? 'correctly' : 'not'} emit progress events`, async () => {
+			const stream = await request.stream({
+				baseUrl: mockServer.url,
+				url: '/foo',
+			});
+			const streamEvents: Array<BalenaRequestStreamProgressEvent | undefined> =
+				[];
+			stream.on('progress', (state) => {
+				streamEvents.push(state);
+			});
+
+			const data = await utils.getStreamContents(stream);
+			expect(data).to.equal(message);
+
+			expect(streamEvents).to.deep.equal(
+				IS_BROWSER
+					? [undefined]
+					: [
+							{
+								total: compressedMessageLength,
+								received: compressedMessageLength,
+								eta: 0,
+								percentage: 100,
+							},
+						],
+			);
 		});
 
 		it('should set no .length property', async () => {
