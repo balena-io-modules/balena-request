@@ -21,6 +21,13 @@ import type * as Stream from 'stream';
 
 const IS_BROWSER = typeof window !== 'undefined' && window !== null;
 
+export interface BalenaRequestStreamProgressEvent {
+	total: number;
+	received: number;
+	eta: number;
+	percentage: number;
+}
+
 /**
  * @module progress
  */
@@ -42,7 +49,7 @@ const IS_BROWSER = typeof window !== 'undefined' && window !== null;
  */
 const getProgressStream = function (
 	total: number | undefined,
-	onState?: (chunk: any) => void,
+	onState: (chunk: BalenaRequestStreamProgressEvent | undefined) => void,
 ) {
 	const progress =
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
