@@ -1,4 +1,16 @@
 - commits:
+    - subject: Drop @balena/node-web-streams
+      hash: e59a9609e7a18f08780cebcc68138f55030ffb93
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+      nested: []
+  version: 14.0.7
+  title: ""
+  date: 2025-05-26T13:30:25.806Z
+- commits:
     - subject: Clear created setTimeout
       hash: f4f0a2f561950d30c7148494ce046c1c6779b3e2
       body: ""
