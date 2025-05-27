@@ -1,4 +1,16 @@
 - commits:
+    - subject: Simplify the event emitting logic in the stream() method
+      hash: 5f82b96b68d6574ffa59dcd96e3b7c98edeeb2d2
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.1.2
+  title: ""
+  date: 2025-05-27T16:11:22.289Z
+- commits:
     - subject: Update dependency temp to ^0.9.0
       hash: 47d34ab568e24fe7cb7a8c9030f55eb2977850d6
       body: |
