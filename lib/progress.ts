@@ -60,18 +60,16 @@ const getProgressStream = function (
 	});
 
 	progressStream.on('progress', function (state) {
-		if (state.length === 0) {
-			return typeof onState === 'function' ? onState(undefined) : undefined;
-		}
-
-		return typeof onState === 'function'
-			? onState({
-					total: state.length,
-					received: state.transferred,
-					eta: state.eta,
-					percentage: state.percentage,
-				})
-			: undefined;
+		onState(
+			state.length === 0
+				? undefined
+				: {
+						total: state.length,
+						received: state.transferred,
+						eta: state.eta,
+						percentage: state.percentage,
+					},
+		);
 	});
 
 	return progressStream;
