@@ -364,7 +364,7 @@ describe('Request:', function () {
 			});
 		});
 
-		describe('given simple endpoints that handle a request body', () =>
+		describe('given simple endpoints that handle a request body', () => {
 			writeMethods.forEach(([upperMethod, camelMethod]) =>
 				describe(`given a ${upperMethod} endpoint that matches the request body`, function () {
 					beforeEach(() =>
@@ -387,7 +387,8 @@ describe('Request:', function () {
 						return expect(promise).to.eventually.become({ matched: true });
 					});
 				}),
-			));
+			);
+		});
 
 		describe('given a body with a Blob data', function () {
 			beforeEach(async () => {

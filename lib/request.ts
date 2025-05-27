@@ -21,6 +21,9 @@ import * as urlLib from 'url';
 import * as errors from 'balena-errors';
 import * as utils from './utils';
 
+import type { BalenaRequestStreamProgressEvent } from './progress';
+export type { BalenaRequestStreamProgressEvent } from './progress';
+
 export interface BalenaRequestOptions {
 	method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 	baseUrl?: string;
@@ -59,6 +62,19 @@ export interface BalenaRequestPassThroughStream extends Stream.PassThrough {
 
 export interface BalenaRequestStreamResult extends Stream.Readable {
 	mime: string;
+	on(
+		event: 'progress',
+		listener: (event: BalenaRequestStreamProgressEvent | undefined) => void,
+	): this;
+	// Copying the base Stream.Readable overeloads for `on` until TS offers a better way to extend it
+	on(event: 'close', listener: () => void): this;
+	on(event: 'data', listener: (chunk: any) => void): this;
+	on(event: 'end', listener: () => void): this;
+	on(event: 'error', listener: (err: Error) => void): this;
+	on(event: 'pause', listener: () => void): this;
+	on(event: 'readable', listener: () => void): this;
+	on(event: 'resume', listener: () => void): this;
+	on(event: string | symbol, listener: (...args: any[]) => void): this;
 }
 
 export interface WebResourceFile extends Blob {
