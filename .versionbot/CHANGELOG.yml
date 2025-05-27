@@ -1,4 +1,40 @@
 - commits:
+    - subject: Add test for stream() progress events
+      hash: acc60b08828da2d1019ce22b269610ac3495b2c7
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: "tests/stream: Remove redundant response length checks"
+      hash: ae2775cc753639785d7673382afa5ea7839e2c61
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Convert the stream tests to async await
+      hash: 0456af703d04895e2a543820b1aa7fff9a6800d1
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Add typing for the progress event on the result of the stream() method
+      hash: 351dfdd509ebcd0e9c2ae14f215e2a99665030c5
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.1.0
+  title: ""
+  date: 2025-05-27T14:39:45.095Z
+- commits:
     - subject: Drop fetch-ponyfill in favor of native fetch & node-fetch for streaming
         downloads
       hash: 21ff9c1fee6a9c4b367fbca1cb3cca82967b53cd
