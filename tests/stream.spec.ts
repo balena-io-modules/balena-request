@@ -127,7 +127,6 @@ describe('Request (stream):', function () {
 			});
 			const data = await utils.getStreamContents(stream);
 			expect(data).to.equal('Lorem ipsum dolor sit amet');
-			expect(data.length).to.equal(26);
 		});
 
 		it('should set no .length property', async () => {
@@ -158,7 +157,6 @@ describe('Request (stream):', function () {
 			});
 			const data = await utils.getStreamContents(stream);
 			expect(data).to.equal('Lorem ipsum dolor sit amet');
-			expect(data.length).to.equal(26);
 		});
 	});
 
@@ -181,7 +179,6 @@ describe('Request (stream):', function () {
 			});
 			const data = await utils.getStreamContents(stream);
 			expect(data).to.equal('Lorem ipsum dolor sit amet');
-			expect(data.length).to.equal(26);
 		});
 	});
 
