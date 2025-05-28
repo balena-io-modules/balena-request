@@ -36,6 +36,20 @@ const IS_BROWSER = typeof window !== 'undefined' && window !== null;
 
 export const TOKEN_REFRESH_INTERVAL = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
+async function timeout<T>(p: Promise<T>, ms: number): Promise<T> {
+	let timeoutRef;
+	try {
+		return await new Promise<T>((resolve, reject) => {
+			timeoutRef = setTimeout(() => {
+				reject(new Error('network timeout'));
+			}, ms);
+			p.then(resolve, reject);
+		});
+	} finally {
+		clearTimeout(timeoutRef);
+	}
+}
+
 /**
  * @summary Determine if the token should be updated
  * @function
@@ -210,7 +224,7 @@ export function debugRequest(
 	options: BalenaRequestOptions,
 	response: BalenaRequestResponse,
 ) {
-	return console.error({
+	console.error({
 		statusCode: response.statusCode,
 		duration: response.duration,
 		...options,
@@ -270,7 +284,7 @@ const processRequestOptions = function (options: BalenaRequestOptions) {
 	}
 	if (options.qs) {
 		const params = qs.stringify(options.qs);
-		url += (url.indexOf('?') >= 0 ? '&' : '?') + params;
+		url += (url.includes('?') ? '&' : '?') + params;
 	}
 
 	let { body, headers } = options;
@@ -401,7 +415,9 @@ async function requestAsync(
 		// As a result when fetch-readablestream uses the native fetch on Edge, the headers sent
 		// to the server only contain a `map` property and not the actual headers that we want.
 		const nativeHeaders = new Headers();
-		opts.headers.forEach((value, name) => nativeHeaders.append(name, value));
+		opts.headers.forEach((value, name) => {
+			nativeHeaders.append(name, value);
+		});
 		opts.headers = nativeHeaders;
 	}
 
@@ -455,20 +471,13 @@ async function requestAsync(
 		}
 	}
 
-	let timerId: ReturnType<typeof setTimeout> | undefined;
 	try {
 		const requestTime = Date.now();
-		let p = $fetch(url, opts);
+		let p = $fetch(url, opts) as Promise<BalenaRequestResponse>;
 		if (opts.timeout) {
-			p = new Promise((resolve, reject) => {
-				timerId = setTimeout(() => {
-					reject(new Error('network timeout'));
-				}, opts.timeout);
-				p.then(resolve, reject);
-			});
+			p = timeout(p, opts.timeout);
 		}
-
-		const response = (await p) as BalenaRequestResponse;
+		const response = await p;
 
 		if (opts.signal) {
 			handleAbortIfNotSupported(opts.signal, response);
@@ -487,10 +496,6 @@ async function requestAsync(
 			return await requestAsync($fetch, options, retriesRemaining - 1);
 		}
 		throw err;
-	} finally {
-		if (timerId != null) {
-			clearTimeout(timerId);
-		}
 	}
 }
 
@@ -519,7 +524,7 @@ function handleAbortIfNotSupported(
 		if (signal.aborted) {
 			return emulateAbort();
 		} else {
-			return signal.addEventListener('abort', () => emulateAbort(), {
+			signal.addEventListener('abort', () => emulateAbort(), {
 				once: true,
 			});
 		}

@@ -137,7 +137,7 @@ export function estimate(requestAsync: ReturnType<typeof getRequestAsync>) {
 		output.response = response;
 
 		const responseLength = utils.getResponseLength(response);
-		const total = responseLength.uncompressed || responseLength.compressed;
+		const total = responseLength.uncompressed ?? responseLength.compressed;
 
 		let responseStream: any;
 		if (response.body.getReader) {

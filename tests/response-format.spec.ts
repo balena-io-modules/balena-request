@@ -76,8 +76,10 @@ describe('responseFormat:', function () {
 					// use the FileReader to read the blob content as a string
 					return new Promise(function (resolve) {
 						const reader = new FileReader();
-						reader.addEventListener('loadend', () => resolve(reader.result));
-						return reader.readAsText(body);
+						reader.addEventListener('loadend', () => {
+							resolve(reader.result);
+						});
+						reader.readAsText(body);
 					});
 				});
 			return expect(promise).to.eventually.satisfy(function (body: any) {

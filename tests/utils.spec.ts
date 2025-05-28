@@ -236,7 +236,7 @@ describe('Utils:', function () {
 				headers: new Headers({
 					'content-encoding': 'gzip',
 				}),
-			} as BalenaRequestResponse<any>;
+			} as BalenaRequestResponse;
 
 			return expect(utils.isResponseCompressed(response)).to.be.true;
 		});
@@ -244,7 +244,7 @@ describe('Utils:', function () {
 		it('should return false if Content-Encoding is not set', function () {
 			const response = {
 				headers: new Headers({}),
-			} as BalenaRequestResponse<any>;
+			} as BalenaRequestResponse;
 
 			return expect(utils.isResponseCompressed(response)).to.be.false;
 		});
