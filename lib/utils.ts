@@ -36,6 +36,20 @@ const IS_BROWSER = typeof window !== 'undefined' && window !== null;
 
 export const TOKEN_REFRESH_INTERVAL = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
+async function timeout<T>(p: Promise<T>, ms: number): Promise<T> {
+	let timeoutRef;
+	try {
+		return await new Promise<T>((resolve, reject) => {
+			timeoutRef = setTimeout(() => {
+				reject(new Error('network timeout'));
+			}, ms);
+			p.then(resolve, reject);
+		});
+	} finally {
+		clearTimeout(timeoutRef);
+	}
+}
+
 /**
  * @summary Determine if the token should be updated
  * @function
@@ -455,20 +469,13 @@ async function requestAsync(
 		}
 	}
 
-	let timerId: ReturnType<typeof setTimeout> | undefined;
 	try {
 		const requestTime = Date.now();
-		let p = $fetch(url, opts);
+		let p = $fetch(url, opts) as Promise<BalenaRequestResponse>;
 		if (opts.timeout) {
-			p = new Promise((resolve, reject) => {
-				timerId = setTimeout(() => {
-					reject(new Error('network timeout'));
-				}, opts.timeout);
-				p.then(resolve, reject);
-			});
+			p = timeout(p, opts.timeout);
 		}
-
-		const response = (await p) as BalenaRequestResponse;
+		const response = await p;
 
 		if (opts.signal) {
 			handleAbortIfNotSupported(opts.signal, response);
@@ -487,10 +494,6 @@ async function requestAsync(
 			return await requestAsync($fetch, options, retriesRemaining - 1);
 		}
 		throw err;
-	} finally {
-		if (timerId != null) {
-			clearTimeout(timerId);
-		}
 	}
 }
 
