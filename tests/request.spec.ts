@@ -373,18 +373,16 @@ describe('Request:', function () {
 							.thenJson(200, { matched: true }),
 					);
 
-					it('should eventually return the body', function () {
-						const promise = request
-							.send({
-								method: upperMethod,
-								baseUrl: mockServer.url,
-								url: '/',
-								body: {
-									foo: 'bar',
-								},
-							})
-							.then((v) => v.body);
-						return expect(promise).to.eventually.become({ matched: true });
+					it('should eventually return the body', async function () {
+						const { body } = await request.send({
+							method: upperMethod,
+							baseUrl: mockServer.url,
+							url: '/',
+							body: {
+								foo: 'bar',
+							},
+						});
+						expect(body).to.deep.equal({ matched: true });
 					});
 				}),
 			);
@@ -392,11 +390,9 @@ describe('Request:', function () {
 
 		describe('given a body with a Blob data', function () {
 			beforeEach(async () => {
-				await mockServer
-					.forPost('/multipart-endpoint')
-					.thenCallback(async (req) => {
-						return { statusCode: 200, body: req.headers['content-type'] };
-					});
+				await mockServer.forPost('/multipart-endpoint').thenCallback((req) => {
+					return { statusCode: 200, body: req.headers['content-type'] };
+				});
 			});
 			it('should send the request as multipart/form-data with boundary', async function () {
 				const fileName = 'testfile.txt';

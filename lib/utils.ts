@@ -224,7 +224,7 @@ export function debugRequest(
 	options: BalenaRequestOptions,
 	response: BalenaRequestResponse,
 ) {
-	return console.error({
+	console.error({
 		statusCode: response.statusCode,
 		duration: response.duration,
 		...options,
@@ -284,7 +284,7 @@ const processRequestOptions = function (options: BalenaRequestOptions) {
 	}
 	if (options.qs) {
 		const params = qs.stringify(options.qs);
-		url += (url.indexOf('?') >= 0 ? '&' : '?') + params;
+		url += (url.includes('?') ? '&' : '?') + params;
 	}
 
 	let { body, headers } = options;
@@ -415,7 +415,9 @@ async function requestAsync(
 		// As a result when fetch-readablestream uses the native fetch on Edge, the headers sent
 		// to the server only contain a `map` property and not the actual headers that we want.
 		const nativeHeaders = new Headers();
-		opts.headers.forEach((value, name) => nativeHeaders.append(name, value));
+		opts.headers.forEach((value, name) => {
+			nativeHeaders.append(name, value);
+		});
 		opts.headers = nativeHeaders;
 	}
 
@@ -522,7 +524,7 @@ function handleAbortIfNotSupported(
 		if (signal.aborted) {
 			return emulateAbort();
 		} else {
-			return signal.addEventListener('abort', () => emulateAbort(), {
+			signal.addEventListener('abort', () => emulateAbort(), {
 				once: true,
 			});
 		}
