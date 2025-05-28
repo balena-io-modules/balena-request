@@ -1,4 +1,16 @@
 - commits:
+    - subject: Abstract the timeout implementation
+      hash: 0fe4910a29415c8f293f68d9d9bcb32879db6fd8
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.1.3
+  title: ""
+  date: 2025-05-28T15:36:56.822Z
+- commits:
     - subject: Simplify the event emitting logic in the stream() method
       hash: 5f82b96b68d6574ffa59dcd96e3b7c98edeeb2d2
       body: ""
