@@ -1,6 +1,6 @@
 {
   "name": "balena-request",
-  "version": "14.1.4",
+  "version": "14.1.5",
   "description": "Balena HTTP client",
   "type": "commonjs",
   "main": "build/request.js",
@@ -85,6 +85,6 @@
     "balena-auth": "^6.0.1"
   },
   "versionist": {
-    "publishedAt": "2025-05-29T07:05:01.899Z"
+    "publishedAt": "2025-05-29T11:26:52.525Z"
   }
 }

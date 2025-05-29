@@ -1,4 +1,16 @@
 - commits:
+    - subject: Remove no longer needed timekeeper dev dependency
+      hash: 6a9cbc6b862dc30108038ee7c743cea0e65bc457
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.1.5
+  title: ""
+  date: 2025-05-29T11:26:52.369Z
+- commits:
     - subject: Update dependency buffer to v6
       hash: f153b5da35a102597550a8fc1b9924448359862a
       body: |
