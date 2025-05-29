@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update dependency buffer to v6
+      hash: f153b5da35a102597550a8fc1b9924448359862a
+      body: |
+        Update buffer from 5.7.1 to 6.0.3
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 14.1.4
+  title: ""
+  date: 2025-05-29T07:05:01.734Z
+- commits:
     - subject: Abstract the timeout implementation
       hash: 0fe4910a29415c8f293f68d9d9bcb32879db6fd8
       body: ""
