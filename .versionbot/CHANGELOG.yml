@@ -1,4 +1,36 @@
 - commits:
+    - subject: Make url a devDependency since it should now only be necessary in the
+        browser tests
+      hash: 83c95a2d9d630ddd51dba2ad906295dceec2ef4a
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Replace internal uses of the deprecated url.parse & url.resolve with
+        WHATWG URL API
+      hash: d0f5f81f4b8e68cb17cc73142a3111f08a67f1b8
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        See: https://balena.fibery.io/Work/Project/2258
+        see: https://balena.fibery.io/Work/Project/2258
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Update flowzone config
+      hash: 197a199c14e95a046dd53a84fb3eb31f762adedc
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.1.6
+  title: ""
+  date: 2026-02-12T13:18:35.796Z
+- commits:
     - subject: Remove no longer needed timekeeper dev dependency
       hash: 6a9cbc6b862dc30108038ee7c743cea0e65bc457
       body: ""
