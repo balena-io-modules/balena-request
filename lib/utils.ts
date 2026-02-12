@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-import * as urlLib from 'url';
+import type * as urlLib from 'url';
 import * as qs from 'qs';
 import * as errors from 'balena-errors';
 import type BalenaAuth from 'balena-auth';
@@ -280,7 +280,7 @@ const processRequestOptions = function (options: BalenaRequestOptions) {
 		throw new Error('url option not provided');
 	}
 	if (options.baseUrl) {
-		url = urlLib.resolve(options.baseUrl, url);
+		url = new URL(url, options.baseUrl).href;
 	}
 	if (options.qs) {
 		const params = qs.stringify(options.qs);
@@ -327,7 +327,7 @@ const processRequestOptions = function (options: BalenaRequestOptions) {
 		redirect: options.followRedirect === false ? 'manual' : 'follow',
 	};
 
-	return [url, opts] as const;
+	return [new URL(url), opts] as const;
 };
 
 /**
@@ -397,13 +397,35 @@ const isFile = (value: string | WebResourceFile): value is WebResourceFile => {
 	);
 };
 
+// TODO: Drop in the next major & ship it with an SDK major
+const mapUrlToLegacyUrlWithStringQuery = (
+	url: URL,
+): urlLib.UrlWithStringQuery => {
+	const legacySearch =
+		url.search !== '' ? url.search : url.href.endsWith('?') ? '?' : null;
+	return {
+		href: url.href,
+		protocol: url.protocol,
+		slashes: url.protocol !== '',
+		auth: url.username ? `${url.username}:${url.password}` : null,
+		host: url.host,
+		hostname: url.hostname,
+		port: url.port !== '' ? url.port : null,
+		pathname: url.pathname,
+		path: `${url.pathname}${legacySearch ?? ''}`,
+		search: legacySearch,
+		query: legacySearch != null ? legacySearch.replace(/^\?/, '') : null,
+		hash: url.hash !== '' ? url.hash : null,
+	};
+};
+
 // This is the actual implementation that hides the internal `retriesRemaining` parameter
 async function requestAsync(
 	$fetch: typeof nativeFetch,
 	options: BalenaRequestOptions,
 	retriesRemaining?: number,
 ): Promise<BalenaRequestResponse> {
-	const [url, opts] = processRequestOptions(options);
+	const [parsedUrl, opts] = processRequestOptions(options);
 	if (retriesRemaining == null) {
 		retriesRemaining = opts.retries;
 	}
@@ -473,7 +495,7 @@ async function requestAsync(
 
 	try {
 		const requestTime = Date.now();
-		let p = $fetch(url, opts) as Promise<BalenaRequestResponse>;
+		let p = $fetch(parsedUrl.href, opts) as Promise<BalenaRequestResponse>;
 		if (opts.timeout) {
 			p = timeout(p, opts.timeout);
 		}
@@ -488,7 +510,7 @@ async function requestAsync(
 		response.statusCode = response.status;
 		response.request = {
 			headers: options.headers,
-			uri: urlLib.parse(url),
+			uri: mapUrlToLegacyUrlWithStringQuery(parsedUrl),
 		};
 		return response;
 	} catch (err) {
