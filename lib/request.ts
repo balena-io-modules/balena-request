@@ -17,7 +17,7 @@ limitations under the License.
 import type BalenaAuth from 'balena-auth';
 import type * as Stream from 'stream';
 
-import * as urlLib from 'url';
+import type * as urlLib from 'node:url';
 import * as errors from 'balena-errors';
 import * as utils from './utils';
 
@@ -149,7 +149,8 @@ export function getRequest({
 			options.url = options.uri;
 			delete options.uri;
 		}
-		const isAbsoluteUrl = urlLib.parse(options.url).protocol != null;
+		// URL.canParse only works when the base protocol & host are present.
+		const isAbsoluteUrl = URL.canParse(options.url);
 		if (isAbsoluteUrl) {
 			delete options.baseUrl;
 		}
@@ -184,7 +185,12 @@ export function getRequest({
 			// The workaround is to append the `apikey` query string manually
 			// to prevent affecting the rest of the query strings.
 			// See https://github.com/request/request/issues/2129
-			options.url += urlLib.parse(options.url).query != null ? '&' : '?';
+			const parsedUrl = new URL(
+				options.url,
+				isAbsoluteUrl ? undefined : baseUrl,
+			);
+			options.url +=
+				parsedUrl.search !== '' ? '&' : parsedUrl.href.endsWith('?') ? '' : '?';
 			options.url += `apikey=${options.apiKey}`;
 		}
 
