@@ -97,6 +97,20 @@ export interface RequestFactoryOptions {
 	interceptors?: Interceptor[];
 }
 
+// TODO: Replace w/ `URL.canParse()` once we drop support for browsers that don't support it
+// See: https://caniuse.com/wf-url-canparse
+let urlCanParse = URL.canParse;
+if (typeof urlCanParse !== 'function') {
+	urlCanParse = function (url, base) {
+		try {
+			new URL(url, base);
+			return true;
+		} catch {
+			return false;
+		}
+	};
+}
+
 export type BalenaRequest = ReturnType<typeof getRequest>;
 
 /**
@@ -150,7 +164,7 @@ export function getRequest({
 			delete options.uri;
 		}
 		// URL.canParse only works when the base protocol & host are present.
-		const isAbsoluteUrl = URL.canParse(options.url);
+		const isAbsoluteUrl = urlCanParse(options.url);
 		if (isAbsoluteUrl) {
 			delete options.baseUrl;
 		}
