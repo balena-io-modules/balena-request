@@ -1,4 +1,16 @@
 - commits:
+    - subject: Use a backwards compatible alternative to URL.canParse
+      hash: af8fb6b626f2485d1db6e0ccbd6f47487a3d84c2
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.1.7
+  title: ""
+  date: 2026-03-02T18:30:43.272Z
+- commits:
     - subject: Make url a devDependency since it should now only be necessary in the
         browser tests
       hash: 83c95a2d9d630ddd51dba2ad906295dceec2ef4a
