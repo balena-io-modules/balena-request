@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import setup from './setup';
 import * as sinon from 'sinon';
-import * as errors from 'balena-errors';
 import * as mockhttp from 'mockttp';
 import * as tokens from './tokens.json';
 import * as utils from '../build/utils';
-import type { BalenaRequestPassThroughStream } from '../build/request';
+import type { BalenaRequestPassThroughStream } from '..';
+import { BalenaRequestError, BalenaExpiredToken } from '..';
 
 const johnDoeFixture = tokens.johndoe;
 const janeDoeFixture = tokens.janedoe;
@@ -190,9 +190,7 @@ describe('Request (token):', function () {
 
 							expect(requestRefreshToken.called).to.equal(false);
 							requestRefreshToken.restore();
-							return expect(promise).to.be.rejectedWith(
-								errors.BalenaExpiredToken,
-							);
+							return expect(promise).to.be.rejectedWith(BalenaExpiredToken);
 						}));
 
 					it('should be rejected with an expiration error', function () {
@@ -200,9 +198,7 @@ describe('Request (token):', function () {
 							baseUrl: mockServer.url,
 							url: '/foo',
 						});
-						return expect(promise).to.be.rejectedWith(
-							errors.BalenaExpiredToken,
-						);
+						return expect(promise).to.be.rejectedWith(BalenaExpiredToken);
 					});
 
 					it('should have the session token as an error attribute', () =>
@@ -268,9 +264,7 @@ describe('Request (token):', function () {
 							baseUrl: mockServer.url,
 							url: '/foo',
 						});
-						return expect(promise).to.be.rejectedWith(
-							errors.BalenaRequestError,
-						);
+						return expect(promise).to.be.rejectedWith(BalenaRequestError);
 					});
 				});
 			});

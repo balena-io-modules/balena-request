@@ -15,14 +15,14 @@ limitations under the License.
 */
 import type * as urlLib from 'url';
 import * as qs from 'qs';
-import * as errors from 'balena-errors';
 import type BalenaAuth from 'balena-auth';
 import type { FormData as FormDataNodeType } from 'formdata-node';
 import { TokenType } from 'balena-auth';
-import type {
-	BalenaRequestOptions,
-	BalenaRequestResponse,
-	WebResourceFile,
+import {
+	BalenaInvalidParameterError,
+	type BalenaRequestOptions,
+	type BalenaRequestResponse,
+	type WebResourceFile,
 } from './request';
 import { Readable } from 'stream';
 
@@ -383,10 +383,7 @@ export async function getBody(
 		return response.text();
 	}
 
-	throw new errors.BalenaInvalidParameterError(
-		'responseFormat',
-		responseFormat,
-	);
+	throw new BalenaInvalidParameterError('responseFormat', responseFormat);
 }
 
 const isFile = (value: string | WebResourceFile): value is WebResourceFile => {

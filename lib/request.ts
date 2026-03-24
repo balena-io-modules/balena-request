@@ -18,8 +18,15 @@ import type BalenaAuth from 'balena-auth';
 import type * as Stream from 'stream';
 
 import type * as urlLib from 'node:url';
-import * as errors from 'balena-errors';
 import * as utils from './utils';
+
+// TODO-MAJOR: Remove balena-errors import altogether and create the relevant errors in this module instead.
+import {
+	BalenaRequestError,
+	BalenaExpiredToken,
+	BalenaInvalidParameterError,
+} from 'balena-errors';
+export { BalenaRequestError, BalenaExpiredToken, BalenaInvalidParameterError };
 
 import type { BalenaRequestStreamProgressEvent } from './progress';
 export type { BalenaRequestStreamProgressEvent } from './progress';
@@ -181,7 +188,7 @@ export function getRequest({
 				await refreshToken({ baseUrl });
 			}
 			if (await auth.isExpired()) {
-				throw new errors.BalenaExpiredToken(await auth.getKey());
+				throw new BalenaExpiredToken(await auth.getKey());
 			}
 		}
 		const authorizationHeader = options.sendToken
@@ -214,7 +221,7 @@ export function getRequest({
 	const interceptRequestOptions = (requestOptions: BalenaRequestOptions) =>
 		interceptRequestOrError(Promise.resolve(requestOptions));
 
-	const interceptRequestError = (requestError: errors.BalenaRequestError) =>
+	const interceptRequestError = (requestError: BalenaRequestError) =>
 		interceptRequestOrError(Promise.reject(requestError));
 
 	const interceptResponse = <
@@ -223,7 +230,7 @@ export function getRequest({
 		response: T,
 	): Promise<T> => interceptResponseOrError(Promise.resolve(response));
 
-	const interceptResponseError = (responseError: errors.BalenaRequestError) =>
+	const interceptResponseError = (responseError: BalenaRequestError) =>
 		interceptResponseOrError(Promise.reject(responseError));
 
 	const interceptRequestOrError = async (initialPromise: Promise<any>) => {
@@ -324,7 +331,7 @@ export function getRequest({
 				if (utils.isErrorCode(response.statusCode)) {
 					const responseError = utils.getErrorMessageFromResponse(response);
 					debugRequest(options, response);
-					throw new errors.BalenaRequestError(
+					throw new BalenaRequestError(
 						responseError,
 						response.statusCode,
 						options,
@@ -402,7 +409,7 @@ export function getRequest({
 
 				debugRequest(options, download.response);
 				// @ts-expect-error error without request options
-				throw new errors.BalenaRequestError(
+				throw new BalenaRequestError(
 					responseError,
 					download.response.statusCode,
 				);
@@ -500,7 +507,7 @@ export function getRequest({
 			) {
 				const expiredKey = await auth.getKey();
 				await auth.removeKey();
-				throw new errors.BalenaExpiredToken(expiredKey);
+				throw new BalenaExpiredToken(expiredKey);
 			}
 			throw err;
 		}

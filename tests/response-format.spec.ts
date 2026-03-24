@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import setup from './setup';
-import * as errors from 'balena-errors';
 import * as mockhttp from 'mockttp';
+import { BalenaInvalidParameterError } from '..';
 
 const mockServer = mockhttp.getLocal();
 
@@ -102,9 +102,7 @@ describe('responseFormat:', function () {
 				// @ts-expect-error We're intentionally testing invalid input
 				responseFormat: 'uzabzabza',
 			});
-			return expect(promise).to.be.rejectedWith(
-				errors.BalenaInvalidParameterError,
-			);
+			return expect(promise).to.be.rejectedWith(BalenaInvalidParameterError);
 		});
 	});
 });
