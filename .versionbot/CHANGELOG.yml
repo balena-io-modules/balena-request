@@ -1,4 +1,16 @@
 - commits:
+    - subject: Export error types for users to be able to use `instanceof` with
+      hash: c4e43ac0a7ac563a213f7685d4c1f7e4c5dbc1a9
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+      nested: []
+  version: 14.2.0
+  title: ""
+  date: 2026-03-24T18:12:09.034Z
+- commits:
     - subject: Use a backwards compatible alternative to URL.canParse
       hash: af8fb6b626f2485d1db6e0ccbd6f47487a3d84c2
       body: ""
