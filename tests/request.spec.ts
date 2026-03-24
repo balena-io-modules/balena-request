@@ -1,8 +1,8 @@
-import * as errors from 'balena-errors';
 import { expect } from 'chai';
 import setup from './setup';
 import * as sinon from 'sinon';
 import * as mockhttp from 'mockttp';
+import { BalenaRequestError } from '..';
 
 const mockServer = mockhttp.getLocal();
 
@@ -186,7 +186,7 @@ describe('Request:', function () {
 								url: '/429',
 							}),
 						).to.be.rejected.then((error) => {
-							expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+							expect(error).to.be.an.instanceOf(BalenaRequestError);
 							expect(error).to.have.property('statusCode', 429);
 							expect(error).to.have.property('name', 'BalenaRequestError');
 							expect(error).to.have.property('body', 'Too Many Requests');
@@ -224,7 +224,7 @@ describe('Request:', function () {
 										url: '/429',
 									}),
 								).to.be.rejected.then((error) => {
-									expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+									expect(error).to.be.an.instanceOf(BalenaRequestError);
 									expect(error).to.have.property('statusCode', 429);
 									expect(error).to.have.property('name', 'BalenaRequestError');
 									expect(error).to.have.property('body', 'Too Many Requests');
@@ -243,7 +243,7 @@ describe('Request:', function () {
 										url: '/429',
 									}),
 								).to.be.rejected.then((error) => {
-									expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+									expect(error).to.be.an.instanceOf(BalenaRequestError);
 									expect(error).to.have.property('statusCode', 429);
 									expect(error).to.have.property('name', 'BalenaRequestError');
 									expect(error).to.have.property('body', 'Too Many Requests');
@@ -274,7 +274,7 @@ describe('Request:', function () {
 									url: '/429',
 								}),
 							).to.be.rejected.then((error) => {
-								expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+								expect(error).to.be.an.instanceOf(BalenaRequestError);
 								expect(error).to.have.property('statusCode', 429);
 								expect(error).to.have.property('name', 'BalenaRequestError');
 								expect(error).to.have.property('body', 'Too Many Requests');
@@ -317,7 +317,7 @@ describe('Request:', function () {
 									url: '/429',
 								}),
 							).to.be.rejected.then((error) => {
-								expect(error).to.be.an.instanceOf(errors.BalenaRequestError);
+								expect(error).to.be.an.instanceOf(BalenaRequestError);
 								expect(error).to.have.property('statusCode', 429);
 								expect(error).to.have.property('name', 'BalenaRequestError');
 								expect(error).to.have.property('body', 'Too Many Requests');

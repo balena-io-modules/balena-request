@@ -296,6 +296,7 @@ describe('An interceptor', function () {
 		it('should be able to change a stream response before it is returned', function () {
 			request.interceptors[0] = {
 				async response() {
+					await delay(10);
 					return stringToStream('replacement stream');
 				},
 			};
