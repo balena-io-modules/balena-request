@@ -1,4 +1,18 @@
 - commits:
+    - subject: Avoid unnecessary array creations while running the response interceptors
+      hash: 2150d6669ae50eed667b32bc5d930d8568d14648
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        See: https://balena.fibery.io/Work/Project/2327
+        see: https://balena.fibery.io/Work/Project/2327
+      author: Thodoris Greasidis
+      nested: []
+  version: 14.2.1
+  title: ""
+  date: 2026-04-24T14:12:32.566Z
+- commits:
     - subject: Export error types for users to be able to use `instanceof` with
       hash: c4e43ac0a7ac563a213f7685d4c1f7e4c5dbc1a9
       body: ""
