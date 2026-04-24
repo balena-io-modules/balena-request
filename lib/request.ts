@@ -247,9 +247,9 @@ export function getRequest({
 		initialPromise: Promise<any>,
 	) {
 		let promise = initialPromise;
-		for (const { response, responseError } of exports.interceptors
-			.slice()
-			.reverse()) {
+		// We execute response interceptors in reverse order.
+		for (let i = exports.interceptors.length - 1; i >= 0; i--) {
+			const { response, responseError } = exports.interceptors[i];
 			if (response != null || responseError != null) {
 				promise = promise.then(response, responseError);
 			}
