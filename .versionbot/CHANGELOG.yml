@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update dependency balena-errors to v5
+      hash: a5885be92a2abdec995ba28341ff8692f9ee5a71
+      body: |
+        Update balena-errors from 4.9.0 to 5.0.1
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 14.2.2
+  title: ""
+  date: 2026-05-13T08:16:32.401Z
+- commits:
     - subject: Avoid unnecessary array creations while running the response interceptors
       hash: 2150d6669ae50eed667b32bc5d930d8568d14648
       body: ""
