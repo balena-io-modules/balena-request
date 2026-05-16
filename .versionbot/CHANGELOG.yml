@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update dependency balena-config-karma to v4.0.3
+      hash: 5957eb452ce5b23e4b034e5ac265d59e0d324d3b
+      body: |
+        Update balena-config-karma from 4.0.2 to 4.0.3
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 14.2.3
+  title: ""
+  date: 2026-05-16T00:14:01.685Z
+- commits:
     - subject: Update dependency balena-errors to v5
       hash: a5885be92a2abdec995ba28341ff8692f9ee5a71
       body: |
