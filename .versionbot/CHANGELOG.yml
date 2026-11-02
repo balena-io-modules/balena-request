@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update dependency flowzonify to v0.4.23
+      hash: dd8aaee80050b240924cdb680d248d28ec370511
+      body: |
+        Update flowzonify from 0.0.0 to 0.4.23
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 14.2.4
+  title: ""
+  date: 2026-11-02T23:01:55.038Z
+- commits:
     - subject: Update dependency balena-config-karma to v4.0.3
       hash: 5957eb452ce5b23e4b034e5ac265d59e0d324d3b
       body: |
